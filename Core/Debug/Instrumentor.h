@@ -10,6 +10,7 @@
 #include <thread>
 #include <mutex>
 #include <sstream>
+#include <iostream>
 
 namespace Core
 {
@@ -28,6 +29,12 @@ namespace Core
 	struct InstrumentationSession
 	{
 		std::string Name;
+	};
+
+	enum class PRINT_TRACE_CONTROL : bool
+	{
+		PRINT_TRACE = true,
+		SUPPRESS_TRACE = false
 	};
 
 	class Instrumentor
@@ -96,6 +103,19 @@ namespace Core
 			}
 		}
 
+		void PrintProfile(const ProfileResult &result)
+		{
+			std::lock_guard lock(m_Mutex);
+			if (m_CurrentSession)
+			{
+				std::cout << "{\n";
+				std::cout << "\t" << result.Name << "\n";
+				std::cout << "\t" << result.ElapsedTime.count() << "\n";
+				std::cout << "\t" << result.ThreadID << "\n";
+				std::cout << "}\n";
+			}
+		}
+
 		static Instrumentor &Get()
 		{
 			static Instrumentor instance;
@@ -147,9 +167,10 @@ namespace Core
 	class InstrumentationTimer
 	{
 	public:
-		InstrumentationTimer(const char *name)
+		InstrumentationTimer(const char *name, PRINT_TRACE_CONTROL control = PRINT_TRACE_CONTROL::SUPPRESS_TRACE)
 			: m_Name(name), m_Stopped(false)
 		{
+			m_PrintControl = control;
 			m_StartTimepoint = std::chrono::steady_clock::now();
 		}
 
@@ -166,6 +187,10 @@ namespace Core
 			auto elapsedTime = std::chrono::time_point_cast<std::chrono::microseconds>(endTimepoint).time_since_epoch() - std::chrono::time_point_cast<std::chrono::microseconds>(m_StartTimepoint).time_since_epoch();
 
 			Instrumentor::Get().WriteProfile({m_Name, highResStart, elapsedTime, std::this_thread::get_id()});
+			if (m_PrintControl == PRINT_TRACE_CONTROL::PRINT_TRACE)
+			{
+				Instrumentor::Get().PrintProfile({m_Name, highResStart, elapsedTime, std::this_thread::get_id()});
+			}
 
 			m_Stopped = true;
 		}
@@ -174,6 +199,7 @@ namespace Core
 		const char *m_Name;
 		std::chrono::time_point<std::chrono::steady_clock> m_StartTimepoint;
 		bool m_Stopped;
+		PRINT_TRACE_CONTROL m_PrintControl;
 	};
 
 	namespace InstrumentorUtils
@@ -208,6 +234,7 @@ namespace Core
 }
 
 #define CORE_PROFILE 1
+#define CORE_PROFILE_PRINT_TRACE 0
 #if CORE_PROFILE
 // Resolve which function signature macro will be used. Note that this only
 // is resolved when the (pre)compiler starts, so the syntax highlighting
@@ -230,17 +257,30 @@ namespace Core
 #define CORE_FUNC_SIG "CORE_FUNC_SIG unknown!"
 #endif
 
+// --- Profiling session macros ---
 #define CORE_PROFILE_BEGIN_SESSION(name, filepath) ::Core::Instrumentor::Get().BeginSession(name, filepath)
 #define CORE_PROFILE_END_SESSION() ::Core::Instrumentor::Get().EndSession()
+
+// --- Conditional trace printing ---
+#if CORE_PROFILE_PRINT_TRACE
+#define CORE_PROFILE_SCOPE_LINE2(name, line)                                                           \
+	constexpr auto fixedName##line = ::Core::InstrumentorUtils::CleanupOutputString(name, "__cdecl "); \
+	::Core::InstrumentationTimer timer##line(fixedName##line.Data, ::Core::PRINT_TRACE_CONTROL::PRINT_TRACE)
+#else
 #define CORE_PROFILE_SCOPE_LINE2(name, line)                                                           \
 	constexpr auto fixedName##line = ::Core::InstrumentorUtils::CleanupOutputString(name, "__cdecl "); \
 	::Core::InstrumentationTimer timer##line(fixedName##line.Data)
+#endif
+
 #define CORE_PROFILE_SCOPE_LINE(name, line) CORE_PROFILE_SCOPE_LINE2(name, line)
 #define CORE_PROFILE_SCOPE(name) CORE_PROFILE_SCOPE_LINE(name, __LINE__)
 #define CORE_PROFILE_FUNCTION() CORE_PROFILE_SCOPE(CORE_FUNC_SIG)
-#else
+
+#else // ----- if CORE_PROFILE disabled -----
+
 #define CORE_PROFILE_BEGIN_SESSION(name, filepath)
 #define CORE_PROFILE_END_SESSION()
 #define CORE_PROFILE_SCOPE(name)
 #define CORE_PROFILE_FUNCTION()
-#endif
+
+#endif // CORE_PROFILE

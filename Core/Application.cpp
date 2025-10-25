@@ -29,13 +29,6 @@ namespace Core
         // Main Application loop
         while (m_Running)
         {
-            std::string input;
-            std::cin >> input;
-            if (input != "yes")
-            {
-                m_Running = false;
-            }
-
             for (const std::unique_ptr<Layer> &layer : m_LayerStack)
                 layer->OnUpdate();
 
@@ -53,7 +46,7 @@ namespace Core
     Application &Application::Get()
     {
         CORE_PROFILE_FUNCTION();
-        CORE_ASSERT(s_Application != nullptr, "Application is NULLPTR whilst trying to GET()")
+        CORE_ASSERT(s_Application != nullptr, "Application is NULLPTR during call to GET()");
         return *s_Application;
     }
 
