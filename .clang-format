@@ -1,0 +1,29 @@
+BasedOnStyle: llvm
+IndentCaseLabels: true
+ColumnLimit: 0
+IncludeBlocks: Regroup
+IncludeCategories:
+  - Regex: '^<.*\.h>'
+    Priority: 1
+  - Regex: "^<.*>"
+    Priority: 2
+  - Regex: '^".*\.h"'
+    Priority: 3
+  - Regex: '^".*"'
+    Priority: 4
+  - Regex: ".*"
+    Priority: 5
+SortIncludes: false
+
+# PointerAlignment
+AlignAfterOpenBracket: DontAlign
+AlwaysBreakTemplateDeclarations: Yes
+
+# Indentation
+IndentWidth: 4
+AccessModifierOffset: -4
+NamespaceIndentation: All
+
+# Force pointers to the type for C++.
+DerivePointerAlignment: false
+PointerAlignment: Left

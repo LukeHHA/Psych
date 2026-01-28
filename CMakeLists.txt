@@ -6,9 +6,9 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 add_compile_definitions(
-    CORE_ENABLE_ASSERTS
-    CORE_PROFILE
+    GE_ENABLE_ASSERTS
+    GE_PROFILE
 )
 
-add_subdirectory(Core)
+add_subdirectory(GameEngine)
 add_subdirectory(App)
