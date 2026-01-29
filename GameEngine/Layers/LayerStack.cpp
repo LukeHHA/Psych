@@ -5,11 +5,17 @@
 #include "Debug/Instrumentor.h"
 
 namespace ge {
+    LayerStack::LayerStack() {
+        CORE_PROFILE_FUNCTION();
+        CORE_LOG_INFO("Initializing LayerStack");
+    }
+
     LayerStack::~LayerStack() {
         CORE_PROFILE_FUNCTION();
         for (const std::unique_ptr<Layer>& layer : m_Layers) {
             layer->OnDetach();
         }
+        CORE_LOG_INFO("LayerStack Shutdown successfully");
     }
 
     void LayerStack::PushLayer(std::unique_ptr<Layer> layer) {

@@ -18,8 +18,10 @@ namespace ge {
 
     Window::~Window() {
         CORE_PROFILE_FUNCTION();
-        m_RendererContext.reset();
-        m_Window.reset();
+        {
+            CORE_PROFILE_SCOPE("Window::Shutdown");
+            Shutdown();
+        }
     }
 
     util::expected<void, errors::WindowError> Window::Init(const std::string& title, unsigned int width, unsigned int height) {
@@ -61,7 +63,16 @@ namespace ge {
             CORE_LOG_INFO("Initialized Context of type '{0}'", static_cast<int>(m_RendererContext->GetCurrentAPI()));
 
             SetVSync(true);
+            CORE_LOG_INFO("Window Initialized successfully");
         }
+        return {};
+    }
+
+    util::expected<void, errors::WindowError> Window::Shutdown() {
+        CORE_PROFILE_FUNCTION();
+        m_RendererContext.reset();
+        m_Window.reset();
+        CORE_LOG_INFO("Window Shutdown successfully");
         return {};
     }
 

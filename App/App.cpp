@@ -7,10 +7,14 @@ class App : public ge::GameEngine {
 public:
     App() {
         CORE_PROFILE_FUNCTION();
+        CORE_LOG_INFO("Initializing App");
         PushLayer(std::move(std::make_unique<AppLayer>()));
     }
 
-    ~App() { CORE_PROFILE_FUNCTION(); }
+    ~App() {
+        CORE_PROFILE_FUNCTION();
+        CORE_LOG_INFO("App Shutdown successfully");
+    }
 };
 
 std::unique_ptr<ge::GameEngine> ge::CreateGameEngine() {
