@@ -12,7 +12,7 @@
 #include <sstream>
 #include <iostream>
 
-namespace Core {
+namespace ge {
 
     using FloatingPointMicroseconds = std::chrono::duration<double, std::micro>;
 
@@ -216,7 +216,7 @@ namespace Core {
             return result;
         }
     } // namespace InstrumentorUtils
-} // namespace Core
+} // namespace ge
 
 #define CORE_PROFILE 1
 #define CORE_PROFILE_PRINT_TRACE 0
@@ -224,14 +224,14 @@ namespace Core {
 // Resolve which function signature macro will be used. Note that this only
 // is resolved when the (pre)compiler starts, so the syntax highlighting
 // could mark the wrong one in your editor!
-#if defined(__GNUC__) || (defined(__MWERKS__) && (__MWERKS__ >= 0x3000)) ||    \
+#if defined(__GNUC__) || (defined(__MWERKS__) && (__MWERKS__ >= 0x3000)) || \
     (defined(__ICC) && (__ICC >= 600)) || defined(__ghs__)
 #define CORE_FUNC_SIG __PRETTY_FUNCTION__
 #elif defined(__DMC__) && (__DMC__ >= 0x810)
 #define CORE_FUNC_SIG __PRETTY_FUNCTION__
 #elif (defined(__FUNCSIG__) || (_MSC_VER))
 #define CORE_FUNC_SIG __FUNCSIG__
-#elif (defined(__INTEL_COMPILER) && (__INTEL_COMPILER >= 600)) ||              \
+#elif (defined(__INTEL_COMPILER) && (__INTEL_COMPILER >= 600)) || \
     (defined(__IBMCPP__) && (__IBMCPP__ >= 500))
 #define CORE_FUNC_SIG __FUNCTION__
 #elif defined(__BORLANDC__) && (__BORLANDC__ >= 0x550)
@@ -245,22 +245,22 @@ namespace Core {
 #endif
 
 // --- Profiling session macros ---
-#define CORE_PROFILE_BEGIN_SESSION(name, filepath)                             \
-    ::Core::Instrumentor::Get().BeginSession(name, filepath)
-#define CORE_PROFILE_END_SESSION() ::Core::Instrumentor::Get().EndSession()
+#define CORE_PROFILE_BEGIN_SESSION(name, filepath) \
+    ::ge::Instrumentor::Get().BeginSession(name, filepath)
+#define CORE_PROFILE_END_SESSION() ::ge::Instrumentor::Get().EndSession()
 
 // --- Conditional trace printing ---
 #if CORE_PROFILE_PRINT_TRACE
-#define CORE_PROFILE_SCOPE_LINE2(name, line)                                   \
-    constexpr auto fixedName##line =                                           \
-        ::Core::InstrumentorUtils::CleanupOutputString(name, "__cdecl ");      \
-    ::Core::InstrumentationTimer timer##line(                                  \
-        fixedName##line.Data, ::Core::PRINT_TRACE_CONTROL::PRINT_TRACE)
+#define CORE_PROFILE_SCOPE_LINE2(name, line)                            \
+    constexpr auto fixedName##line =                                    \
+        ::ge::InstrumentorUtils::CleanupOutputString(name, "__cdecl "); \
+    ::ge::InstrumentationTimer timer##line(                             \
+        fixedName##line.Data, ::ge::PRINT_TRACE_CONTROL::PRINT_TRACE)
 #else
-#define CORE_PROFILE_SCOPE_LINE2(name, line)                                   \
-    constexpr auto fixedName##line =                                           \
-        ::Core::InstrumentorUtils::CleanupOutputString(name, "__cdecl ");      \
-    ::Core::InstrumentationTimer timer##line(fixedName##line.Data)
+#define CORE_PROFILE_SCOPE_LINE2(name, line)                            \
+    constexpr auto fixedName##line =                                    \
+        ::ge::InstrumentorUtils::CleanupOutputString(name, "__cdecl "); \
+    ::ge::InstrumentationTimer timer##line(fixedName##line.Data)
 #endif
 
 #define CORE_PROFILE_SCOPE_LINE(name, line) CORE_PROFILE_SCOPE_LINE2(name, line)

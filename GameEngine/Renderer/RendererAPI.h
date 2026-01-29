@@ -1,7 +1,11 @@
 #pragma once
+#include <Debug/Assert.h>
 
 namespace ge {
-    enum class RendererAPIType { None, Opengl, Vulkan, Metal };
+    enum class RendererAPIType { None,
+        Opengl,
+        Vulkan,
+        Metal };
 
     class RendererAPI {
     public:
@@ -10,9 +14,12 @@ namespace ge {
             return s_RendererAPI;
         }
 
-        static RendererAPIType Current() { return s_RendererAPI; }
+        static RendererAPIType Current() {
+            CORE_ASSERT(s_RendererAPI != RendererAPIType::None, "RendererAPI::Current() called but no API is set!");
+            return s_RendererAPI;
+        }
 
     private:
-        static RendererAPIType s_RendererAPI;
+        inline static RendererAPIType s_RendererAPI;
     };
 } // namespace ge

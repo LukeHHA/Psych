@@ -4,8 +4,11 @@
 #include "Renderer/RendererContext.h"
 #include "GLFW/glfw3.h"
 #include "ge_expected"
+#include "Errors/Errors.h"
+#include "Core/Event.h"
 
 #include <string>
+#include <functional>
 
 namespace ge {
 
@@ -24,21 +27,34 @@ namespace ge {
 
     class Window {
     public:
+        using EventCallbackFn = std::function<void(Event&)>;
+
         Window(const std::string& title, unsigned int width, unsigned int height);
-        ~Window() = default;
+        ~Window();
 
-        util::expected<bool, std::string> Init(const std::string& title, unsigned int width, unsigned int height);
-
+        util::expected<void, errors::WindowError> Init(const std::string& title, unsigned int width, unsigned int height);
         void OnUpdate();
         unsigned int GetWidth() const;
         unsigned int GetHeight() const;
         GLFWwindow* GetNativeWindow() const;
-
+        void SetEventCallback(const EventCallbackFn& callback) { m_Data.EventCallback = callback; }
+        void SetVSync(bool enabled);
+        bool IsVSync() const;
         static Shared<Window> Create(const std::string& title, unsigned int width, unsigned int height);
 
     private:
         Shared<RendererContext> m_RendererContext;
         UniqueGLFWwindow m_Window;
+
+        struct WindowData {
+            std::string Title;
+            unsigned int Width, Height;
+            bool VSync;
+
+            EventCallbackFn EventCallback;
+        };
+
+        WindowData m_Data;
     };
 
 } // namespace ge

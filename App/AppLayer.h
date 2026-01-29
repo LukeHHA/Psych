@@ -2,8 +2,7 @@
 
 #include "Core.h"
 
-class AppLayer : public Core::Layer
-{
+class AppLayer : public ge::Layer {
 public:
     AppLayer();
     virtual ~AppLayer();

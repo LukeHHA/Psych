@@ -7,10 +7,8 @@
 #include <vector>
 #include <memory>
 
-namespace Core
-{
-    class LayerStack
-    {
+namespace ge {
+    class LayerStack {
     public:
         LayerStack() = default;
         ~LayerStack();
@@ -35,4 +33,4 @@ namespace Core
         std::vector<std::unique_ptr<Layer>> m_Layers;
         unsigned int m_LayerInsertIndex = 0;
     };
-}
+} // namespace ge

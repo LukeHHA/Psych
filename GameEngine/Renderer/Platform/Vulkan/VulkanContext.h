@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Renderer/RendererContext.h"
+#include "Renderer/RendererAPI.h"
 
 namespace ge {
     class VulkanContext : public RendererContext {
@@ -10,8 +11,10 @@ namespace ge {
 
         virtual void Init() override;
         virtual void SwapBuffers() override;
+        virtual RendererAPIType GetCurrentAPI() const override { return RendererAPIType::Vulkan; }
 
     private:
         GLFWwindow* m_WindowHandle;
+        RendererAPIType m_API = RendererAPIType::Vulkan;
     };
 } // namespace ge

@@ -1,11 +1,11 @@
 set(SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/Logging/Logging.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/GameEngine.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Core/GameEngine.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Layers/LayerStack.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Vendor/glad/src/glad.c
     ${CMAKE_CURRENT_SOURCE_DIR}/Core/Window.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Renderer/RendererContext.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/Renderer/Platform/Opengl/OpenGLContext.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Renderer/Platform/Opengl/OpenglContext.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Renderer/Platform/Vulkan/VulkanContext.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Renderer/Platform/Metal/MetalContext.cpp
 )
