@@ -13,18 +13,14 @@ namespace ge {
 
     class GameEngine {
     public:
-        GameEngine(
-            const GameEngineSpecification& specification = GameEngineSpecification());
+        GameEngine(const GameEngineSpecification& specification = GameEngineSpecification());
         ~GameEngine();
         util::expected<void, errors::EngineError> Init();
         util::expected<void, errors::EngineError> Shutdown();
-
         void Run();
         void Stop();
-
         void PushLayer(std::unique_ptr<Layer> layer);
         void PushOverlay(std::unique_ptr<Layer> layer);
-
         static GameEngine& Get();
 
     private:
@@ -34,6 +30,5 @@ namespace ge {
         LayerStack m_LayerStack;
         Shared<Window> m_Window;
     };
-
     Unique<GameEngine> CreateGameEngine();
 } // namespace ge

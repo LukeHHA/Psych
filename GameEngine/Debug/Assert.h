@@ -17,19 +17,17 @@
 #define BIT(x) (1 << x)
 
 // --- Core and App specific ASSERT ---
-#ifdef CORE_ENABLE_ASSERTS
-#define DEBUG_TRACE()                                                   \
-    do                                                                  \
-    {                                                                   \
-        std::fprintf(stderr,                                            \
-                     "\033[31;1;4mDEBUG TRACE: %s:%d in %s()\033[0m\n", \
-                     __FILE__, __LINE__, __func__);                     \
+#ifdef GE_ENABLE_ASSERTS
+#define DEBUG_TRACE()                                          \
+    do {                                                       \
+        std::fprintf(stderr,                                   \
+            "\033[31;1;4mDEBUG TRACE: %s:%d in %s()\033[0m\n", \
+            __FILE__, __LINE__, __func__);                     \
     } while (0)
 #pragma message("Asserts are ENABLED")
 #define CORE_ASSERT(x, ...)                                       \
     {                                                             \
-        if (!(x))                                                 \
-        {                                                         \
+        if (!(x)) {                                               \
             CORE_LOG_ERROR("Assertion Failed: {0}", __VA_ARGS__); \
             DEBUG_TRACE();                                        \
             DEBUG_BREAK();                                        \
@@ -38,8 +36,7 @@
 
 #define APP_ASSERT(x, ...)                                       \
     {                                                            \
-        if (!(x))                                                \
-        {                                                        \
+        if (!(x)) {                                              \
             APP_LOG_ERROR("Assertion Failed: {0}", __VA_ARGS__); \
             DEBUG_TRACE();                                       \
             DEBUG_BREAK();                                       \
