@@ -11,10 +11,10 @@ namespace ge {
 
         virtual void Init() override;
         virtual void SwapBuffers() override;
-        virtual RendererAPIType GetCurrentAPI() const override { return RendererAPIType::Opengl; }
+        virtual RendererAPIType GetCurrentAPI() const override { return RendererAPIType::OPENGL; }
 
     private:
         GLFWwindow* m_WindowHandle;
-        RendererAPIType m_API = RendererAPIType::Opengl;
+        RendererAPIType m_API = RendererAPIType::OPENGL;
     };
 } // namespace ge

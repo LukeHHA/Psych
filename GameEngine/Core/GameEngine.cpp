@@ -27,8 +27,12 @@ namespace ge {
         CORE_ASSERT(!s_Application, "Application already exists")
         s_Application = this;
 
-        RendererAPI::SetAPI(RendererAPIType::Opengl);
-
+#ifdef GE_TESTS_ENABLED
+        RendererAPI::SetAPI(RendererAPIType::TEST_HEADLESS);
+#else
+        RendererAPI::SetAPI(RendererAPIType::OPENGL);
+#endif
+        // Will return a headless window when the tests are enabled
         m_Window = Window::Create("Game Engine", 1280, 720);
         return {};
     }

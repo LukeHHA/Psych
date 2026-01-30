@@ -8,6 +8,8 @@ set(SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/Renderer/Platform/Opengl/OpenglContext.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Renderer/Platform/Vulkan/VulkanContext.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Renderer/Platform/Metal/MetalContext.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Window/EngineWindow.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Window/HeadlessWindow.cpp
 )
 
 add_library(GameEngine STATIC)
@@ -53,8 +55,8 @@ if (MSVC)
   )
 else() # GCC/Clang
   target_compile_options(GameEngine PRIVATE
-    -Wall -Wextra -Wpedantic
-    $<$<CXX_COMPILER_ID:GNU,Clang,AppleClang>:-Wall -Wextra -Wpedantic -fdiagnostics-color=always>
+    -Wall -Wextra -Wpedantic 
+    $<$<CXX_COMPILER_ID:GNU,Clang,AppleClang>:-Wall -Wextra -Wpedantic -fdiagnostics-color=always >
   )
 endif()
 
@@ -68,6 +70,10 @@ target_include_directories(GameEngine PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/Vendor/glfw/include
     ${CMAKE_CURRENT_SOURCE_DIR}/Vendor/glad/include
 )
+
+if (BUILD_TESTING)
+    target_compile_definitions(GameEngine PRIVATE GE_TESTS_ENABLED)
+endif()
 
 add_subdirectory(Vendor/spdlog)
 add_subdirectory(Vendor/kz)

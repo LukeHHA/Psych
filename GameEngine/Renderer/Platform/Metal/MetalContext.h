@@ -11,10 +11,10 @@ namespace ge {
 
         virtual void Init() override;
         virtual void SwapBuffers() override;
-        virtual RendererAPIType GetCurrentAPI() const override { return RendererAPIType::Metal; }
+        virtual RendererAPIType GetCurrentAPI() const override { return RendererAPIType::METAL; }
 
     private:
         GLFWwindow* m_WindowHandle;
-        RendererAPIType m_API = RendererAPIType::Metal;
+        RendererAPIType m_API = RendererAPIType::METAL;
     };
 } // namespace ge

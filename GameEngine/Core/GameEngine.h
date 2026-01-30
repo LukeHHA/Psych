@@ -14,7 +14,7 @@ namespace ge {
     class GameEngine {
     public:
         GameEngine(const GameEngineSpecification& specification = GameEngineSpecification());
-        ~GameEngine();
+        virtual ~GameEngine();
         util::expected<void, errors::EngineError> Init();
         util::expected<void, errors::EngineError> Shutdown();
         void Run();

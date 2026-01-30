@@ -1,4 +1,6 @@
 #include "AppLayer.h"
+
+#define GE_ENTRYPOINT_IMPL
 #include "EntryPoint.h"
 
 #include <memory>

@@ -17,4 +17,14 @@ namespace ge {
 
         static Shared<RendererContext> Create(GLFWwindow* window);
     };
+
+    class RendererContextHeadless : public RendererContext {
+    public:
+        RendererContextHeadless() {}
+        virtual ~RendererContextHeadless() {}
+
+        virtual void Init() {}
+        virtual void SwapBuffers() {}
+        virtual RendererAPIType GetCurrentAPI() const {}
+    };
 } // namespace ge

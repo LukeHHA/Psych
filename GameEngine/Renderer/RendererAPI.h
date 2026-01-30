@@ -2,10 +2,13 @@
 #include <Debug/Assert.h>
 
 namespace ge {
-    enum class RendererAPIType { None,
-        Opengl,
-        Vulkan,
-        Metal };
+    enum class RendererAPIType {
+        NONE,
+        OPENGL,
+        VULKAN,
+        METAL,
+        TEST_HEADLESS
+    };
 
     class RendererAPI {
     public:
@@ -15,7 +18,7 @@ namespace ge {
         }
 
         static RendererAPIType Current() {
-            CORE_ASSERT(s_RendererAPI != RendererAPIType::None, "RendererAPI::Current() called but no API is set!");
+            CORE_ASSERT(s_RendererAPI != RendererAPIType::NONE, "RendererAPI::Current() called but no API is set!");
             return s_RendererAPI;
         }
 

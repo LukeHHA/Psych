@@ -29,18 +29,18 @@ namespace ge {
     public:
         using EventCallbackFn = std::function<void(Event&)>;
 
-        Window(const std::string& title, unsigned int width, unsigned int height);
-        ~Window();
+        Window() = default;
+        virtual ~Window() = default;
 
-        util::expected<void, errors::WindowError> Init(const std::string& title, unsigned int width, unsigned int height);
-        util::expected<void, errors::WindowError> Shutdown();
-        void OnUpdate();
+        virtual util::expected<void, errors::WindowError> Init(const std::string& title, unsigned int width, unsigned int height) = 0;
+        virtual util::expected<void, errors::WindowError> Shutdown() = 0;
+        virtual void OnUpdate() = 0;
         unsigned int GetWidth() const { return m_Data.Width; }
         unsigned int GetHeight() const { return m_Data.Height; }
         GLFWwindow* GetNativeWindow() const { return m_Window.get(); }
-        void SetEventCallback(const EventCallbackFn& callback) { m_Data.EventCallback = callback; }
-        void SetVSync(bool enabled);
-        bool IsVSync() const;
+        virtual void SetEventCallback(const EventCallbackFn& callback) { m_Data.EventCallback = callback; }
+        virtual void SetVSync(bool enabled) = 0;
+        virtual bool IsVSync() const = 0;
         static Shared<Window> Create(const std::string& title, unsigned int width, unsigned int height);
 
     private:

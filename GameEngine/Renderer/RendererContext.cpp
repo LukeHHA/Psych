@@ -8,15 +8,18 @@ namespace ge {
     Shared<RendererContext> RendererContext::Create(GLFWwindow* window) {
         CORE_PROFILE_FUNCTION();
         switch (RendererAPI::Current()) {
-            case RendererAPIType::None:
+            case RendererAPIType::NONE:
                 return nullptr;
-            case RendererAPIType::Opengl:
+            case RendererAPIType::TEST_HEADLESS:
+                return CreateShared<RendererContextHeadless>();
+            case RendererAPIType::OPENGL:
                 return CreateShared<OpenglContext>(window);
-            case RendererAPIType::Vulkan:
+            case RendererAPIType::VULKAN:
                 return CreateShared<VulkanContext>(window);
-            case RendererAPIType::Metal:
+            case RendererAPIType::METAL:
                 return CreateShared<OpenglContext>(window);
             default:
+                CORE_ASSERT(false, "Unknown Context during rendererContext::Create()")
                 return nullptr;
         }
     }

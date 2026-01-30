@@ -1,5 +1,9 @@
 #pragma once
 
+#ifndef GE_ENTRYPOINT_IMPL
+#error "EntryPoint.h must only be included from the application's entrypoint .cpp (define GE_ENTRYPOINT_IMPL before including)."
+#endif
+
 #include "Core.h"
 #include "Core/GameEngine.h"
 

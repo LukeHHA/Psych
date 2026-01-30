@@ -11,10 +11,10 @@ namespace ge {
 
         virtual void Init() override;
         virtual void SwapBuffers() override;
-        virtual RendererAPIType GetCurrentAPI() const override { return RendererAPIType::Vulkan; }
+        virtual RendererAPIType GetCurrentAPI() const override { return RendererAPIType::VULKAN; }
 
     private:
         GLFWwindow* m_WindowHandle;
-        RendererAPIType m_API = RendererAPIType::Vulkan;
+        RendererAPIType m_API = RendererAPIType::VULKAN;
     };
 } // namespace ge
