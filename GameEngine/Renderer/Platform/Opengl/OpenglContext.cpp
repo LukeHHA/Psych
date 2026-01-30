@@ -20,15 +20,16 @@ namespace ge {
         CORE_LOG_INFO("  Vendor: {0}", reinterpret_cast<const char*>(glGetString(GL_VENDOR)));
         CORE_LOG_INFO("  Renderer: {0}", reinterpret_cast<const char*>(glGetString(GL_RENDERER)));
         CORE_LOG_INFO("  Version: {0}", reinterpret_cast<const char*>(glGetString(GL_VERSION)));
-        // Initialize OpenGL loader here (e.g., glad, glew, etc.)
-        // For example, if using glad:
-        // int status = gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
-        // CORE_ASSERT(status, "Failed to initialize OpenGL context!");
-
         CORE_LOG_INFO("OpenGL Context Initialized");
+        GLint major = 0, minor = 0;
+        glGetIntegerv(GL_MAJOR_VERSION, &major);
+        glGetIntegerv(GL_MINOR_VERSION, &minor);
+        CORE_LOG_INFO("Opengl major version: {0}", major);
+        CORE_LOG_INFO("Opengl minor version {0}", minor);
     }
     void OpenglContext::SwapBuffers() {
         CORE_PROFILE_FUNCTION();
         glfwSwapBuffers(m_WindowHandle);
     }
+
 } // namespace ge
