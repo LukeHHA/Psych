@@ -19,11 +19,16 @@ namespace ge {
         EngineWindow(const std::string& title, unsigned int width, unsigned int height);
         virtual ~EngineWindow();
 
-        util::expected<void, errors::WindowError> Init(const std::string& title, unsigned int width, unsigned int height) override;
-        util::expected<void, errors::WindowError> Shutdown() override;
-        void OnUpdate() override;
-        void SetVSync(bool enabled) override;
-        bool IsVSync() const override;
+        virtual util::expected<void, errors::WindowError> Init(const std::string& title, unsigned int width, unsigned int height) override;
+        virtual util::expected<void, errors::WindowError> Shutdown() override;
+        virtual void PollEvents() override;
+        virtual unsigned int GetWidth() const override { return m_Data.Width; }
+        virtual unsigned int GetHeight() const override { return m_Data.Height; }
+        virtual GLFWwindow* GetNativeWindow() const override { return m_Window.get(); }
+        virtual void SetEventCallback(const EventCallbackFn& callback) override { m_Data.EventCallback = callback; }
+        virtual void OnUpdate() override;
+        virtual void SetVSync(bool enabled) override;
+        virtual bool IsVSync() const override;
 
     private:
         Shared<RendererContext> m_RendererContext;

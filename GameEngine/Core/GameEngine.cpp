@@ -53,6 +53,8 @@ namespace ge {
 
         // Main Application loop
         while (m_Running) {
+            m_Window->PollEvents();
+
             for (const auto& layer : m_LayerStack)
                 layer->OnUpdate();
 

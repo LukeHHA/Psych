@@ -35,10 +35,11 @@ namespace ge {
         virtual util::expected<void, errors::WindowError> Init(const std::string& title, unsigned int width, unsigned int height) = 0;
         virtual util::expected<void, errors::WindowError> Shutdown() = 0;
         virtual void OnUpdate() = 0;
-        unsigned int GetWidth() const { return m_Data.Width; }
-        unsigned int GetHeight() const { return m_Data.Height; }
-        GLFWwindow* GetNativeWindow() const { return m_Window.get(); }
-        virtual void SetEventCallback(const EventCallbackFn& callback) { m_Data.EventCallback = callback; }
+        virtual void PollEvents() = 0;
+        virtual unsigned int GetWidth() const = 0;
+        virtual unsigned int GetHeight() const = 0;
+        virtual GLFWwindow* GetNativeWindow() const = 0;
+        virtual void SetEventCallback(const EventCallbackFn& callback) = 0;
         virtual void SetVSync(bool enabled) = 0;
         virtual bool IsVSync() const = 0;
         static Shared<Window> Create(const std::string& title, unsigned int width, unsigned int height);
