@@ -17,4 +17,7 @@ namespace ge {
     constexpr Shared<T> CreateShared(Args&&... args) {
         return std::make_shared<T>(std::forward<Args>(args)...);
     }
+
+#define CORE_BIND_EVENT_FN(fn) [this](auto&&... args) -> decltype(auto) { return this->fn(std::forward<decltype(args)>(args)...); }
+
 } // namespace ge

@@ -27,6 +27,8 @@ namespace ge {
         CORE_ASSERT(!s_Application, "Application already exists")
         s_Application = this;
 
+        m_EventHandler = CreateShared<EventHandler>();
+
 #ifdef GE_TESTS_ENABLED
         RendererAPI::SetAPI(RendererAPIType::TEST_HEADLESS);
 #else

@@ -10,7 +10,7 @@ public:
     App() {
         CORE_PROFILE_FUNCTION();
         CORE_LOG_INFO("Initializing App");
-        PushLayer(std::move(std::make_unique<AppLayer>()));
+        PushLayer(std::make_unique<AppLayer>());
     }
 
     ~App() {

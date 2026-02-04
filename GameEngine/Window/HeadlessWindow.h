@@ -5,7 +5,7 @@
 #include "GLFW/glfw3.h"
 #include "ge_expected"
 #include "Errors/Errors.h"
-#include "Core/Event.h"
+#include "Events/Event.h"
 #include "Core/Window.h"
 
 #include <string>
@@ -21,6 +21,11 @@ namespace ge {
 
         util::expected<void, errors::WindowError> Init(const std::string& title, unsigned int width, unsigned int height) override;
         util::expected<void, errors::WindowError> Shutdown() override;
+        virtual void PollEvents() override {}
+        virtual unsigned int GetWidth() const override { return m_Data.Width; }
+        virtual unsigned int GetHeight() const override { return m_Data.Height; }
+        virtual GLFWwindow* GetNativeWindow() const override { return m_Window.get(); }
+        virtual void SetEventCallback(const EventCallbackFn& callback) override { m_Data.EventCallback = callback; }
         void OnUpdate() override;
         void SetVSync(bool enabled) override;
         bool IsVSync() const override;

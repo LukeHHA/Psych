@@ -10,6 +10,7 @@ set(SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/Renderer/Platform/Metal/MetalContext.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Window/EngineWindow.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Window/HeadlessWindow.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Events/EventHandler.cpp
 )
 
 add_library(GameEngine STATIC)

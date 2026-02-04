@@ -5,7 +5,7 @@
 #include "GLFW/glfw3.h"
 #include "ge_expected"
 #include "Errors/Errors.h"
-#include "Core/Event.h"
+#include "Events/Event.h"
 
 #include <string>
 #include <functional>
