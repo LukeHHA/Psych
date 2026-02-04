@@ -37,6 +37,8 @@ namespace ge {
     public:
         Instrumentor(const Instrumentor&) = delete;
         Instrumentor(Instrumentor&&) = delete;
+        Instrumentor& operator=(const Instrumentor& other) = delete;
+        Instrumentor& operator=(Instrumentor&& other) = delete;
 
         void BeginSession(const std::string& name,
             const std::string& filepath = "results.json") {
