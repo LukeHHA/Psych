@@ -31,6 +31,10 @@ namespace ge {
 
         Window() = default;
         virtual ~Window() = default;
+        Window(const Window& other) = delete;
+        Window(Window&& other) = delete;
+        Window& operator=(const Window& other) = delete;
+        Window& operator=(Window&& other) = delete;
 
         virtual util::expected<void, errors::WindowError> Init(const std::string& title, unsigned int width, unsigned int height) = 0;
         virtual util::expected<void, errors::WindowError> Shutdown() = 0;
