@@ -10,8 +10,16 @@
 namespace ge {
     class LayerStack {
     public:
+        // For now the Application is the only object that should own a LayerStack
+        // And therefore there is no reason to copy or move it for now. If the time
+        // Comes where a copy of the LayerStack would make sense (maybe to copy state)
+        // The copy ctor will be implemented
         LayerStack();
         ~LayerStack();
+        LayerStack(const LayerStack& other) = delete;
+        LayerStack(LayerStack&& other) = delete;
+        LayerStack& operator=(const LayerStack& other) = delete;
+        LayerStack& operator=(LayerStack&& other) = delete;
 
         void PushLayer(std::unique_ptr<Layer> layer);
         void PushOverlay(std::unique_ptr<Layer> overlay);
