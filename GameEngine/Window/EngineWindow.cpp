@@ -1,7 +1,6 @@
 #include "EngineWindow.h"
 #include "Debug/Instrumentor.h"
 #include "Debug/Assert.h"
-#include "Events/EventsHandler.h"
 #include "Core/Base.h"
 
 namespace ge {
@@ -74,10 +73,6 @@ namespace ge {
             SetVSync(true);
             CORE_LOG_INFO("EngineWindow Initialized successfully");
 
-            EventHandler::SubmitCallbackFn<WindowResizeEvent>([](WindowResizeEvent& event) {
-                std::cout << event.GetHeight() << " " << event.GetWidth() << std::endl;
-            });
-
             // Set GLFW callbacks
             glfwSetWindowSizeCallback(m_Window.get(), [](GLFWwindow* window, int width, int height) {
                 WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
@@ -85,7 +80,7 @@ namespace ge {
                 data.Height = height;
 
                 WindowResizeEvent event(width, height);
-                        });
+            });
             /*
 
             glfwSetWindowCloseCallback(m_Window, [](GLFWwindow* window) {

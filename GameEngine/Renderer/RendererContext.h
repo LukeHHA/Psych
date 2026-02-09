@@ -25,6 +25,6 @@ namespace ge {
 
         virtual void Init() {}
         virtual void SwapBuffers() {}
-        virtual RendererAPIType GetCurrentAPI() const {}
+        virtual RendererAPIType GetCurrentAPI() const { return RendererAPIType::TEST_HEADLESS; }
     };
 } // namespace ge

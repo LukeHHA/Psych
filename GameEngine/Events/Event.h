@@ -9,9 +9,9 @@ namespace ge {
     class Event {
     public:
         Event() = default;
-        ~Event() = default;
+        virtual ~Event() = default;
 
-        static EventType GetEventType() {}
+        virtual EventType GetEventType() = 0;
     };
 
     class WindowResizeEvent : public Event {
@@ -19,7 +19,7 @@ namespace ge {
         WindowResizeEvent(unsigned int width, unsigned int height)
             : m_Width(width), m_Height(height) {}
 
-        static EventType GetEventType() {
+        virtual EventType GetEventType() override {
             return EventType::WindowResizeEvent;
         }
 

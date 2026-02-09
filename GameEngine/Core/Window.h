@@ -32,7 +32,7 @@ namespace ge {
         Window() = default;
         virtual ~Window() = default;
         Window(const Window& other) = delete;
-        Window(Window&& other) = delete;
+        Window(Window&& other) = delete; // Moving may be allowed in the future if it the window ever needs to change owners
         Window& operator=(const Window& other) = delete;
         Window& operator=(Window&& other) = delete;
 

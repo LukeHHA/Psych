@@ -9,7 +9,7 @@ public:
 
     virtual void OnAttach() override;
     virtual void OnDetach() override;
-
+    virtual void OnEvent(ge::Event& event) override;
     virtual void OnUpdate(float ts) override;
     virtual void OnRender() override;
 

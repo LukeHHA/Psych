@@ -24,7 +24,7 @@
             "\033[31;1;4mDEBUG TRACE: %s:%d in %s()\033[0m\n", \
             __FILE__, __LINE__, __func__);                     \
     } while (0)
-#pragma message("Asserts are ENABLED")
+
 #define CORE_ASSERT(x, ...)                                       \
     {                                                             \
         if (!(x)) {                                               \
@@ -42,10 +42,6 @@
             DEBUG_BREAK();                                       \
         }                                                        \
     }
-#else
-#pragma message("Asserts are DISABLED")
-#define CORE_ASSERT(x, ...)
-#define APP_ASSERT(x, ...)
 #endif
 
 #else

@@ -10,7 +10,6 @@ set(SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/Renderer/Platform/Metal/MetalContext.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Window/EngineWindow.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Window/HeadlessWindow.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/Events/EventHandler.cpp
 )
 
 add_library(GameEngine STATIC)
@@ -25,18 +24,18 @@ set(GLFW_LIB_SHARED "${GLFW_LIB_DIR}/libglfw.3.dylib")
 
 option(USE_GLFW_SHARED "Link GLFW as a shared library (.dylib)" OFF)
 
-if (USE_GLFW_SHARED)
-    add_library(glfw3 SHARED IMPORTED GLOBAL)
-    set_target_properties(glfw3 PROPERTIES
+if(USE_GLFW_SHARED)
+  add_library(glfw3 SHARED IMPORTED GLOBAL)
+  set_target_properties(glfw3 PROPERTIES
         IMPORTED_LOCATION "${GLFW_LIB_SHARED}"
         INTERFACE_INCLUDE_DIRECTORIES "${GLFW_INCLUDE_DIR}"
-    )
+  )
 else()
-    add_library(glfw3 STATIC IMPORTED GLOBAL)
-    set_target_properties(glfw3 PROPERTIES
+  add_library(glfw3 STATIC IMPORTED GLOBAL)
+  set_target_properties(glfw3 PROPERTIES
         IMPORTED_LOCATION "${GLFW_LIB_STATIC}"
         INTERFACE_INCLUDE_DIRECTORIES "${GLFW_INCLUDE_DIR}"
-    )
+  )
 endif()
 
 target_link_libraries(GameEngine PUBLIC glfw3)
@@ -49,15 +48,14 @@ target_link_libraries(GameEngine PUBLIC
     "-framework OpenGL"
 )
 
-if (MSVC)
-  target_compile_options(GameEngine PRIVATE
-    /W4
-    $<$<BOOL:${WARNINGS_AS_ERRORS}>:/WX>
-  )
-else() # GCC/Clang
-  target_compile_options(GameEngine PRIVATE
-    -Wall -Wextra -Wpedantic 
-    $<$<CXX_COMPILER_ID:GNU,Clang,AppleClang>:-Wall -Wextra -Wpedantic -fdiagnostics-color=always >
+if(
+  (CMAKE_CXX_COMPILER_ID STREQUAL "GNU") OR
+  (CMAKE_CXXCOMPILER_ID MATCHES "Clang")
+)
+  target_compile_options(
+    GameEngine PRIVATE -g3 -Wall -Wextra
+    -Wconverstion -Wdouble-promotion
+    -Wno-unused-parameter -fsanitize=address,undefined
   )
 endif()
 
@@ -72,12 +70,18 @@ target_include_directories(GameEngine PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/Vendor/glad/include
 )
 
-if (BUILD_TESTING)
-    target_compile_definitions(GameEngine PRIVATE GE_TESTS_ENABLED)
+if(BUILD_TESTING)
+  target_compile_definitions(GameEngine PRIVATE GE_TESTS_ENABLED)
 endif()
 
 add_subdirectory(Vendor/spdlog)
 add_subdirectory(Vendor/kz)
 
 target_link_libraries(GameEngine PUBLIC spdlog)
+
+if(GE_ENABLE_ASSERTS)
+  message(STATUS "Asserts are ENABLED")
+else()
+  message(STATUS "Asserts are DISABLED")
+endif()
 

@@ -5,7 +5,6 @@
 #include "Core/Window.h"
 #include "Errors/Errors.h"
 #include "ge_expected"
-#include "Events/EventsHandler.h"
 
 namespace ge {
     struct GameEngineSpecification {
@@ -38,7 +37,6 @@ namespace ge {
         static GameEngine* s_Application;
         LayerStack m_LayerStack;
         Shared<Window> m_Window;
-        Shared<EventHandler> m_EventHandler;
     };
     Unique<GameEngine> CreateGameEngine();
 } // namespace ge

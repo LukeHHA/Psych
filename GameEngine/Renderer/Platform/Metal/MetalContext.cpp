@@ -2,9 +2,11 @@
 #include "Debug/Assert.h"
 
 namespace ge {
-    MetalContext::MetalContext(GLFWwindow* window) : m_WindowHandle(window) {
-        CORE_ASSERT(window, "Window is null!");
-    }
+    // MetalContext::MetalContext(GLFWwindow* window) : m_WindowHandle(window) {
+    //     CORE_ASSERT(window, "Window is null!");
+    // }
+
+    MetalContext::MetalContext() = default;
 
     void MetalContext::Init() {
         // Implementation for initializing Metal context

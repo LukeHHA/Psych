@@ -6,7 +6,8 @@
 namespace ge {
     class VulkanContext : public RendererContext {
     public:
-        VulkanContext(GLFWwindow* window);
+        VulkanContext();
+        // VulkanContext(GLFWwindow* window);
         virtual ~VulkanContext() = default;
 
         virtual void Init() override;
@@ -14,7 +15,7 @@ namespace ge {
         virtual RendererAPIType GetCurrentAPI() const override { return RendererAPIType::VULKAN; }
 
     private:
-        GLFWwindow* m_WindowHandle;
-        RendererAPIType m_API = RendererAPIType::VULKAN;
+        // GLFWwindow* m_WindowHandle;
+        // RendererAPIType m_API = RendererAPIType::VULKAN;
     };
 } // namespace ge

@@ -6,7 +6,8 @@
 namespace ge {
     class MetalContext : public RendererContext {
     public:
-        MetalContext(GLFWwindow* window);
+        MetalContext();
+        // MetalContext(GLFWwindow* window);
         virtual ~MetalContext() = default;
 
         virtual void Init() override;
@@ -14,7 +15,7 @@ namespace ge {
         virtual RendererAPIType GetCurrentAPI() const override { return RendererAPIType::METAL; }
 
     private:
-        GLFWwindow* m_WindowHandle;
-        RendererAPIType m_API = RendererAPIType::METAL;
+        // GLFWwindow* m_WindowHandle;
+        // RendererAPIType m_API = RendererAPIType::METAL;
     };
 } // namespace ge

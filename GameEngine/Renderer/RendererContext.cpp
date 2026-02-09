@@ -15,7 +15,7 @@ namespace ge {
             case RendererAPIType::OPENGL:
                 return CreateShared<OpenglContext>(window);
             case RendererAPIType::VULKAN:
-                return CreateShared<VulkanContext>(window);
+                return CreateShared<VulkanContext>();
             case RendererAPIType::METAL:
                 return CreateShared<OpenglContext>(window);
             default:
