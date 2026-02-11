@@ -2,7 +2,6 @@ set(SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/Logging/Logging.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Core/GameEngine.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Layers/LayerStack.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/Vendor/glad/src/glad.c
     ${CMAKE_CURRENT_SOURCE_DIR}/Core/Window.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Renderer/RendererContext.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Renderer/Platform/Opengl/OpenglContext.cpp
@@ -10,6 +9,8 @@ set(SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/Renderer/Platform/Metal/MetalContext.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Window/EngineWindow.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Window/HeadlessWindow.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Events/EventHandler.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Events/EventQueue.cpp
 )
 
 add_library(GameEngine STATIC)
@@ -48,36 +49,45 @@ target_link_libraries(GameEngine PUBLIC
     "-framework OpenGL"
 )
 
+option(GE_ENABLE_SANITIZERS "Enable ASan/UBSan" ON)
+
 if(
   (CMAKE_CXX_COMPILER_ID STREQUAL "GNU") OR
-  (CMAKE_CXXCOMPILER_ID MATCHES "Clang")
+  (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
 )
+  if(GE_ENABLE_SANITIZERS)
+    set(SAN_FLAGS -fsanitize=address,undefined -fno-omit-frame-pointer)
+    target_compile_options(GameEngine PRIVATE ${SAN_FLAGS})
+    target_link_options(GameEngine PUBLIC ${SAN_FLAGS})
+  endif()
   target_compile_options(
     GameEngine PRIVATE -g3 -Wall -Wextra
-    -Wconverstion -Wdouble-promotion
-    -Wno-unused-parameter -fsanitize=address,undefined
+    -Wconversion -Wdouble-promotion
+    -Wno-unused-parameter -Wno-sign-conversion
   )
 endif()
 
 target_sources(GameEngine PRIVATE ${SOURCES})
 
+add_subdirectory(Vendor/spdlog)
+add_subdirectory(Vendor/kz)
+add_subdirectory(Vendor/glad)
+
+target_link_libraries(GameEngine PUBLIC
+  spdlog::spdlog
+  glad
+  kiznit::expected
+)
+
 target_include_directories(GameEngine PUBLIC
-    ${CMAKE_CURRENT_SOURCE_DIR}/include
     ${CMAKE_CURRENT_SOURCE_DIR}/
-    ${CMAKE_CURRENT_SOURCE_DIR}/Vendor/spdlog
     ${CMAKE_CURRENT_SOURCE_DIR}/Vendor/kz/src
-    ${CMAKE_CURRENT_SOURCE_DIR}/Vendor/glfw/include
-    ${CMAKE_CURRENT_SOURCE_DIR}/Vendor/glad/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/include
 )
 
 if(BUILD_TESTING)
   target_compile_definitions(GameEngine PRIVATE GE_TESTS_ENABLED)
 endif()
-
-add_subdirectory(Vendor/spdlog)
-add_subdirectory(Vendor/kz)
-
-target_link_libraries(GameEngine PUBLIC spdlog)
 
 if(GE_ENABLE_ASSERTS)
   message(STATUS "Asserts are ENABLED")

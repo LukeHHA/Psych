@@ -1,4 +1,5 @@
 #include "GameEngine.h"
+#include "Core/Base.h"
 #include "Debug/Assert.h"
 #include "Debug/Instrumentor.h"
 #include "Renderer/RendererAPI.h"
@@ -36,8 +37,10 @@ util::expected<void, errors::EngineError> GameEngine::Init()
 #else
   RendererAPI::SetAPI(RendererAPIType::OPENGL);
 #endif
+  m_EventHandler_ = CreateShared<EventHandler>();
   // Will return a headless window when the tests are enabled
-  m_Window = Window::Create("Game Engine", 1280, 720);
+  m_Window = Window::Create("Game Engine", 1280, 720, m_EventHandler_);
+
   return {};
 }
 
@@ -51,6 +54,18 @@ util::expected<void, errors::EngineError> GameEngine::Shutdown()
   return {};
 }
 
+void GameEngine::HandleEvents()
+{
+  Unique<Event> event = nullptr;
+  while (m_EventHandler_->TryDequeueEvent(event)) {
+    switch (event->GetEventType()) {
+    case EventType::WindowClose:
+      m_Running = false;
+    }
+    m_Window->HandleEvents(std::move(event));
+  }
+}
+
 void GameEngine::Run()
 {
   CORE_PROFILE_FUNCTION();
@@ -61,15 +76,13 @@ void GameEngine::Run()
   while (m_Running) {
     m_Window->PollEvents();
 
+    HandleEvents();
+
     for (const auto& layer : m_LayerStack) layer->OnUpdate();
 
     for (const auto& layer : m_LayerStack) layer->OnRender();
 
     m_Window->OnUpdate();
-
-    auto stop = std::cin.get();
-    if (stop == "stop"[0])
-      Stop();
   }
 }
 
