@@ -2,7 +2,7 @@
 #include "Core/Base.h"
 #include "Debug/Assert.h"
 #include "Debug/Instrumentor.h"
-#include "Renderer/RendererAPI.h"
+#include "Renderer/Renderer.h"
 
 namespace ge
 {
@@ -32,14 +32,12 @@ util::expected<void, errors::EngineError> GameEngine::Init()
   CORE_ASSERT(!s_Application, "Application already exists")
   s_Application = this;
 
-#ifdef GE_TESTS_ENABLED
-  RendererAPI::SetAPI(RendererAPIType::TEST_HEADLESS);
-#else
-  RendererAPI::SetAPI(RendererAPIType::OPENGL);
-#endif
   m_EventHandler_ = CreateShared<EventHandler>();
-  // Will return a headless window when the tests are enabled
+  CORE_ASSERT(m_EventHandler_ != nullptr,
+              "Event handler failed to initalize within Application")
+  Renderer::Init(m_Specification);
   m_Window = Window::Create("Game Engine", 1280, 720, m_EventHandler_);
+  CORE_ASSERT(m_Window != nullptr, "Window Creation failed returning nullptr")
 
   return {};
 }
@@ -72,6 +70,8 @@ void GameEngine::Run()
   m_Running = true;
   CORE_LOG_INFO("Entering Main Application Loop");
 
+  Renderer::SetClearColour({0.1f, 0.5f, 0.9f});
+
   // Main Application loop
   while (m_Running) {
     m_Window->PollEvents();
@@ -83,6 +83,8 @@ void GameEngine::Run()
     for (const auto& layer : m_LayerStack) layer->OnRender();
 
     m_Window->OnUpdate();
+
+    Renderer::Clear();
   }
 }
 

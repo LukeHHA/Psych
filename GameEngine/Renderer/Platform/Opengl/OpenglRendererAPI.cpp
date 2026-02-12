@@ -3,9 +3,13 @@
 
 namespace ge
 {
-void OpenglRendererAPI::SetClearColour(glm::vec3& colour)
+void OpenglRendererAPI::SetClearColour(const glm::vec3& colour)
 {
   glClearColor(colour.x, colour.y, colour.z, 0.01f);
-  glClear(GL_COLOR_BUFFER_BIT);
+}
+
+void OpenglRendererAPI::Clear()
+{
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 } // namespace ge

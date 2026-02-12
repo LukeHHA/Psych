@@ -6,9 +6,10 @@ namespace ge
 class OpenglRendererAPI : public RendererAPI
 {
 public:
-  OpenglRendererAPI()  = default;
-  ~OpenglRendererAPI() = default;
+  OpenglRendererAPI()          = default;
+  virtual ~OpenglRendererAPI() = default;
 
-  virtual void SetClearColour(glm::vec3& colour) override;
+  virtual void SetClearColour(const glm::vec3& colour) override;
+  virtual void Clear() override;
 };
 } // namespace ge

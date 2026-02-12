@@ -1,8 +1,8 @@
 #pragma once
 
 #include "Core/Base.h"
+#include "glm/vec3.hpp"
 #include <Debug/Assert.h>
-#include <glm/vec3.hpp>
 
 namespace ge
 {
@@ -11,11 +11,9 @@ enum class RendererAPIType { NONE, OPENGL, VULKAN, METAL, TEST_HEADLESS };
 class RendererAPI
 {
 public:
-  static RendererAPIType SetAPI(RendererAPIType api)
-  {
-    s_RendererAPI = api;
-    return s_RendererAPI;
-  }
+  RendererAPI()          = default;
+  virtual ~RendererAPI() = default;
+  static void SetAPI(RendererAPIType api) { s_RendererAPI = api; }
 
   static RendererAPIType Current()
   {
@@ -24,7 +22,8 @@ public:
     return s_RendererAPI;
   }
 
-  virtual void SetClearColour(glm::vec3& colour) = 0;
+  virtual void SetClearColour(const glm::vec3& colour) = 0;
+  virtual void Clear()                                 = 0;
   static Unique<RendererAPI> Create();
 
 private:

@@ -9,7 +9,10 @@ Unique<RendererAPI> RendererAPI::Create()
   switch (s_RendererAPI) {
   case ge::RendererAPIType::OPENGL:
     return CreateUnique<OpenglRendererAPI>();
+  case ge::RendererAPIType::NONE:
+    CORE_ASSERT(false, "No API type has been set")
   }
+
   CORE_ASSERT(false, "Unknown Renderer API")
   return {};
 }

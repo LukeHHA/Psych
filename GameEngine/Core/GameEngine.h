@@ -5,12 +5,14 @@
 #include "Errors/Errors.h"
 #include "Events/EventHandler.h"
 #include "Layers/LayerStack.h"
+#include "Renderer/RendererAPI.h"
 #include "ge_expected"
 
 namespace ge
 {
 struct GameEngineSpecification {
-  std::string Name = "Application";
+  std::string Name             = "Application";
+  RendererAPIType RenderingAPI = RendererAPIType::OPENGL;
 };
 
 class GameEngine

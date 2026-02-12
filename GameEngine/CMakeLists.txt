@@ -5,12 +5,15 @@ set(SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/Core/Window.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Renderer/RendererContext.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Renderer/Platform/Opengl/OpenglContext.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Renderer/Platform/Opengl/OpenglRendererAPI.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Renderer/Platform/Vulkan/VulkanContext.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Renderer/Platform/Metal/MetalContext.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Window/EngineWindow.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Window/HeadlessWindow.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Events/EventHandler.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Events/EventQueue.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Renderer/Renderer.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Renderer/RendererAPI.cpp
 )
 
 add_library(GameEngine STATIC)
@@ -89,6 +92,8 @@ if(BUILD_TESTING)
   target_compile_definitions(GameEngine PRIVATE GE_TESTS_ENABLED)
 endif()
 
+target_compile_definitions(GameEngine PRIVATE GL_SILENCE_DEPRECATION)
+
 if(GE_ENABLE_ASSERTS)
   message(STATUS "Asserts are ENABLED")
 else()
@@ -101,10 +106,10 @@ include(FetchContent)
 
 FetchContent_Declare(
  glm
- GIT_REPOSITORY	https://github.com/g-truc/glm.git
- GIT_TAG 	0af55ccecd98d4e5a8d1fad7de25ba429d60e863 #refs/tags/1.0.1
+ GIT_REPOSITORY https://github.com/g-truc/glm.git
+ GIT_TAG 0af55ccecd98d4e5a8d1fad7de25ba429d60e863 #refs/tags/1.0.1
 )
 
 FetchContent_MakeAvailable(glm)
 
-target_link_libraries(GameEngine PRIVATE glm::glm)
+target_link_libraries(GameEngine PUBLIC glm::glm)
