@@ -63,7 +63,7 @@ if(
   target_compile_options(
     GameEngine PRIVATE -g3 -Wall -Wextra
     -Wconversion -Wdouble-promotion
-    -Wno-unused-parameter -Wno-sign-conversion
+    -Wno-unused-parameter -Wno-sign-conversion -Wno-switch
   )
 endif()
 
@@ -95,3 +95,16 @@ else()
   message(STATUS "Asserts are DISABLED")
 endif()
 
+cmake_minimum_required(VERSION 3.11) # FetchContent is new in version 3.11.
+
+include(FetchContent)
+
+FetchContent_Declare(
+ glm
+ GIT_REPOSITORY	https://github.com/g-truc/glm.git
+ GIT_TAG 	0af55ccecd98d4e5a8d1fad7de25ba429d60e863 #refs/tags/1.0.1
+)
+
+FetchContent_MakeAvailable(glm)
+
+target_link_libraries(GameEngine PRIVATE glm::glm)
