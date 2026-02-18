@@ -21,10 +21,8 @@ public:
   GameEngine(
       const GameEngineSpecification& specification = GameEngineSpecification());
   virtual ~GameEngine();
-  GameEngine(const GameEngine& other)            = delete;
-  GameEngine(GameEngine&& other)                 = delete;
-  GameEngine& operator=(GameEngine&& other)      = delete;
-  GameEngine& operator=(const GameEngine& other) = delete;
+  CORE_NO_COPY_NO_MOVE(GameEngine);
+
   util::expected<void, errors::EngineError> Init();
   util::expected<void, errors::EngineError> Shutdown();
   void Run();

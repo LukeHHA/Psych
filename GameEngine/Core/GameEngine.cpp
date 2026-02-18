@@ -15,6 +15,7 @@ GameEngine::GameEngine(const GameEngineSpecification& specification)
   CORE_PROFILE_FUNCTION();
   Init();
   CORE_LOG_INFO("Game Engine Initialized");
+  CORE_LOG_INFO("Game engine startup");
 }
 
 GameEngine::~GameEngine()

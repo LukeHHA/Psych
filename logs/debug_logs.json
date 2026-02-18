@@ -1,0 +1,220 @@
+{
+  "log": [
+    {
+      "time": "2026-02-14T17:20:05.128924+08:00",
+      "name": "CORE_MULTI_SINK_LOGGER",
+      "level": "info",
+      "trace": "/Users/lukeh/Documents/MainProjects/game_engine/GameEngine/EntryPoint.h:14",
+      "func": "main",
+      "process": 66947,
+      "thread": 30005698,
+      "message": "Core Library Initializing"
+    },
+    {
+      "time": "2026-02-14T17:20:05.129448+08:00",
+      "name": "CORE_MULTI_SINK_LOGGER",
+      "level": "info",
+      "trace": "/Users/lukeh/Documents/MainProjects/game_engine/GameEngine/EntryPoint.h:15",
+      "func": "main",
+      "process": 66947,
+      "thread": 30005698,
+      "message": "Initialized Core Logger"
+    },
+    {
+      "time": "2026-02-14T17:20:05.129456+08:00",
+      "name": "CORE_MULTI_SINK_LOGGER",
+      "level": "info",
+      "trace": "/Users/lukeh/Documents/MainProjects/game_engine/GameEngine/EntryPoint.h:17",
+      "func": "main",
+      "process": 66947,
+      "thread": 30005698,
+      "message": "Core Library Initialized"
+    },
+    {
+      "time": "2026-02-14T17:20:05.129815+08:00",
+      "name": "CORE_MULTI_SINK_LOGGER",
+      "level": "info",
+      "trace": "/Users/lukeh/Documents/MainProjects/game_engine/GameEngine/Layers/LayerStack.cpp:10",
+      "func": "LayerStack",
+      "process": 66947,
+      "thread": 30005698,
+      "message": "Initializing LayerStack"
+    },
+    {
+      "time": "2026-02-14T17:20:05.253951+08:00",
+      "name": "CORE_MULTI_SINK_LOGGER",
+      "level": "info",
+      "trace": "/Users/lukeh/Documents/MainProjects/game_engine/GameEngine/Window/EngineWindow.cpp:56",
+      "func": "Init",
+      "process": 66947,
+      "thread": 30005698,
+      "message": "GLFW initialized successfully"
+    },
+    {
+      "time": "2026-02-14T17:20:05.347875+08:00",
+      "name": "CORE_MULTI_SINK_LOGGER",
+      "level": "info",
+      "trace": "/Users/lukeh/Documents/MainProjects/game_engine/GameEngine/Window/EngineWindow.cpp:86",
+      "func": "Init",
+      "process": 66947,
+      "thread": 30005698,
+      "message": "GLFW Window 'Game Engine' created successfully"
+    },
+    {
+      "time": "2026-02-14T17:20:05.349626+08:00",
+      "name": "CORE_MULTI_SINK_LOGGER",
+      "level": "info",
+      "trace": "/Users/lukeh/Documents/MainProjects/game_engine/GameEngine/Renderer/Platform/Opengl/OpenglContext.cpp:19",
+      "func": "Init",
+      "process": 66947,
+      "thread": 30005698,
+      "message": "OpenGL Info:"
+    },
+    {
+      "time": "2026-02-14T17:20:05.349650+08:00",
+      "name": "CORE_MULTI_SINK_LOGGER",
+      "level": "info",
+      "trace": "/Users/lukeh/Documents/MainProjects/game_engine/GameEngine/Renderer/Platform/Opengl/OpenglContext.cpp:20",
+      "func": "Init",
+      "process": 66947,
+      "thread": 30005698,
+      "message": "  Vendor: Apple"
+    },
+    {
+      "time": "2026-02-14T17:20:05.349655+08:00",
+      "name": "CORE_MULTI_SINK_LOGGER",
+      "level": "info",
+      "trace": "/Users/lukeh/Documents/MainProjects/game_engine/GameEngine/Renderer/Platform/Opengl/OpenglContext.cpp:21",
+      "func": "Init",
+      "process": 66947,
+      "thread": 30005698,
+      "message": "  Renderer: Apple M4 Pro"
+    },
+    {
+      "time": "2026-02-14T17:20:05.349659+08:00",
+      "name": "CORE_MULTI_SINK_LOGGER",
+      "level": "info",
+      "trace": "/Users/lukeh/Documents/MainProjects/game_engine/GameEngine/Renderer/Platform/Opengl/OpenglContext.cpp:22",
+      "func": "Init",
+      "process": 66947,
+      "thread": 30005698,
+      "message": "  Version: 4.1 Metal - 90.5"
+    },
+    {
+      "time": "2026-02-14T17:20:05.349663+08:00",
+      "name": "CORE_MULTI_SINK_LOGGER",
+      "level": "info",
+      "trace": "/Users/lukeh/Documents/MainProjects/game_engine/GameEngine/Renderer/Platform/Opengl/OpenglContext.cpp:23",
+      "func": "Init",
+      "process": 66947,
+      "thread": 30005698,
+      "message": "OpenGL Context Initialized"
+    },
+    {
+      "time": "2026-02-14T17:20:05.349667+08:00",
+      "name": "CORE_MULTI_SINK_LOGGER",
+      "level": "info",
+      "trace": "/Users/lukeh/Documents/MainProjects/game_engine/GameEngine/Renderer/Platform/Opengl/OpenglContext.cpp:27",
+      "func": "Init",
+      "process": 66947,
+      "thread": 30005698,
+      "message": "Opengl major version: 4"
+    },
+    {
+      "time": "2026-02-14T17:20:05.349671+08:00",
+      "name": "CORE_MULTI_SINK_LOGGER",
+      "level": "info",
+      "trace": "/Users/lukeh/Documents/MainProjects/game_engine/GameEngine/Renderer/Platform/Opengl/OpenglContext.cpp:28",
+      "func": "Init",
+      "process": 66947,
+      "thread": 30005698,
+      "message": "Opengl minor version 1"
+    },
+    {
+      "time": "2026-02-14T17:20:05.349692+08:00",
+      "name": "CORE_MULTI_SINK_LOGGER",
+      "level": "info",
+      "trace": "/Users/lukeh/Documents/MainProjects/game_engine/GameEngine/Window/EngineWindow.cpp:92",
+      "func": "Init",
+      "process": 66947,
+      "thread": 30005698,
+      "message": "Initialized Context of type '1'"
+    },
+    {
+      "time": "2026-02-14T17:20:05.352374+08:00",
+      "name": "CORE_MULTI_SINK_LOGGER",
+      "level": "info",
+      "trace": "/Users/lukeh/Documents/MainProjects/game_engine/GameEngine/Window/EngineWindow.cpp:96",
+      "func": "Init",
+      "process": 66947,
+      "thread": 30005698,
+      "message": "EngineWindow Initialized successfully"
+    },
+    {
+      "time": "2026-02-14T17:20:05.352464+08:00",
+      "name": "CORE_MULTI_SINK_LOGGER",
+      "level": "info",
+      "trace": "/Users/lukeh/Documents/MainProjects/game_engine/GameEngine/Core/GameEngine.cpp:17",
+      "func": "GameEngine",
+      "process": 66947,
+      "thread": 30005698,
+      "message": "Game Engine Initialized"
+    },
+    {
+      "time": "2026-02-14T17:20:05.352468+08:00",
+      "name": "CORE_MULTI_SINK_LOGGER",
+      "level": "info",
+      "trace": "/Users/lukeh/Documents/MainProjects/game_engine/GameEngine/Core/GameEngine.cpp:18",
+      "func": "GameEngine",
+      "process": 66947,
+      "thread": 30005698,
+      "message": "Game engine startup"
+    },
+    {
+      "time": "2026-02-14T17:20:05.352480+08:00",
+      "name": "CORE_MULTI_SINK_LOGGER",
+      "level": "info",
+      "trace": "/Users/lukeh/Documents/MainProjects/game_engine/App/App.cpp:12",
+      "func": "App",
+      "process": 66947,
+      "thread": 30005698,
+      "message": "Initializing App"
+    },
+    {
+      "time": "2026-02-14T17:20:05.352569+08:00",
+      "name": "CORE_MULTI_SINK_LOGGER",
+      "level": "info",
+      "trace": "/Users/lukeh/Documents/MainProjects/game_engine/GameEngine/EntryPoint.h:21",
+      "func": "main",
+      "process": 66947,
+      "thread": 30005698,
+      "message": "App Session Created Successfully"
+    },
+    {
+      "time": "2026-02-14T17:20:05.352752+08:00",
+      "name": "CORE_MULTI_SINK_LOGGER",
+      "level": "info",
+      "trace": "/Users/lukeh/Documents/MainProjects/game_engine/GameEngine/Core/GameEngine.cpp:72",
+      "func": "Run",
+      "process": 66947,
+      "thread": 30005698,
+      "message": "Entering Main Application Loop"
+    },
+    {
+      "time": "2026-02-14T17:20:10.465859+08:00",
+      "name": "CORE_MULTI_SINK_LOGGER",
+      "level": "trace",
+      "trace": ":",
+      "func": "",
+      "process": 66947,
+      "thread": 30005698,
+      "message": "finished."
+    }
+  ]
+}
+]
+}
+]
+}
+]
+}

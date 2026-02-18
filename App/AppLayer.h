@@ -2,16 +2,17 @@
 
 #include "Core.h"
 
-class AppLayer : public ge::Layer {
+class AppLayer : public ge::Layer
+{
 public:
-    AppLayer();
-    virtual ~AppLayer();
+  AppLayer();
+  virtual ~AppLayer();
 
-    virtual void OnAttach() override;
-    virtual void OnDetach() override;
-    virtual void OnEvent(ge::Event& event) override;
-    virtual void OnUpdate(float ts) override;
-    virtual void OnRender() override;
+  virtual void OnAttach() override;
+  virtual void OnDetach() override;
+  virtual void OnEvent(ge::Event& event) override;
+  virtual void OnUpdate(float ts = 1) override;
+  virtual void OnRender() override;
 
 private:
 };
