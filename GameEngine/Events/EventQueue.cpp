@@ -1,9 +1,10 @@
 #include "EventQueue.h"
+#include "Logging/Logging.h"
 
 namespace ge
 {
-EventQueue::EventQueue() {}
-EventQueue::~EventQueue() {};
+EventQueue::EventQueue() { CORE_LOG_INFO("EventQueue Init"); }
+EventQueue::~EventQueue() { CORE_LOG_INFO("EventQueue Shutdown"); }
 
 void EventQueue::QueueEvent(Unique<Event> event)
 {

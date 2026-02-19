@@ -1,10 +1,11 @@
 #include "EventHandler.h"
 #include "Core/Base.h"
+#include "Logging/Logging.h"
 
 namespace ge
 {
-EventHandler::EventHandler() {}
-EventHandler::~EventHandler() {}
+EventHandler::EventHandler() { CORE_LOG_INFO("EventHandler Init"); }
+EventHandler::~EventHandler() { CORE_LOG_INFO("EventHandler Shutdown"); }
 
 void EventHandler::QueueEvent(Unique<Event> event)
 {

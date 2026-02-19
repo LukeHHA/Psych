@@ -2,6 +2,7 @@
 #include "Core/Base.h"
 #include "Debug/Assert.h"
 #include "Debug/Instrumentor.h"
+#include "FileSystem/FileSystem.h"
 #include "Renderer/Renderer.h"
 
 namespace ge
@@ -12,45 +13,35 @@ GameEngine* GameEngine::s_Application = nullptr;
 GameEngine::GameEngine(const GameEngineSpecification& specification)
     : m_Specification(specification)
 {
-  CORE_PROFILE_FUNCTION();
-  Init();
-  CORE_LOG_INFO("Game Engine Initialized");
   CORE_LOG_INFO("Game engine startup");
-}
-
-GameEngine::~GameEngine()
-{
-  CORE_PROFILE_FUNCTION();
-  Shutdown();
-  CORE_LOG_INFO("Game Engine Shutdown Complete");
-}
-
-util::expected<void, errors::EngineError> GameEngine::Init()
-{
   CORE_PROFILE_FUNCTION();
   CORE_PROFILE_SCOPE("GameEngine::Init");
 
   CORE_ASSERT(!s_Application, "Application already exists")
   s_Application = this;
 
+  m_LayerStack    = CreateUnique<LayerStack>();
   m_EventHandler_ = CreateShared<EventHandler>();
-  CORE_ASSERT(m_EventHandler_ != nullptr,
-              "Event handler failed to initalize within Application")
   Renderer::Init(m_Specification);
   m_Window = Window::Create("Game Engine", 1280, 720, m_EventHandler_);
-  CORE_ASSERT(m_Window != nullptr, "Window Creation failed returning nullptr")
 
-  return {};
+  CORE_ASSERT(m_EventHandler_, "EventHandler creation failed")
+  CORE_ASSERT(m_EventHandler_, "EventHandler creation failed")
+  CORE_ASSERT(m_Window, "Window Creation failed returning nullptr")
+  CORE_LOG_INFO("GameEngine Init");
 }
 
-util::expected<void, errors::EngineError> GameEngine::Shutdown()
+GameEngine::~GameEngine()
 {
   CORE_PROFILE_FUNCTION();
   CORE_PROFILE_SCOPE("GameEngine::Shutdown");
-  CORE_ASSERT(s_Application == this,
-              "Static Application Pointer Is Corrupt On Teardown");
+
+  m_LayerStack.reset();
+  m_EventHandler_.reset();
+  m_Window.reset();
+
   s_Application = nullptr;
-  return {};
+  CORE_LOG_INFO("GameEngine Shutdown");
 }
 
 void GameEngine::HandleEvents()
@@ -79,9 +70,9 @@ void GameEngine::Run()
 
     HandleEvents();
 
-    for (const auto& layer : m_LayerStack) layer->OnUpdate();
+    for (const auto& layer : Layers()) layer->OnUpdate();
 
-    for (const auto& layer : m_LayerStack) layer->OnRender();
+    for (const auto& layer : Layers()) layer->OnRender();
 
     m_Window->OnUpdate();
 
@@ -107,12 +98,12 @@ GameEngine& GameEngine::Get()
 void GameEngine::PushLayer(std::unique_ptr<Layer> layer)
 {
   CORE_PROFILE_FUNCTION();
-  m_LayerStack.PushLayer(std::move(layer));
+  m_LayerStack->PushLayer(std::move(layer));
 }
 
 void GameEngine::PushOverlay(std::unique_ptr<Layer> layer)
 {
   CORE_PROFILE_FUNCTION();
-  m_LayerStack.PushOverlay(std::move(layer));
+  m_LayerStack->PushOverlay(std::move(layer));
 }
 } // namespace ge

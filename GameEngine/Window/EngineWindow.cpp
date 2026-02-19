@@ -25,6 +25,7 @@ EngineWindow::EngineWindow(const std::string& title, unsigned int width,
     CORE_PROFILE_SCOPE("EngineWindow::Init");
     Init(title, width, height, eventHandler);
   }
+  CORE_LOG_INFO("Window Init");
 }
 
 EngineWindow::~EngineWindow()
@@ -34,6 +35,7 @@ EngineWindow::~EngineWindow()
     CORE_PROFILE_SCOPE("EngineWindow::Shutdown");
     Shutdown();
   }
+  CORE_LOG_INFO("Window Shutdown");
 }
 
 util::expected<void, errors::WindowError>

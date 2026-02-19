@@ -14,6 +14,7 @@ set(SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/Events/EventQueue.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Renderer/Renderer.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Renderer/RendererAPI.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/FileSystem/FileSystem.cpp
 )
 
 add_library(GameEngine STATIC)

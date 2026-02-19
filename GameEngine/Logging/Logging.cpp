@@ -3,12 +3,15 @@
 #include "spdlog/common.h"
 #include "spdlog/sinks/basic_file_sink.h"
 #include "spdlog/sinks/stdout_color_sinks.h"
+#include <iostream>
 
 namespace ge
 {
 
 void Log::Init()
 {
+
+  // Ensure logging file is empty
 
   using COUTColorSink_mt = spdlog::sinks::stdout_color_sink_mt;
   using FileSink_mt      = spdlog::sinks::basic_file_sink_mt;
@@ -21,7 +24,7 @@ void Log::Init()
   s_AppConsoleLogger_->set_pattern("%^[%T] [%n] [%s:%#]: %v%$");
   s_AppConsoleLogger_->set_level(spdlog::level::trace);
 
-  s_JSONSink_ = CreateShared<FileSink_mt>("logs/debug_logs.json");
+  s_JSONSink_ = CreateShared<FileSink_mt>("logs/debug_logs.json", true);
   s_JSONSink_->set_level(spdlog::level::trace);
   s_JSONSink_->set_pattern("{\n \"log\": [");
 
@@ -78,7 +81,8 @@ void Log::Shutdown()
   s_JSONSink_->set_pattern(jsonlastlogpattern);
   s_CoreMultiLogger_->trace("finished.");
   s_JSONSink_->set_pattern("]\n}");
-  SPDLOG_LOGGER_TRACE(s_CoreMultiLogger_, "");
+  s_CoreMultiLogger_->trace("");
   spdlog::drop("CORE_MULTI_SINK_LOGGER");
+  std::cout << "logging shutdown\n";
 }
 } // namespace ge
