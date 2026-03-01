@@ -5,24 +5,44 @@
 
 namespace ge
 {
-OpenglVertexArray::OpenglVertexArray(Unique<VertexBuffer> vertexBuffer,
-                                     Unique<IndexBuffer> indexBuffer)
+OpenglVertexArray::OpenglVertexArray()
 {
-  CORE_ASSERT(vertexBuffer, "vertex buffer is nullptr");
-  CORE_ASSERT(indexBuffer, "index buffer is nullptr");
-
-  m_VertexBuffers_.push_back(std::move(vertexBuffer));
-  m_IndexBuffer_ = std::move(indexBuffer);
-
-  glGenVertexArrays(1, &m_RendererID_);
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-  glEnableVertexAttribArray(0);
+  glCreateVertexArrays(1, &m_RendererID_);
 }
 
-Unique<VertexArray> OpenglVertexArray::Create(Unique<VertexBuffer> vertexBuffer,
-                                              Unique<IndexBuffer> indexBuffer)
+OpenglVertexArray::~OpenglVertexArray()
 {
-  return CreateUnique<OpenglVertexArray>(std::move(vertexBuffer),
-                                         std::move(indexBuffer));
+  glDeleteVertexArrays(1, &m_RendererID_);
+}
+
+void OpenglVertexArray::Bind() const { glBindVertexArray(m_RendererID_); }
+
+void OpenglVertexArray::Unbind() const { glBindVertexArray(0); }
+
+void OpenglVertexArray::AddVertexBuffer(
+    const Shared<VertexBuffer>& vertexBuffer)
+{
+  CORE_ASSERT(vertexBuffer, "vertex buffer is nullptr");
+  glBindVertexArray(m_RendererID_);
+  vertexBuffer->Bind();
+
+  // set attributes
+  glEnableVertexAttribArray(m_RendererID_);
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+
+  m_VertexBuffers_.push_back(vertexBuffer);
+}
+
+void OpenglVertexArray::AddIndexBuffer(const Shared<IndexBuffer>& indexBuffer)
+{
+  CORE_ASSERT(indexBuffer, "index buffer is nullptr");
+  glBindVertexArray(m_RendererID_);
+  indexBuffer->Bind();
+  m_IndexBuffer_ = indexBuffer;
+}
+
+Unique<VertexArray> OpenglVertexArray::Create()
+{
+  return CreateUnique<OpenglVertexArray>();
 }
 } // namespace ge

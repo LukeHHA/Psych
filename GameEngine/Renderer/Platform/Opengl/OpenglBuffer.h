@@ -22,13 +22,15 @@ private:
 class OpenglIndexBuffer : public IndexBuffer
 {
 public:
-  OpenglIndexBuffer(const float* vertices);
+  OpenglIndexBuffer(const float* indices, const uint32_t count);
   virtual ~OpenglIndexBuffer();
 
   void Bind() const override;
   void Unbind() const override;
+  virtual uint32_t GetIndexCount() const override;
 
 private:
   uint32_t m_RendererID_ = 0;
+  uint32_t m_Count_      = 0;
 };
 } // namespace ge

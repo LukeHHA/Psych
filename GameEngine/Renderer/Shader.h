@@ -29,9 +29,6 @@ public:
   static Shared<Shader> Create(const std::string& vertexSrc,
                                const std::string& fragSrc,
                                const std::string& name);
-
-private:
-  uint32_t m_ShaderID_ = 0;
 };
 
 enum class ShaderLibraryErrors { NotFound };

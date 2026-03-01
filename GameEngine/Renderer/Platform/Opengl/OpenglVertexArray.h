@@ -12,19 +12,24 @@ namespace ge
 class OpenglVertexArray : public VertexArray
 {
 public:
-  OpenglVertexArray(Unique<VertexBuffer> vertexBuffer,
-                    Unique<IndexBuffer> indexBuffer);
+  OpenglVertexArray();
   ~OpenglVertexArray() override;
 
-  void Bind() const override;
-  void Unbind() const override;
-
-  static Unique<VertexArray> Create(Unique<VertexBuffer> vertexBuffer,
-                                    Unique<IndexBuffer> indexBuffer);
+  virtual void Bind() const override;
+  virtual void Unbind() const override;
+  virtual void
+  AddVertexBuffer(const Shared<VertexBuffer>& vertexBuffer) override;
+  virtual void AddIndexBuffer(const Shared<IndexBuffer>& indexBuffer) override;
+  virtual Shared<VertexBuffer>& GetVertexBuffer() const override;
+  virtual const Shared<IndexBuffer>& GetIndexBuffer() const override
+  {
+    return m_IndexBuffer_;
+  };
+  static Unique<VertexArray> Create();
 
 private:
   uint32_t m_RendererID_ = 0;
-  std::vector<Unique<VertexBuffer>> m_VertexBuffers_;
-  Unique<IndexBuffer> m_IndexBuffer_;
+  std::vector<Shared<VertexBuffer>> m_VertexBuffers_;
+  Shared<IndexBuffer> m_IndexBuffer_;
 };
 } // namespace ge

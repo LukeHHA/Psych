@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Core/Base.h"
+#include "Renderer/VertexArray.h"
 #include "glm/vec3.hpp"
 #include <Debug/Assert.h>
 
@@ -13,6 +14,8 @@ class RendererAPI
 public:
   RendererAPI()          = default;
   virtual ~RendererAPI() = default;
+
+  virtual void Init()    = 0;
   static void SetAPI(RendererAPIType api) { s_RendererAPI = api; }
 
   static RendererAPIType Current()
@@ -23,7 +26,11 @@ public:
   }
 
   virtual void SetClearColour(const glm::vec3& colour) = 0;
+  virtual void SetViewPort(uint32_t x, uint32_t y, uint32_t width,
+                           uint32_t height)            = 0;
   virtual void Clear()                                 = 0;
+  virtual void DrawIndexed(const Shared<VertexArray>& vertexArray,
+                           uint32_t indexCount)        = 0;
   static Unique<RendererAPI> Create();
 
 private:

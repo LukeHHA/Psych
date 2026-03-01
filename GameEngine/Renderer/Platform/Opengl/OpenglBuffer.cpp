@@ -20,7 +20,8 @@ void OpenglVertexBuffer::Unbind() const { glBindBuffer(0, m_RendererID_); }
 
 // INDEX BUFFER
 
-OpenglIndexBuffer::OpenglIndexBuffer(const float* indices)
+OpenglIndexBuffer::OpenglIndexBuffer(const float* indices, const uint32_t count)
+    : m_Count_(count)
 {
   CORE_ASSERT(indices, "Indices is nullptr");
   glGenBuffers(1, &m_RendererID_);
@@ -31,4 +32,6 @@ OpenglIndexBuffer::OpenglIndexBuffer(const float* indices)
 
 void OpenglIndexBuffer::Bind() const { glBindBuffer(1, m_RendererID_); }
 void OpenglIndexBuffer::Unbind() const { glBindBuffer(0, m_RendererID_); }
+
+uint32_t OpenglIndexBuffer::GetIndexCount() const { return m_Count_; }
 } // namespace ge
