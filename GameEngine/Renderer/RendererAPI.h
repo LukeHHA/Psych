@@ -1,9 +1,11 @@
 #pragma once
 
 #include "Core/Base.h"
+#include "Debug/Assert.h"
+#include "Renderer/Buffer.h"
 #include "Renderer/VertexArray.h"
 #include "glm/vec3.hpp"
-#include <Debug/Assert.h>
+#include <cstdint>
 
 namespace ge
 {

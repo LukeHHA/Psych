@@ -8,6 +8,7 @@ namespace ge
 {
 OpenglShader::OpenglShader(const std::string& vertexPath,
                            const std::string& fragPath, const std::string& name)
+    : m_ShaderName_(name)
 {
   const std::string vertexSrc = util::Filesystem::StreamFile(vertexPath);
   const std::string fragSrc   = util::Filesystem::StreamFile(fragPath);
@@ -91,6 +92,7 @@ void OpenglShader::CheckCompileErrors(unsigned int shader,
           << "ERROR::SHADER_COMPILATION_ERROR of type: " << type << "\n"
           << infoLog
           << "\n -- --------------------------------------------------- -- "
+          << "Shader Name: " << m_ShaderName_ << '\n'
           << std::endl;
     }
   } else {
@@ -101,6 +103,7 @@ void OpenglShader::CheckCompileErrors(unsigned int shader,
           << "ERROR::PROGRAM_LINKING_ERROR of type: " << type << "\n"
           << infoLog
           << "\n -- --------------------------------------------------- -- "
+          << "Shader Name: " << m_ShaderName_ << '\n'
           << std::endl;
     }
   }

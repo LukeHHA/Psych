@@ -11,7 +11,7 @@ class OpenglShader : public Shader
 public:
   OpenglShader(const std::string& vertexSrc, const std::string& fragSrc,
                const std::string& name);
-  ~OpenglShader() override;
+  virtual ~OpenglShader() override = default;
 
   virtual void Bind() const override;
   virtual void Unbind() const override;
@@ -27,13 +27,14 @@ public:
                          const glm::vec4& value) override;
   virtual void SetMat4(const std::string& name,
                        const glm::mat4& value) override;
-  const std::string& GetName() const override;
+  const std::string& GetName() const override { return m_ShaderName_; }
 
 private:
   void CheckCompileErrors(unsigned int shader, const std::string& type);
 
 private:
-  uint32_t m_ShaderID_ = 0;
+  uint32_t m_ShaderID_      = 0;
+  std::string m_ShaderName_ = "Unamed_Shader";
 };
 
 } // namespace ge

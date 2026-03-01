@@ -5,8 +5,14 @@ set(SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/Layers/LayerStack.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Core/Window.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Renderer/RendererContext.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Renderer/Shader.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Renderer/Buffer.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Renderer/VertexArray.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Renderer/Platform/Opengl/OpenglContext.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Renderer/Platform/Opengl/OpenglShader.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Renderer/Platform/Opengl/OpenglRendererAPI.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Renderer/Platform/Opengl/OpenglBuffer.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Renderer/Platform/Opengl/OpenglVertexArray.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Renderer/Platform/Vulkan/VulkanContext.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Renderer/Platform/Metal/MetalContext.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Window/EngineWindow.cpp

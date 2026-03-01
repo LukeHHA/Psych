@@ -6,23 +6,26 @@ namespace ge
 class VertexBuffer
 {
 public:
-  virtual ~VertexBuffer();
+  VertexBuffer()              = default;
+  virtual ~VertexBuffer()     = default;
 
   virtual void Bind() const   = 0;
   virtual void Unbind() const = 0;
 
-  static Unique<VertexBuffer> Create(const float* vertices);
+  static Shared<VertexBuffer> Create(const float* vertices, uint32_t count);
 };
 
 class IndexBuffer
 {
 public:
-  virtual ~IndexBuffer();
+  IndexBuffer()                          = default;
+  virtual ~IndexBuffer()                 = default;
 
   virtual void Bind() const              = 0;
   virtual void Unbind() const            = 0;
   virtual uint32_t GetIndexCount() const = 0;
 
-  static Unique<IndexBuffer> Create(const float* vertices);
+  static Shared<IndexBuffer> Create(const uint32_t* indices,
+                                    const uint32_t count);
 };
 } // namespace ge

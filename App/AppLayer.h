@@ -1,6 +1,8 @@
 #pragma once
 
 #include "Layers/Layer.h"
+#include "Renderer/Shader.h"
+#include "Renderer/VertexArray.h"
 
 class AppLayer : public ge::Layer
 {
@@ -16,4 +18,6 @@ public:
   virtual void OnImGuiRender() override;
 
 private:
+  ge::Shared<ge::VertexArray> m_VertexArray;
+  ge::Shared<ge::Shader> m_Shader;
 };

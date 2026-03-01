@@ -16,7 +16,7 @@ if (BUILD_TESTING)
   add_subdirectory(tests)
 endif()
 
-option(BUILD_EDITOR "Build the editor target" ON)
+option(BUILD_EDITOR "Build the editor target" OFF)
 
 add_subdirectory(GameEngine)
 if (BUILD_EDITOR)

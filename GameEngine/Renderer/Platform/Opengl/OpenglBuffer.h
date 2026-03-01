@@ -9,11 +9,11 @@ namespace ge
 class OpenglVertexBuffer : public VertexBuffer
 {
 public:
-  OpenglVertexBuffer(const float* vertices);
-  ~OpenglVertexBuffer() override;
+  OpenglVertexBuffer(const float* vertices, uint32_t count);
+  virtual ~OpenglVertexBuffer() = default;
 
-  void Bind() const override;
-  void Unbind() const override;
+  virtual void Bind() const override;
+  virtual void Unbind() const override;
 
 private:
   uint32_t m_RendererID_ = 0;
@@ -22,11 +22,11 @@ private:
 class OpenglIndexBuffer : public IndexBuffer
 {
 public:
-  OpenglIndexBuffer(const float* indices, const uint32_t count);
-  virtual ~OpenglIndexBuffer();
+  OpenglIndexBuffer(const uint32_t* indices, const uint32_t count);
+  virtual ~OpenglIndexBuffer() = default;
 
-  void Bind() const override;
-  void Unbind() const override;
+  virtual void Bind() const override;
+  virtual void Unbind() const override;
   virtual uint32_t GetIndexCount() const override;
 
 private:

@@ -7,31 +7,41 @@ namespace ge
 {
 
 // VERTEX BUFFER
-OpenglVertexBuffer::OpenglVertexBuffer(const float* vertices)
+OpenglVertexBuffer::OpenglVertexBuffer(const float* vertices, uint32_t count)
 {
   CORE_ASSERT(vertices, "Vertices is nullptr");
   glGenBuffers(1, &m_RendererID_);
   glBindBuffer(GL_ARRAY_BUFFER, m_RendererID_);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+  glBufferData(GL_ARRAY_BUFFER, count, vertices, GL_STATIC_DRAW);
 }
 
-void OpenglVertexBuffer::Bind() const { glBindBuffer(1, m_RendererID_); }
-void OpenglVertexBuffer::Unbind() const { glBindBuffer(0, m_RendererID_); }
+void OpenglVertexBuffer::Bind() const
+{
+  glBindBuffer(GL_ARRAY_BUFFER, m_RendererID_);
+}
+void OpenglVertexBuffer::Unbind() const { glBindBuffer(GL_ARRAY_BUFFER, 0); }
 
 // INDEX BUFFER
 
-OpenglIndexBuffer::OpenglIndexBuffer(const float* indices, const uint32_t count)
+OpenglIndexBuffer::OpenglIndexBuffer(const uint32_t* indices,
+                                     const uint32_t count)
     : m_Count_(count)
 {
   CORE_ASSERT(indices, "Indices is nullptr");
   glGenBuffers(1, &m_RendererID_);
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_RendererID_);
-  glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices,
+  glBufferData(GL_ELEMENT_ARRAY_BUFFER, count * sizeof(indices), indices,
                GL_STATIC_DRAW);
 }
 
-void OpenglIndexBuffer::Bind() const { glBindBuffer(1, m_RendererID_); }
-void OpenglIndexBuffer::Unbind() const { glBindBuffer(0, m_RendererID_); }
+void OpenglIndexBuffer::Bind() const
+{
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_RendererID_);
+}
+void OpenglIndexBuffer::Unbind() const
+{
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+}
 
 uint32_t OpenglIndexBuffer::GetIndexCount() const { return m_Count_; }
 } // namespace ge

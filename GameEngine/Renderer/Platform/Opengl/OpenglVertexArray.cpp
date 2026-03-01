@@ -5,10 +5,7 @@
 
 namespace ge
 {
-OpenglVertexArray::OpenglVertexArray()
-{
-  glCreateVertexArrays(1, &m_RendererID_);
-}
+OpenglVertexArray::OpenglVertexArray() { glGenVertexArrays(1, &m_RendererID_); }
 
 OpenglVertexArray::~OpenglVertexArray()
 {
@@ -27,8 +24,12 @@ void OpenglVertexArray::AddVertexBuffer(
   vertexBuffer->Bind();
 
   // set attributes
-  glEnableVertexAttribArray(m_RendererID_);
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+  glEnableVertexAttribArray(0);
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
+
+  glEnableVertexAttribArray(1);
+  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float),
+                        (void*)(3 * sizeof(float)));
 
   m_VertexBuffers_.push_back(vertexBuffer);
 }
@@ -41,8 +42,8 @@ void OpenglVertexArray::AddIndexBuffer(const Shared<IndexBuffer>& indexBuffer)
   m_IndexBuffer_ = indexBuffer;
 }
 
-Unique<VertexArray> OpenglVertexArray::Create()
+Shared<VertexArray> OpenglVertexArray::Create()
 {
-  return CreateUnique<OpenglVertexArray>();
+  return CreateShared<OpenglVertexArray>();
 }
 } // namespace ge

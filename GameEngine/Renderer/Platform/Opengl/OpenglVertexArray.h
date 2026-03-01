@@ -20,12 +20,15 @@ public:
   virtual void
   AddVertexBuffer(const Shared<VertexBuffer>& vertexBuffer) override;
   virtual void AddIndexBuffer(const Shared<IndexBuffer>& indexBuffer) override;
-  virtual Shared<VertexBuffer>& GetVertexBuffer() const override;
+  virtual const Shared<VertexBuffer>& GetVertexBuffer() const override
+  {
+    return {};
+  }
   virtual const Shared<IndexBuffer>& GetIndexBuffer() const override
   {
     return m_IndexBuffer_;
   };
-  static Unique<VertexArray> Create();
+  static Shared<VertexArray> Create();
 
 private:
   uint32_t m_RendererID_ = 0;

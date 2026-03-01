@@ -1,16 +1,18 @@
 #include "Buffer.h"
 #include "Core/Base.h"
 #include "Renderer/Platform/Opengl/OpenglBuffer.h"
+#include <cstdint>
 
 namespace ge
 {
-Unique<VertexBuffer> VertexBuffer::Create(float& vertices)
+Shared<VertexBuffer> VertexBuffer::Create(const float* vertices, uint32_t count)
 {
-  return CreateUnique<OpenglVertexBuffer>(vertices);
+  return CreateShared<OpenglVertexBuffer>(vertices, count);
 }
 
-Unique<IndexBuffer> IndexBuffer::Create(float& vertices)
+Shared<IndexBuffer> IndexBuffer::Create(const uint32_t* indices,
+                                        const uint32_t count)
 {
-  return CreateUnique<OpenglIndexBuffer>(vertices);
+  return CreateShared<OpenglIndexBuffer>(indices, count);
 }
 } // namespace ge

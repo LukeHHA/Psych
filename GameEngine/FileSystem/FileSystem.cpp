@@ -52,11 +52,13 @@ bool Filesystem::DirExists(const std::filesystem::path& path)
   return res;
 }
 
-const std::string StreamFile(const std::string& path)
+const std::string Filesystem::StreamFile(const std::string& path)
 {
-  std::ifstream file(path);
+  auto debug_path = s_CurrentWorkingDir_ / path;
+  std::ifstream file(s_CurrentWorkingDir_ / path);
   if (!file.is_open()) {
-    CORE_ASSERT(false, "Failed to open file {}", path);
+    CORE_LOG_ERROR("Path: {}", debug_path.string());
+    CORE_ASSERT(false, "Failed to open file");
   }
 
   std::stringstream contents;
