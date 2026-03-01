@@ -1,6 +1,8 @@
 #include "AppLayer.h"
+#include "Debug/Instrumentor.h"
+#include "Renderer/Renderer.h"
 
-AppLayer::AppLayer() { CORE_PROFILE_FUNCTION(); }
+AppLayer::AppLayer() : ge::Layer("AppLayer") { CORE_PROFILE_FUNCTION(); }
 
 AppLayer::~AppLayer() { CORE_PROFILE_FUNCTION(); }
 
@@ -16,3 +18,5 @@ void AppLayer::OnRender() { CORE_PROFILE_FUNCTION(); }
 void AppLayer::OnAttach() { CORE_PROFILE_FUNCTION(); }
 
 void AppLayer::OnDetach() { CORE_PROFILE_FUNCTION(); }
+
+void AppLayer::OnImGuiRender() {}

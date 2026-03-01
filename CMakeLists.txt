@@ -13,8 +13,14 @@ add_compile_definitions(
 
 include(CTest)
 if (BUILD_TESTING)
-    add_subdirectory(tests)
+  add_subdirectory(tests)
 endif()
 
+option(BUILD_EDITOR "Build the editor target" ON)
+
 add_subdirectory(GameEngine)
-add_subdirectory(App)
+if (BUILD_EDITOR)
+  add_subdirectory(Editor)
+else()
+  add_subdirectory(App)
+endif()

@@ -2,9 +2,34 @@ BasedOnStyle: LLVM
 DerivePointerAlignment: false
 PointerAlignment: Left
 
-AlignConsecutiveAssignments: Consecutive
+AlignConsecutiveAssignments:
+  Enabled: true
+  AcrossEmptyLines: true
+  AcrossComments: false
+
+AlignConsecutiveMacros:
+  Enabled: true
+  AcrossEmptyLines: true
+  AcrossComments: false
+
+AlignConsecutiveShortCaseStatements:
+  Enabled: true
+  AcrossEmptyLines: true
+  AcrossComments: true
+  AlignCaseColons: false
+
+AlignEscapedNewlines: Right
+
+AlignTrailingComments:
+  Kind: Always
+  OverEmptyLines: 2
 
 AllowShortLoopsOnASingleLine: true
 
 BreakBeforeBraces: Linux
+
+# BreakBeforeCloseBracketBracedList: true
+#
+BreakBeforeConceptDeclarations: Always
+
 

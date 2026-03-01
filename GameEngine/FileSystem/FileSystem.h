@@ -14,8 +14,10 @@ public:
 
   static void Init();
   static void Shutdown();
-  static bool Exists(const std::filesystem::path& path);
+  static bool FileExists(const std::filesystem::path& path);
+  static bool DirExists(const std::filesystem::path& path);
   static void DeleteFile(const std::filesystem::path& path);
+  static const std::string StreamFile(const std::string& path);
 
 private:
   inline static std::filesystem::path s_CurrentWorkingDir_;

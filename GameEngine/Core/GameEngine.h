@@ -4,6 +4,7 @@
 #include "Core/Window.h"
 #include "Debug/Assert.h"
 #include "Events/EventHandler.h"
+#include "Imgui/ImguiLayer.h"
 #include "Layers/LayerStack.h"
 #include "Renderer/RendererAPI.h"
 
@@ -52,6 +53,7 @@ private:
   bool m_Running = false;
   static GameEngine* s_Application;
   Unique<LayerStack> m_LayerStack;
+  ImGuiLayer* m_ImGuiLayer_;
   Shared<Window> m_Window;
   Shared<EventHandler> m_EventHandler_;
 };

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Core.h"
+#include "Layers/Layer.h"
 
 class AppLayer : public ge::Layer
 {
@@ -13,6 +13,7 @@ public:
   virtual void OnEvent(ge::Event& event) override;
   virtual void OnUpdate(float ts = 1) override;
   virtual void OnRender() override;
+  virtual void OnImGuiRender() override;
 
 private:
 };

@@ -1,6 +1,7 @@
 set(SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/Logging/Logging.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Core/GameEngine.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Layers/Layer.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Layers/LayerStack.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Core/Window.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Renderer/RendererContext.cpp
@@ -15,6 +16,16 @@ set(SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/Renderer/Renderer.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Renderer/RendererAPI.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/FileSystem/FileSystem.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Imgui/ImguiLayer.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Vendor/imgui/imgui.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Vendor/imgui/imgui_draw.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Vendor/imgui/imgui_demo.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Vendor/imgui/imgui_tables.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Vendor/imgui/imgui_widgets.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Vendor/imgui/backends/imgui_impl_glfw.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Vendor/imgui/backends/imgui_impl_opengl3.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Vendor/imgui/misc/cpp/imgui_stdlib.cpp
+
 )
 
 add_library(GameEngine STATIC)
@@ -86,6 +97,7 @@ target_link_libraries(GameEngine PUBLIC
 target_include_directories(GameEngine PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/
     ${CMAKE_CURRENT_SOURCE_DIR}/Vendor/kz/src
+    ${CMAKE_CURRENT_SOURCE_DIR}/Vendor/imgui
     ${CMAKE_CURRENT_SOURCE_DIR}/include
 )
 
