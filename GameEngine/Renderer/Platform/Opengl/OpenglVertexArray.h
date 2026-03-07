@@ -5,7 +5,10 @@
 
 #include "../../VertexArray.h"
 #include "Core/Base.h"
+#include "Core/glad_glfw_incl.h"
+#include "Debug/Assert.h"
 #include "Renderer/Buffer.h"
+#include "Renderer/VertexFormat.h"
 
 namespace ge
 {
@@ -29,6 +32,44 @@ public:
     return m_IndexBuffer_;
   };
   static Shared<VertexArray> Create();
+
+  inline static GLenum ToOpenGLBaseType(ShaderDataType t)
+  {
+    switch (t) {
+    case ShaderDataType::Float2:
+    case ShaderDataType::Float3:
+      return GL_FLOAT;
+    case ShaderDataType::Int3:
+      return GL_INT;
+    default:
+      CORE_ASSERT(false, "Unknown ShaderDataType");
+      return 0;
+    }
+  }
+
+  inline static GLint ComponentCount(ShaderDataType t)
+  {
+    switch (t) {
+    case ShaderDataType::Float2:
+      return 2;
+    case ShaderDataType::Float3:
+      return 3;
+    default:
+      CORE_ASSERT(false, "Unknown ShaderDataType");
+      return 0;
+    }
+  }
+
+  inline static bool IsIntegerType(ShaderDataType t)
+  {
+    switch (t) {
+    case ShaderDataType::Int2:
+    case ge::ShaderDataType::Int3:
+      return true;
+    default:
+      return false;
+    }
+  }
 
 private:
   uint32_t m_RendererID_ = 0;

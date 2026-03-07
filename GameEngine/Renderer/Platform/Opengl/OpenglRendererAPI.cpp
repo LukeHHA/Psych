@@ -51,8 +51,8 @@ void OpenglRendererAPI::SetClearColour(const glm::vec3& colour)
 {
   glClearColor(colour.x, colour.y, colour.z, 0.01f);
 }
-void OpenglRendererAPI::SetViewPort(uint32_t x, uint32_t y, uint32_t width,
-                                    uint32_t height)
+void OpenglRendererAPI::SetViewPort(const uint32_t x, const uint32_t y,
+                                    const uint32_t width, const uint32_t height)
 {
   glViewport(x, y, width, height);
 }
@@ -62,8 +62,9 @@ void OpenglRendererAPI::Clear()
 }
 
 void OpenglRendererAPI::DrawIndexed(const Shared<VertexArray>& vertexArray,
-                                    uint32_t indexCount)
+                                    const uint32_t indexCount)
 {
+  CORE_PROFILE_FUNCTION();
   vertexArray->Bind();
   uint32_t count =
       indexCount ? indexCount : vertexArray->GetIndexBuffer()->GetIndexCount();

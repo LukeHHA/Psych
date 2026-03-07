@@ -10,6 +10,11 @@ Shared<VertexBuffer> VertexBuffer::Create(const float* vertices, uint32_t count)
   return CreateShared<OpenglVertexBuffer>(vertices, count);
 }
 
+Shared<VertexBuffer> VertexBuffer::Create(uint32_t size)
+{
+  return CreateShared<OpenglVertexBuffer>(size);
+}
+
 Shared<IndexBuffer> IndexBuffer::Create(const uint32_t* indices,
                                         const uint32_t count)
 {

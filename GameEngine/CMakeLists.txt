@@ -8,6 +8,7 @@ set(SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/Renderer/Shader.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Renderer/Buffer.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Renderer/VertexArray.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Renderer/VertexFormat.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Renderer/Platform/Opengl/OpenglContext.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Renderer/Platform/Opengl/OpenglShader.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Renderer/Platform/Opengl/OpenglRendererAPI.cpp

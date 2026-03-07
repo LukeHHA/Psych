@@ -1,6 +1,5 @@
 #include "OpenglVertexArray.h"
 #include "Core/Base.h"
-#include "Core/glad_glfw_incl.h"
 #include "Debug/Assert.h"
 
 namespace ge
@@ -22,15 +21,30 @@ void OpenglVertexArray::AddVertexBuffer(
   CORE_ASSERT(vertexBuffer, "vertex buffer is nullptr");
   glBindVertexArray(m_RendererID_);
   vertexBuffer->Bind();
+  auto& fmt = vertexBuffer->GetVertexLayout();
 
   // set attributes
-  glEnableVertexAttribArray(0);
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
+  CORE_ASSERT(!fmt.attrs.empty(), "Vertex format has no attributes, You may "
+                                  "have forgotten to set the layout");
+  CORE_ASSERT(fmt.stride > 0, "Vertex format stride is 0");
 
-  glEnableVertexAttribArray(1);
-  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float),
-                        (void*)(3 * sizeof(float)));
+  for (const auto& a : fmt.attrs) {
+    const GLuint loc = a.location;
+    glEnableVertexAttribArray(loc);
 
+    const GLenum glType  = ToOpenGLBaseType(a.type);
+    const GLint count    = ComponentCount(a.type);
+    const GLboolean norm = a.normalized ? GL_TRUE : GL_FALSE;
+    const GLsizei stride = static_cast<GLsizei>(fmt.stride);
+    const void* ptr =
+        reinterpret_cast<const void*>(static_cast<uintptr_t>(a.offset));
+
+    if (IsIntegerType(a.type)) {
+      glVertexAttribIPointer(loc, count, glType, stride, ptr);
+    } else {
+      glVertexAttribPointer(loc, count, glType, norm, stride, ptr);
+    }
+  }
   m_VertexBuffers_.push_back(vertexBuffer);
 }
 
