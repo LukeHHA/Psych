@@ -1,6 +1,7 @@
 #include "Window.h"
 #include "Debug/Assert.h"
 #include "Debug/Instrumentor.h"
+#include "Logging/Logging.h"
 #include "Window/EngineWindow.h"
 #include "Window/HeadlessWindow.h"
 
@@ -12,7 +13,6 @@ Shared<Window> Window::Create(const std::string& title, unsigned int width,
                               Shared<EventHandler> eventHandler)
 {
   CORE_PROFILE_FUNCTION();
-
   switch (RendererAPI::Current()) {
   case RendererAPIType::TEST_HEADLESS:
     return CreateShared<HeadlessWindow>(title, width, height, eventHandler);

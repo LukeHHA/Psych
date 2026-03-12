@@ -5,6 +5,7 @@ set(SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/Layers/LayerStack.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Core/Window.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Renderer/RendererContext.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Renderer/RendererContextHeadless.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Renderer/Shader.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Renderer/Chunk.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Renderer/Buffer.cpp
@@ -38,6 +39,23 @@ set(SOURCES
 add_library(GameEngine STATIC)
 target_sources(GameEngine PRIVATE ${SOURCES})
 
+if(APPLE)
+  target_link_libraries(GameEngine PUBLIC
+        "-framework Cocoa"
+        "-framework IOKit"
+        "-framework CoreVideo"
+        "-framework OpenGL"
+    )
+elseif(UNIX AND NOT APPLE)
+  target_link_libraries(GameEngine PUBLIC
+        GL
+        GLU
+        pthread
+        Xrandr
+        Xi
+    )
+endif()
+
 option(GE_ENABLE_SANITIZERS "Enable ASan/UBSan" ON)
 if(
   (CMAKE_CXX_COMPILER_ID STREQUAL "GNU") OR
@@ -58,7 +76,7 @@ endif()
 add_subdirectory(Vendor/spdlog)
 add_subdirectory(Vendor/kz)
 add_subdirectory(Vendor/glad)
-add_subdirectory(Vendor/glfw)
+add_subdirectory(Vendor/glfw-3.4)
 
 set(BUILD_SHARED_LIBS OFF)
 add_subdirectory(Vendor/assimp)
@@ -75,8 +93,8 @@ target_link_libraries(GameEngine PUBLIC
   spdlog::spdlog
   glad
   kiznit::expected
-  glfw3
   assimp
+  glfw
 )
 
 target_include_directories(GameEngine PUBLIC

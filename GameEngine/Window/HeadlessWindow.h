@@ -4,7 +4,7 @@
 #include "Core/Window.h"
 #include "Errors/Errors.h"
 #include "Events/Event.h"
-#include "GLFW/glfw3.h"
+#include "Core/glad_glfw_incl.h"
 #include "Renderer/RendererContext.h"
 #include "ge_expected"
 

@@ -2,9 +2,9 @@
 
 #include "Core/Base.h"
 #include "Core/Window.h"
+#include "Core/glad_glfw_incl.h"
 #include "Errors/Errors.h"
 #include "Events/Event.h"
-#include "GLFW/glfw3.h"
 #include "Renderer/RendererContext.h"
 #include "ge_expected"
 
@@ -52,7 +52,7 @@ private:
     std::string Title;
     unsigned int Width, Height;
     bool VSync;
-    Shared<EventHandler> EventHandler;
+    Shared<EventHandler> EventsHandler;
     EventCallbackFn EventCallback;
   };
 

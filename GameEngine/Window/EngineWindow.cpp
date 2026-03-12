@@ -47,10 +47,10 @@ EngineWindow::Init(const std::string& title, unsigned int width,
   // This is just to ensure one window for now but will be reference counted in
   // the future
   if (!m_Window) {
-    m_Data.Title        = title;
-    m_Data.Width        = width;
-    m_Data.Height       = height;
-    m_Data.EventHandler = eventHandler;
+    m_Data.Title         = title;
+    m_Data.Width         = width;
+    m_Data.Height        = height;
+    m_Data.EventsHandler = eventHandler;
 
     CORE_PROFILE_SCOPE("glfwInit");
     int success = glfwInit();
@@ -102,21 +102,21 @@ EngineWindow::Init(const std::string& title, unsigned int width,
         m_Window.get(), [](GLFWwindow* window, int width, int height) {
           WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
 
-          auto event = CreateUnique<WindowResizeEvent>(width, height);
-          data.EventHandler->QueueEvent(std::move(event));
+          auto event       = CreateUnique<WindowResizeEvent>(width, height);
+          data.EventsHandler->QueueEvent(std::move(event));
         });
 
     glfwSetFramebufferSizeCallback(
         m_Window.get(), [](GLFWwindow* window, int width, int height) {
           WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
           auto event = CreateUnique<FramebufferResizeEvent>(width, height);
-          data.EventHandler->QueueEvent(std::move(event));
+          data.EventsHandler->QueueEvent(std::move(event));
         });
 
     glfwSetWindowCloseCallback(m_Window.get(), [](GLFWwindow* window) {
       WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
       auto event       = CreateUnique<WindowCloseEvent>();
-      data.EventHandler->QueueEvent(std::move(event));
+      data.EventsHandler->QueueEvent(std::move(event));
     });
 
     glfwSetKeyCallback(m_Window.get(), [](GLFWwindow* window, int key,
@@ -126,17 +126,17 @@ EngineWindow::Init(const std::string& title, unsigned int width,
       switch (action) {
       case GLFW_PRESS: {
         auto event = CreateUnique<KeyPressedEvent>(key, 0);
-        data.EventHandler->QueueEvent(std::move(event));
+        data.EventsHandler->QueueEvent(std::move(event));
         break;
       }
       case GLFW_RELEASE: {
         auto event = CreateUnique<KeyReleasedEvent>(key);
-        data.EventHandler->QueueEvent(std::move(event));
+        data.EventsHandler->QueueEvent(std::move(event));
         break;
       }
       case GLFW_REPEAT: {
         auto event = CreateUnique<KeyPressedEvent>(key, true);
-        data.EventHandler->QueueEvent(std::move(event));
+        data.EventsHandler->QueueEvent(std::move(event));
         break;
       }
       }
@@ -146,7 +146,7 @@ EngineWindow::Init(const std::string& title, unsigned int width,
         m_Window.get(), [](GLFWwindow* window, unsigned int keycode) {
           WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
           auto event       = CreateUnique<KeyTypedEvent>(keycode);
-          data.EventHandler->QueueEvent(std::move(event));
+          data.EventsHandler->QueueEvent(std::move(event));
         });
 
     glfwSetMouseButtonCallback(
@@ -157,12 +157,12 @@ EngineWindow::Init(const std::string& title, unsigned int width,
           switch (action) {
           case GLFW_PRESS: {
             auto event = CreateUnique<MouseButtonPressedEvent>(button);
-            data.EventHandler->QueueEvent(std::move(event));
+            data.EventsHandler->QueueEvent(std::move(event));
             break;
           }
           case GLFW_RELEASE: {
             auto event = CreateUnique<MouseButtonReleasedEvent>(button);
-            data.EventHandler->QueueEvent(std::move(event));
+            data.EventsHandler->QueueEvent(std::move(event));
             break;
           }
           }
@@ -174,7 +174,7 @@ EngineWindow::Init(const std::string& title, unsigned int width,
 
           auto event =
               CreateUnique<MouseScrolledEvent>((float)xOffset, (float)yOffset);
-          data.EventHandler->QueueEvent(std::move(event));
+          data.EventsHandler->QueueEvent(std::move(event));
         });
 
     glfwSetCursorPosCallback(
@@ -182,7 +182,7 @@ EngineWindow::Init(const std::string& title, unsigned int width,
           WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
 
           auto event = CreateUnique<MouseMovedEvent>((float)xPos, (float)yPos);
-          data.EventHandler->QueueEvent(std::move(event));
+          data.EventsHandler->QueueEvent(std::move(event));
         });
   }
   return {};

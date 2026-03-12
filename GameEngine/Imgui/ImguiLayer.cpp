@@ -12,7 +12,7 @@
 
 namespace ge
 {
-ImGuiLayer::ImGuiLayer() : Layer("ImGuiLayer") {}
+ImGuiLayer::ImGuiLayer() : IImGuiLayer("ImGuiLayer") {}
 
 void ImGuiLayer::OnAttach()
 {

@@ -11,6 +11,7 @@ Shared<VertexArray> VertexArray::Create()
   switch (RendererAPI::Current()) {
 
   case ge::RendererAPIType::OPENGL:
+  case ge::RendererAPIType::TEST_HEADLESS:
     return CreateShared<OpenglVertexArray>();
 
   default:

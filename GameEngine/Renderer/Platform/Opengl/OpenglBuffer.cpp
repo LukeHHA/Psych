@@ -1,7 +1,6 @@
 #include "OpenglBuffer.h"
 #include "Core/glad_glfw_incl.h"
 #include "Debug/Assert.h"
-#include "GLFW/glfw3.h"
 #include "Renderer/VertexFormat.h"
 
 namespace ge

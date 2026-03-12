@@ -1,5 +1,6 @@
 #include "Renderer.h"
 #include "Core/GameEngine.h"
+#include "Debug/Assert.h"
 #include "Renderer/RendererAPI.h"
 #include "Renderer/VertexTypes.h"
 #include <iostream>
@@ -38,6 +39,9 @@ void Renderer::Flush() { s_Data.drawCalls = 0; }
 void Renderer::SetRendererAPI(RendererAPIType type)
 {
   switch (type) {
+  case ge::RendererAPIType::TEST_HEADLESS:
+    s_RendererAPI_->SetAPI(RendererAPIType::TEST_HEADLESS);
+    return;
   case RendererAPIType::OPENGL:
     s_RendererAPI_->SetAPI(RendererAPIType::OPENGL);
     return;

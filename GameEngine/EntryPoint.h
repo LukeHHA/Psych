@@ -1,25 +1,45 @@
 #pragma once
 
-#include "Core/Base.h"
+#include <iostream>
+#include <memory>
+
 #include "Core/GameEngine.h"
 #include "Debug/Instrumentor.h"
 #include "FileSystem/FileSystem.h"
+#include "Renderer/RendererAPI.h"
+#include "Util/CommandLine.h"
 
-extern std::unique_ptr<ge::GameEngine> ge::CreateGameEngine();
+extern std::unique_ptr<ge::GameEngine>
+ge::CreateGameEngine(ge::GameEngineSpecification& spec);
 
 int main(int argc, char** argv)
 {
-  /* Ensure that no Logging is attempted befoire this point
-   * otherwise a segmentation fault occurs
-   */
   {
     ge::util::Filesystem::Init();
     ge::Log::Init();
+
     CORE_LOG_INFO("Logging Init");
     CORE_LOG_INFO("Filesystem Init");
 
+    const ge::cli::ParseResult parseResult =
+        ge::cli::CommandLineParser::Parse(argc, argv);
+
+    if (!parseResult.Success) {
+      std::cerr << parseResult.ErrorMessage;
+      return 1;
+    }
+
+    if (parseResult.Options.ShowHelp) {
+      std::cout << ge::cli::CommandLineParser::HelpText();
+      return 0;
+    }
+
+    ge::GameEngineSpecification spec;
+    spec.Name         = "Game Engine";
+    spec.RenderingAPI = parseResult.Options.RenderingAPI;
+
     CORE_PROFILE_BEGIN_SESSION("Startup", "CoreProfile-Startup.json");
-    auto app = ge::CreateGameEngine();
+    auto app = ge::CreateGameEngine(spec);
     CORE_LOG_INFO("App Session Created Successfully");
     CORE_PROFILE_END_SESSION();
 
@@ -33,9 +53,7 @@ int main(int argc, char** argv)
 
     ge::util::Filesystem::Shutdown();
     CORE_LOG_INFO("Filesystem Shutdown");
-  } // Scoped to ensure that logging is the last thing to destruct
-
-  ge::Log::Shutdown();
+  }
 
   return 0;
 }

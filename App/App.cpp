@@ -1,4 +1,5 @@
 #include "AppLayer.h"
+#include "Core/GameEngine.h"
 
 #define GE_ENTRYPOINT_IMPL
 #include "EntryPoint.h"
@@ -9,7 +10,7 @@
 class App : public ge::GameEngine
 {
 public:
-  App()
+  App(ge::GameEngineSpecification& spec) : ge::GameEngine(spec)
   {
     CORE_PROFILE_FUNCTION();
     CORE_LOG_INFO("Initializing App");
@@ -23,8 +24,9 @@ public:
   }
 };
 
-std::unique_ptr<ge::GameEngine> ge::CreateGameEngine()
+std::unique_ptr<ge::GameEngine>
+ge::CreateGameEngine(ge::GameEngineSpecification& spec)
 {
   CORE_PROFILE_FUNCTION();
-  return std::make_unique<App>();
+  return std::make_unique<App>(spec);
 }
