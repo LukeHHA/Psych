@@ -1,7 +1,8 @@
 #pragma once
 
-#include "Core.h"
+#include "Core/Base.h"
 #include "Core/GameEngine.h"
+#include "Debug/Instrumentor.h"
 #include "FileSystem/FileSystem.h"
 
 extern std::unique_ptr<ge::GameEngine> ge::CreateGameEngine();

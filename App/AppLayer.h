@@ -1,8 +1,7 @@
 #pragma once
 
-#include "Layers/Layer.h"
-#include "Renderer/Shader.h"
-#include "Renderer/VertexArray.h"
+#include "ge/Core/Layer.h"
+#include "ge/Core/Renderer.h"
 
 class AppLayer : public ge::Layer
 {

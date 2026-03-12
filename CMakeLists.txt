@@ -1,4 +1,5 @@
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.11)
+
 cmake_policy(SET CMP0135 NEW)
 project(Template VERSION 1.0)
 
@@ -10,6 +11,12 @@ add_compile_definitions(
     GE_ENABLE_ASSERTS
     GE_PROFILE
 )
+
+if(GE_ENABLE_ASSERTS)
+  message(STATUS "Asserts are ENABLED")
+else()
+  message(STATUS "Asserts are DISABLED")
+endif()
 
 include(CTest)
 if (BUILD_TESTING)

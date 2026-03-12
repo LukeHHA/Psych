@@ -6,6 +6,7 @@ set(SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/Core/Window.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Renderer/RendererContext.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Renderer/Shader.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Renderer/Chunk.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Renderer/Buffer.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Renderer/VertexArray.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Renderer/VertexFormat.cpp
@@ -32,47 +33,12 @@ set(SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/Vendor/imgui/backends/imgui_impl_glfw.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Vendor/imgui/backends/imgui_impl_opengl3.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Vendor/imgui/misc/cpp/imgui_stdlib.cpp
-
 )
 
 add_library(GameEngine STATIC)
-
-set(GLFW_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/Vendor/glfw")
-set(GLFW_INCLUDE_DIR "${GLFW_ROOT}/include")
-set(GLFW_LIB_DIR "${GLFW_ROOT}/lib-arm64")
-
-# Choose ONE:
-set(GLFW_LIB_STATIC "${GLFW_LIB_DIR}/libglfw3.a")
-set(GLFW_LIB_SHARED "${GLFW_LIB_DIR}/libglfw.3.dylib")
-
-option(USE_GLFW_SHARED "Link GLFW as a shared library (.dylib)" OFF)
-
-if(USE_GLFW_SHARED)
-  add_library(glfw3 SHARED IMPORTED GLOBAL)
-  set_target_properties(glfw3 PROPERTIES
-        IMPORTED_LOCATION "${GLFW_LIB_SHARED}"
-        INTERFACE_INCLUDE_DIRECTORIES "${GLFW_INCLUDE_DIR}"
-  )
-else()
-  add_library(glfw3 STATIC IMPORTED GLOBAL)
-  set_target_properties(glfw3 PROPERTIES
-        IMPORTED_LOCATION "${GLFW_LIB_STATIC}"
-        INTERFACE_INCLUDE_DIRECTORIES "${GLFW_INCLUDE_DIR}"
-  )
-endif()
-
-target_link_libraries(GameEngine PUBLIC glfw3)
-
-# macOS frameworks GLFW needs
-target_link_libraries(GameEngine PUBLIC
-    "-framework Cocoa"
-    "-framework IOKit"
-    "-framework CoreVideo"
-    "-framework OpenGL"
-)
+target_sources(GameEngine PRIVATE ${SOURCES})
 
 option(GE_ENABLE_SANITIZERS "Enable ASan/UBSan" ON)
-
 if(
   (CMAKE_CXX_COMPILER_ID STREQUAL "GNU") OR
   (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
@@ -89,38 +55,44 @@ if(
   )
 endif()
 
-target_sources(GameEngine PRIVATE ${SOURCES})
-
 add_subdirectory(Vendor/spdlog)
 add_subdirectory(Vendor/kz)
 add_subdirectory(Vendor/glad)
+add_subdirectory(Vendor/glfw)
 
+set(BUILD_SHARED_LIBS OFF)
+add_subdirectory(Vendor/assimp)
+set(BUILD_SHARED_LIBS ON)
+
+# MacOS specific libs
+target_link_libraries(GameEngine PRIVATE
+    "-framework Cocoa"
+    "-framework IOKit"
+    "-framework CoreVideo"
+    "-framework OpenGL"
+)
 target_link_libraries(GameEngine PUBLIC
   spdlog::spdlog
   glad
   kiznit::expected
+  glfw3
+  assimp
 )
 
 target_include_directories(GameEngine PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/
-    ${CMAKE_CURRENT_SOURCE_DIR}/Vendor/kz/src
+    ${CMAKE_CURRENT_SOURCE_DIR}/Vendor
     ${CMAKE_CURRENT_SOURCE_DIR}/Vendor/imgui
+)
+
+target_include_directories(GameEngine PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/include
 )
 
 if(BUILD_TESTING)
   target_compile_definitions(GameEngine PRIVATE GE_TESTS_ENABLED)
 endif()
-
 target_compile_definitions(GameEngine PRIVATE GL_SILENCE_DEPRECATION)
-
-if(GE_ENABLE_ASSERTS)
-  message(STATUS "Asserts are ENABLED")
-else()
-  message(STATUS "Asserts are DISABLED")
-endif()
-
-cmake_minimum_required(VERSION 3.11) # FetchContent is new in version 3.11.
 
 include(FetchContent)
 

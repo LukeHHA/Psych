@@ -1,14 +1,14 @@
 #include "ImguiLayer.h"
 #include "Core/GameEngine.h"
 #include "Debug/Instrumentor.h"
-#include "imgui.h"
-#include "imgui_internal.h"
+#include "imgui/imgui.h"
+#include "imgui/imgui_internal.h"
 
 #ifndef IMGUI_IMPL_API
 #define IMGUI_IMPL_API
 #endif
-#include "backends/imgui_impl_glfw.h"
-#include "backends/imgui_impl_opengl3.h"
+#include "imgui/backends/imgui_impl_glfw.h"
+#include "imgui/backends/imgui_impl_opengl3.h"
 
 namespace ge
 {

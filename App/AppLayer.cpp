@@ -1,10 +1,6 @@
 #include "AppLayer.h"
-#include "Debug/Instrumentor.h"
-#include "Renderer/Buffer.h"
-#include "Renderer/Renderer.h"
-#include "Renderer/RendererAPI.h"
-#include "Renderer/Shader.h"
-#include "Renderer/VertexFormat.h"
+#include "ge/Core/Core.h"
+#include "ge/Core/Renderer.h"
 
 AppLayer::AppLayer() : ge::Layer("AppLayer") { CORE_PROFILE_FUNCTION(); }
 
