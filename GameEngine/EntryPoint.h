@@ -3,8 +3,10 @@
 #include "Core.h"
 #include "Core/GameEngine.h"
 #include "FileSystem/FileSystem.h"
+#include "Renderer/RendererAPI.h"
 
-extern std::unique_ptr<ge::GameEngine> ge::CreateGameEngine();
+extern std::unique_ptr<ge::GameEngine>
+ge::CreateGameEngine(ge::GameEngineSpecification& spec);
 
 int main(int argc, char** argv)
 {
@@ -17,8 +19,12 @@ int main(int argc, char** argv)
     CORE_LOG_INFO("Logging Init");
     CORE_LOG_INFO("Filesystem Init");
 
+    ge::GameEngineSpecification spec;
+    spec.Name         = "Headless Build";
+    spec.RenderingAPI = ge::RendererAPIType::TEST_HEADLESS;
+
     CORE_PROFILE_BEGIN_SESSION("Startup", "CoreProfile-Startup.json");
-    auto app = ge::CreateGameEngine();
+    auto app = ge::CreateGameEngine(spec);
     CORE_LOG_INFO("App Session Created Successfully");
     CORE_PROFILE_END_SESSION();
 

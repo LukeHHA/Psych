@@ -1,9 +1,9 @@
 #pragma once
 
 #include "Core/Base.h"
+#include "Core/glad_glfw_incl.h"
 #include "Errors/Errors.h"
 #include "Events/Event.h"
-#include "GLFW/glfw3.h"
 #include "Renderer/RendererContext.h"
 #include "ge_expected"
 
@@ -30,8 +30,8 @@ using UniqueGLFWwindow = Unique<GLFWwindow, GLFWwindowDeleter>;
 class Window
 {
 public:
-  using EventCallbackFn = std::function<void(Event&)>;
-  using QueueEventFn    = EventCallbackFn;
+  using EventCallbackFn       = std::function<void(Event&)>;
+  using QueueEventFn          = EventCallbackFn;
 
   Window()                    = default;
   virtual ~Window()           = default;
@@ -66,7 +66,7 @@ private:
     std::string Title;
     unsigned int Width, Height;
     bool VSync;
-    Shared<EventHandler> EventHandler;
+    Shared<EventHandler> EventsHandler;
     EventCallbackFn EventCallback;
   };
 

@@ -2,7 +2,7 @@
 
 #include "Logging/Logging.h"
 
-#ifdef __APPLE__
+#if defined(__APPLE__) || defined(__linux__)
 
 // --- Breakpoint for debugger on MacOS ---
 #if defined(__APPLE__) || defined(__linux__)
@@ -44,5 +44,5 @@
 #endif
 
 #else
-#error Core only supports MacOS
+#error Core only supports MacOS and Linux
 #endif

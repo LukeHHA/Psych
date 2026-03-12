@@ -2,7 +2,7 @@
 #include "Debug/Assert.h"
 #include "Debug/Instrumentor.h"
 #include "glad/glad.h"
-#include "GLFW/glfw3.h"
+#include "Core/glad_glfw_incl.h"
 
 namespace ge {
     OpenglContext::OpenglContext(GLFWwindow* window) : m_WindowHandle(window) {

@@ -24,11 +24,17 @@ GameEngine::GameEngine(const GameEngineSpecification& specification)
   m_LayerStack    = CreateUnique<LayerStack>();
   m_EventHandler_ = CreateShared<EventHandler>();
   Renderer::Init(m_Specification);
-  m_Window      = Window::Create("Game Engine", 1280, 720, m_EventHandler_);
+  m_Window = Window::Create("Game Engine", 1280, 720, m_EventHandler_);
 
-  auto imgui    = CreateUnique<ImGuiLayer>();
-  m_ImGuiLayer_ = imgui.get();
-  PushOverlay(std::move(imgui));
+  if (m_Specification.RenderingAPI != RendererAPIType::TEST_HEADLESS) {
+    auto imgui    = CreateUnique<ImGuiLayer>();
+    m_ImGuiLayer_ = imgui.get();
+    PushOverlay(std::move(imgui));
+  } else {
+    auto imgui    = CreateUnique<NullImguiLayer>();
+    m_ImGuiLayer_ = imgui.get();
+    PushOverlay(std::move(imgui));
+  }
 
   CORE_ASSERT(m_EventHandler_, "EventHandler creation failed")
   CORE_ASSERT(m_EventHandler_, "EventHandler creation failed")

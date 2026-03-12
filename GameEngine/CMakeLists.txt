@@ -5,6 +5,7 @@ set(SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/Layers/LayerStack.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Core/Window.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Renderer/RendererContext.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Renderer/RendererContextHeadless.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Renderer/Shader.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Renderer/Buffer.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Renderer/VertexArray.cpp
@@ -37,39 +38,43 @@ set(SOURCES
 
 add_library(GameEngine STATIC)
 
-set(GLFW_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/Vendor/glfw")
-set(GLFW_INCLUDE_DIR "${GLFW_ROOT}/include")
-set(GLFW_LIB_DIR "${GLFW_ROOT}/lib-arm64")
+# set(GLFW_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/Vendor/glfw")
+# set(GLFW_INCLUDE_DIR "${GLFW_ROOT}/include")
+#
+# if(CMAKE_SYSTEM_PROCESSOR MATCHES "^(arm64|aarch64)$")
+#   set(GLFW_LIB_DIR "${GLFW_ROOT}/lib-arm64")
+# elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "^(x86_64|AMD64|amd64)$")
+#   set(GLFW_LIB_DIR "${GLFW_ROOT}/lib-x86_64")
+# else()
+#   set(GLFW_LIB_DIR "${GLFW_ROOT}/lib-universal")
+# endif()
+#
+# set(GLFW_LIB_STATIC "${GLFW_LIB_DIR}/libglfw3.a")
+#
+# add_library(glfw3 STATIC IMPORTED GLOBAL)
+# set_target_properties(glfw3 PROPERTIES
+#     IMPORTED_LOCATION "${GLFW_LIB_STATIC}"
+#     INTERFACE_INCLUDE_DIRECTORIES "${GLFW_INCLUDE_DIR}"
+# )
+#
+# target_link_libraries(GameEngine PUBLIC glfw3)
 
-# Choose ONE:
-set(GLFW_LIB_STATIC "${GLFW_LIB_DIR}/libglfw3.a")
-set(GLFW_LIB_SHARED "${GLFW_LIB_DIR}/libglfw.3.dylib")
-
-option(USE_GLFW_SHARED "Link GLFW as a shared library (.dylib)" OFF)
-
-if(USE_GLFW_SHARED)
-  add_library(glfw3 SHARED IMPORTED GLOBAL)
-  set_target_properties(glfw3 PROPERTIES
-        IMPORTED_LOCATION "${GLFW_LIB_SHARED}"
-        INTERFACE_INCLUDE_DIRECTORIES "${GLFW_INCLUDE_DIR}"
-  )
-else()
-  add_library(glfw3 STATIC IMPORTED GLOBAL)
-  set_target_properties(glfw3 PROPERTIES
-        IMPORTED_LOCATION "${GLFW_LIB_STATIC}"
-        INTERFACE_INCLUDE_DIRECTORIES "${GLFW_INCLUDE_DIR}"
-  )
+if(APPLE)
+  target_link_libraries(GameEngine PUBLIC
+        "-framework Cocoa"
+        "-framework IOKit"
+        "-framework CoreVideo"
+        "-framework OpenGL"
+    )
+elseif(UNIX AND NOT APPLE)
+  target_link_libraries(GameEngine PUBLIC
+        GL
+        GLU
+        pthread
+        Xrandr
+        Xi
+    )
 endif()
-
-target_link_libraries(GameEngine PUBLIC glfw3)
-
-# macOS frameworks GLFW needs
-target_link_libraries(GameEngine PUBLIC
-    "-framework Cocoa"
-    "-framework IOKit"
-    "-framework CoreVideo"
-    "-framework OpenGL"
-)
 
 option(GE_ENABLE_SANITIZERS "Enable ASan/UBSan" ON)
 
@@ -94,11 +99,13 @@ target_sources(GameEngine PRIVATE ${SOURCES})
 add_subdirectory(Vendor/spdlog)
 add_subdirectory(Vendor/kz)
 add_subdirectory(Vendor/glad)
+add_subdirectory(Vendor/glfw-3.4)
 
 target_link_libraries(GameEngine PUBLIC
   spdlog::spdlog
   glad
   kiznit::expected
+  glfw
 )
 
 target_include_directories(GameEngine PUBLIC

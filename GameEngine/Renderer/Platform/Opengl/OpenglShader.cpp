@@ -1,6 +1,7 @@
 #include "OpenglShader.h"
+#include "Core/glad_glfw_incl.h"
+#include "Debug/Assert.h"
 #include "FileSystem/FileSystem.h"
-#include "GLFW/glfw3.h"
 #include "glm/gtc/type_ptr.hpp"
 #include <iostream>
 
@@ -13,8 +14,11 @@ OpenglShader::OpenglShader(const std::string& vertexPath,
   const std::string vertexSrc = util::Filesystem::StreamFile(vertexPath);
   const std::string fragSrc   = util::Filesystem::StreamFile(fragPath);
 
-  const char* vertexCode      = vertexSrc.c_str();
-  const char* fragCode        = fragSrc.c_str();
+  CORE_ASSERT(glfwGetCurrentContext() != nullptr,
+              "No current GLFW context before glCreateShader");
+
+  const char* vertexCode = vertexSrc.c_str();
+  const char* fragCode   = fragSrc.c_str();
 
   unsigned int vertex, fragment;
   // vertex shader
