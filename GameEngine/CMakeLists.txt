@@ -82,13 +82,6 @@ set(BUILD_SHARED_LIBS OFF)
 add_subdirectory(Vendor/assimp)
 set(BUILD_SHARED_LIBS ON)
 
-# MacOS specific libs
-target_link_libraries(GameEngine PRIVATE
-    "-framework Cocoa"
-    "-framework IOKit"
-    "-framework CoreVideo"
-    "-framework OpenGL"
-)
 target_link_libraries(GameEngine PUBLIC
   spdlog::spdlog
   glad

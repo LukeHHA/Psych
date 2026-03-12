@@ -35,9 +35,9 @@ struct ChunkMesh {
 };
 
 struct ChunkRenderProxy {
-  Shared<VertexBuffer> VertexBuffer;
-  Shared<IndexBuffer> IndexBuffer;
-  Shared<VertexArray> VertexArray;
+  Shared<VertexBuffer> vertexBuffer;
+  Shared<IndexBuffer> indexBuffer;
+  Shared<VertexArray> vertexArray;
 };
 
 struct ChunkRecord {
