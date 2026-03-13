@@ -78,6 +78,8 @@ add_subdirectory(Vendor/kz)
 add_subdirectory(Vendor/glad)
 add_subdirectory(Vendor/glfw-3.4)
 
+find_package(Boost REQUIRED)
+
 set(BUILD_SHARED_LIBS OFF)
 add_subdirectory(Vendor/assimp)
 set(BUILD_SHARED_LIBS ON)
@@ -88,6 +90,7 @@ target_link_libraries(GameEngine PUBLIC
   kiznit::expected
   assimp
   glfw
+  Boost::boost
 )
 
 target_include_directories(GameEngine PUBLIC
