@@ -14,6 +14,13 @@ public:
 #endif
   }
 
+  static UUID Nill()
+  {
+    UUID id;
+    id.m_id_ = {};
+    return id;
+  }
+
   ~UUID()               = default;
 
   using value_type      = std::uint8_t;

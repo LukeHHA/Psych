@@ -6,16 +6,16 @@
 
 namespace ge
 {
-class OpenglTexture : public Texture
+class OpenglTexture2D : public Texture2D
 {
 public:
-    OpenglTexture();
-    ~OpenglTexture() override;
+  OpenglTexture2D(const std::string& path);
+  virtual ~OpenglTexture2D() = default;
 
-    void Bind(uint32_t slot = 0) const override;
-    uint32_t GetRendererID() const override;
+  virtual void Bind(uint32_t slot = 0) const override;
+  virtual uint32_t GetTextureID() const override { return m_TextureID_; };
 
 private:
-    uint32_t m_RendererID = 0;
+  uint32_t m_TextureID_ = 0;
 };
 } // namespace ge
