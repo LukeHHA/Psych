@@ -41,10 +41,10 @@ public:
   Window& operator=(const Window& other) = delete;
   Window& operator=(Window&& other)      = delete;
 
-  virtual util::expected<void, errors::WindowError>
+  virtual Expected<void, errors::WindowError>
   Init(const std::string& title, unsigned int width, unsigned int height,
        Shared<EventHandler> eventHandler)                        = 0;
-  virtual util::expected<void, errors::WindowError> Shutdown()   = 0;
+  virtual Expected<void, errors::WindowError> Shutdown()         = 0;
   virtual void OnUpdate()                                        = 0;
   virtual void PollEvents()                                      = 0;
   virtual unsigned int GetWidth() const                          = 0;

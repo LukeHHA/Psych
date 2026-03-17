@@ -1,11 +1,10 @@
 #pragma once
 
+#include "Asset/AssetTypes.h"
 #include "Core/UUID.h"
 namespace ge
 {
 using AssetHandle = UUID;
-
-enum class AssetType { None, Texture2D, Mesh, StaticMesh };
 
 class Asset
 {

@@ -37,11 +37,9 @@
 #include <kz/expected.hpp>
 
 namespace ge {
-    namespace util {
         template <class T, class E>
-        using expected = kz::expected<T, E>;
+        using Expected = kz::expected<T, E>;
 
         template <class E>
-        using unexpected = kz::unexpected<E>;
-    } // namespace util
+        using Unexpected = kz::unexpected<E>;
 } // namespace ge

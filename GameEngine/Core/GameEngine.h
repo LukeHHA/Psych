@@ -4,6 +4,7 @@
 #include "Core/Window.h"
 #include "Debug/Assert.h"
 #include "Events/EventHandler.h"
+#include "FileSystem/FileSystem.h"
 #include "Imgui/ImguiLayer.h"
 #include "Layers/LayerStack.h"
 #include "Renderer/RendererAPI.h"
@@ -13,6 +14,7 @@ namespace ge
 struct GameEngineSpecification {
   std::string Name             = "Application";
   RendererAPIType RenderingAPI = RendererAPIType::OPENGL;
+  util::FilePath AssetBasePath;
 };
 
 class GameEngine
@@ -56,6 +58,7 @@ private:
   IImGuiLayer* m_ImGuiLayer_;
   Shared<Window> m_Window;
   Shared<EventHandler> m_EventHandler_;
+  Shared<AssetManager> m_AssetManager_;
 };
 Unique<GameEngine> CreateGameEngine(GameEngineSpecification& spec);
 } // namespace ge

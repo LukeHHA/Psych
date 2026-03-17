@@ -1,5 +1,6 @@
 #pragma once
 
+#include <filesystem>
 #include <span>
 #include <string>
 #include <string_view>
@@ -10,6 +11,7 @@ namespace ge::cli
 {
 
 struct CommandLineOptions {
+  std::filesystem::path DataDirectory{};
   RendererAPIType RenderingAPI = RendererAPIType::OPENGL;
   bool ShowHelp                = false;
 };
@@ -55,6 +57,18 @@ public:
         continue;
       }
 
+      if (arg == "--data-dir") {
+        const ValueResult valueResult = ReadNextValue(args, i, "--data-dir");
+        if (!valueResult.Success) {
+          result.Success      = false;
+          result.ErrorMessage = valueResult.ErrorMessage;
+          return result;
+        }
+
+        result.Options.DataDirectory = valueResult.Value;
+        continue;
+      }
+
       if (arg == "--api") {
         const ValueResult valueResult = ReadNextValue(args, i, "--api");
         if (!valueResult.Success) {
@@ -78,14 +92,23 @@ public:
       return result;
     }
 
+    if (!result.Options.ShowHelp && result.Options.DataDirectory.empty()) {
+      result.Success = false;
+      result.ErrorMessage =
+          "Missing required option: --data-dir <path>\n\n" + HelpText();
+    }
+
     return result;
   }
 
   [[nodiscard]] static std::string HelpText()
   {
     return "Usage:\n"
-           "  App [--headless] [--api <opengl|headless>] [--help]\n\n"
+           "  App --data-dir <path> [--headless] [--api <opengl|headless>]\n"
+           "  App --help\n\n"
            "Options:\n"
+           "  --data-dir <path>    Required unless --help is provided.\n"
+           "                        Path to the application data directory.\n"
            "  --headless            Use the headless renderer API.\n"
            "  --api <value>         Explicitly choose a renderer API.\n"
            "                        Supported values: opengl, headless\n"
@@ -124,6 +147,13 @@ private:
       return {.Success      = false,
               .Value        = {},
               .ErrorMessage = "Empty value for " + std::string(optionName) +
+                              "\n\n" + HelpText()};
+    }
+
+    if (value.starts_with('-') && value != "-" && value != "--") {
+      return {.Success      = false,
+              .Value        = {},
+              .ErrorMessage = "Missing value for " + std::string(optionName) +
                               "\n\n" + HelpText()};
     }
 

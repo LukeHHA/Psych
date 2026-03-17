@@ -4,12 +4,16 @@
 #include <filesystem>
 #include <fstream>
 #include <iostream>
+#include <sstream>
 
 namespace ge::util
 {
-void Filesystem::Init()
+void Filesystem::Init(const std::filesystem::path& dataDirectory)
 {
   s_CurrentWorkingDir_ = std::filesystem::current_path();
+  s_DataDirectory_ =
+      dataDirectory.is_absolute() ? dataDirectory
+                                  : s_CurrentWorkingDir_ / dataDirectory;
   std::cout << "CWD: " + s_CurrentWorkingDir_.string() << "\n";
 }
 
@@ -25,14 +29,8 @@ void Filesystem::DeleteFile(const std::filesystem::path& path)
 bool Filesystem::FileExists(const std::filesystem::path& path)
 {
   std::error_code ec;
-  std::filesystem::path abs_path;
-
-  if (path.is_relative()) {
-    abs_path = s_CurrentWorkingDir_ / path;
-  }
-  abs_path = path;
-
-  auto res = std::filesystem::is_regular_file(abs_path, ec);
+  const std::filesystem::path resolvedPath = ResolvePath(path);
+  auto res = std::filesystem::is_regular_file(resolvedPath, ec);
   CORE_ASSERT(ec, "{}: FileExists Failed", ec.message());
   return res;
 }
@@ -40,29 +38,36 @@ bool Filesystem::FileExists(const std::filesystem::path& path)
 bool Filesystem::DirExists(const std::filesystem::path& path)
 {
   std::error_code ec;
-  std::filesystem::path abs_path;
-
-  if (path.is_relative()) {
-    abs_path = s_CurrentWorkingDir_ / path;
-  }
-  abs_path = path;
-
-  auto res = std::filesystem::is_directory(abs_path, ec);
+  const std::filesystem::path resolvedPath = ResolvePath(path);
+  auto res = std::filesystem::is_directory(resolvedPath, ec);
   CORE_ASSERT(ec, "{}: DirectoryExists Failed", ec.message());
   return res;
 }
 
 const std::string Filesystem::StreamFile(const std::string& path)
 {
-  auto debug_path = s_CurrentWorkingDir_ / path;
-  std::ifstream file(s_CurrentWorkingDir_ / path);
+  const std::filesystem::path resolvedPath = ResolvePath(path);
+  std::ifstream file(resolvedPath);
   if (!file.is_open()) {
-    CORE_LOG_ERROR("Path: {}", debug_path.string());
+    CORE_LOG_ERROR("Path: {}", resolvedPath.string());
     CORE_ASSERT(false, "Failed to open file");
   }
 
   std::stringstream contents;
   contents << file.rdbuf();
   return contents.str();
+}
+
+std::filesystem::path Filesystem::ResolvePath(const std::filesystem::path& path)
+{
+  if (path.is_absolute()) {
+    return path;
+  }
+
+  if (!s_DataDirectory_.empty()) {
+    return s_DataDirectory_ / path;
+  }
+
+  return s_CurrentWorkingDir_ / path;
 }
 } // namespace ge::util

@@ -1,4 +1,4 @@
-// Modified from Hazel’s LayerStack (Apache 2.0);
+// Modified from ge’s LayerStack (Apache 2.0);
 // renamed namespace hz → Core and prefixed macros with CORE_…
 
 #include "LayerStack.h"

@@ -5,6 +5,9 @@
 
 namespace ge::util
 {
+using FilePath = std::filesystem::path;
+using recursive_directory_iterator =
+    std::filesystem::recursive_directory_iterator;
 class Filesystem
 {
 public:
@@ -20,6 +23,10 @@ public:
   static const std::string StreamFile(const std::string& path);
 
 private:
+  static std::filesystem::path ResolvePath(const std::filesystem::path& path);
+
+private:
   inline static std::filesystem::path s_CurrentWorkingDir_;
+  inline static std::filesystem::path s_DataDirectory_;
 };
 } // namespace ge::util

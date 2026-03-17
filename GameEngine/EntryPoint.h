@@ -15,12 +15,6 @@ ge::CreateGameEngine(ge::GameEngineSpecification& spec);
 int main(int argc, char** argv)
 {
   {
-    ge::util::Filesystem::Init();
-    ge::Log::Init();
-
-    CORE_LOG_INFO("Logging Init");
-    CORE_LOG_INFO("Filesystem Init");
-
     const ge::cli::ParseResult parseResult =
         ge::cli::CommandLineParser::Parse(argc, argv);
 
@@ -34,9 +28,16 @@ int main(int argc, char** argv)
       return 0;
     }
 
+    ge::util::Filesystem::Init();
+    ge::Log::Init();
+
+    CORE_LOG_INFO("Logging Init");
+    CORE_LOG_INFO("Filesystem Init");
+
     ge::GameEngineSpecification spec;
-    spec.Name         = "Game Engine";
-    spec.RenderingAPI = parseResult.Options.RenderingAPI;
+    spec.Name          = "Game Engine";
+    spec.RenderingAPI  = parseResult.Options.RenderingAPI;
+    spec.AssetBasePath = parseResult.Options.DataDirectory;
 
     CORE_PROFILE_BEGIN_SESSION("Startup", "CoreProfile-Startup.json");
     auto app = ge::CreateGameEngine(spec);
