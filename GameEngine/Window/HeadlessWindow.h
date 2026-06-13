@@ -2,9 +2,9 @@
 
 #include "Core/Base.h"
 #include "Core/Window.h"
+#include "Core/glad_glfw_incl.h"
 #include "Errors/Errors.h"
 #include "Events/Event.h"
-#include "Core/glad_glfw_incl.h"
 #include "Renderer/RendererContext.h"
 #include "ge_expected"
 
@@ -22,10 +22,10 @@ public:
                  unsigned int height, Shared<EventHandler> eventHandler);
   virtual ~HeadlessWindow();
 
-  util::expected<void, errors::WindowError>
+  Expected<void, errors::WindowError>
   Init(const std::string& title, unsigned int width, unsigned int height,
        Shared<EventHandler> eventHandler) override;
-  util::expected<void, errors::WindowError> Shutdown() override;
+  Expected<void, errors::WindowError> Shutdown() override;
   virtual void PollEvents() override {}
   virtual unsigned int GetWidth() const override { return m_Data.Width; }
   virtual unsigned int GetHeight() const override { return m_Data.Height; }

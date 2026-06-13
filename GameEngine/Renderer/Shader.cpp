@@ -59,17 +59,17 @@ Shared<Shader> ShaderLibrary::Load(const std::string& vertexSrc,
   return it->second;
 }
 
-util::expected<Shared<Shader>, ShaderLibraryError>
+Expected<Shared<Shader>, ShaderLibraryError>
 ShaderLibrary::Get(const std::string& name) const
 {
   // For now this function will assert if the shader is not found
   // however when the engine compiles as a editor it will need to
-  // handle this properly ie. util::expected
+  // handle this properly ie. Expected
 
   if (auto it = m_Shaders_.find(name); it != m_Shaders_.end()) {
     return it->second;
   } else {
-    return util::unexpected(ShaderLibraryError{ShaderLibraryErrors::NotFound});
+    return Unexpected(ShaderLibraryError{ShaderLibraryErrors::NotFound});
   }
 }
 

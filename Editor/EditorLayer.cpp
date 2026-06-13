@@ -1,151 +1,158 @@
 #include "EditorLayer.h"
-#include "imgui.h"
+#include "Core/GameEngine.h"
+#include "Debug/Instrumentor.h"
+#include "UI/Modules/EditorMenuBar.h"
+#include "imgui/imgui.h"
+#include "imgui/imgui_internal.h"
+
+#ifndef IMGUI_IMPL_API
+#define IMGUI_IMPL_API
+#endif
+#include "imgui/backends/imgui_impl_glfw.h"
+#include "imgui/backends/imgui_impl_opengl3.h"
 
 namespace ge
 {
-EditorLayer::EditorLayer() : Layer("EditorLayer") {}
-void EditorLayer::OnAttach() {}
-void EditorLayer::OnUpdate(float ts) {}
+EditorLayer::EditorLayer() : Layer("ImGuiLayer") {}
+
+void EditorLayer::OnAttach()
+{
+  CORE_PROFILE_FUNCTION();
+  CORE_LOG_INFO("EditorLayer Attached");
+
+  ImGuiIO& io = ImGui::GetIO();
+  (void)io;
+  io.ConfigFlags |=
+      ImGuiConfigFlags_NavEnableKeyboard; // Enable Keyboard Controls
+  // io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad
+  // Controls
+  io.ConfigFlags |= ImGuiConfigFlags_DockingEnable; // Enable Docking
+  // io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable; // Enable
+  // Multi-Viewport / Platform Windows
+  // io.ConfigFlags |= ImGuiConfigFlags_ViewportsNoTaskBarIcons;
+  // io.ConfigFlags |= ImGuiConfigFlags_ViewportsNoMerge;
+
+  // Setup Platform/Renderer bindings
+  // Setup Dear ImGui style
+  ImGui::StyleColorsDark();
+  // ImGui::StyleColorsClassic();
+
+  // When viewports are enabled we tweak WindowRounding/WindowBg so platform
+  // windows can look identical to regular ones.
+  ImGuiStyle& style = ImGui::GetStyle();
+  if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
+    style.WindowRounding              = 0.5f;
+    style.Colors[ImGuiCol_WindowBg].w = 1.0f;
+  }
+
+  SetDarkThemeColors();
+
+  GameEngine& app = GameEngine::Get();
+  GLFWwindow* window =
+      static_cast<GLFWwindow*>(app.GetWindow().GetNativeWindow());
+
+  float dpi_scale      = ImGui_ImplGlfw_GetContentScaleForWindow(window);
+  float base_font_size = 18.0f;
+  float font_size      = base_font_size * dpi_scale;
+  io.FontDefault       = io.Fonts->AddFontFromFileTTF(
+      "Editor/Assets/Fonts/JetBrainsMonoNerdFont-Regular.ttf", font_size);
+
+  style.ScaleAllSizes(dpi_scale);
+}
+
 void EditorLayer::OnDetach() {}
-void EditorLayer::OnEvent(Event& event) {}
-void EditorLayer::OnRender() {}
+
+void EditorLayer::OnEvent(Event& e)
+{
+  // if (m_BlockEvents) {
+  //   ImGuiIO& io = ImGui::GetIO();
+  //   e.Handled |= e.IsInCategory(EventCategoryMouse) & io.WantCaptureMouse;
+  //   e.Handled |= e.IsInCategory(EventCategoryKeyboard) &
+  //   io.WantCaptureKeyboard;
+  // }
+}
+
+void EditorLayer::Begin() { CORE_PROFILE_FUNCTION(); }
+
+void EditorLayer::End() { CORE_PROFILE_FUNCTION(); }
+
+void EditorLayer::SetDarkThemeColors()
+{
+  auto& colors              = ImGui::GetStyle().Colors;
+  colors[ImGuiCol_WindowBg] = ImVec4{0.1f, 0.105f, 0.11f, 1.0f};
+
+  // Headers
+  colors[ImGuiCol_Header]        = ImVec4{0.2f, 0.205f, 0.21f, 1.0f};
+  colors[ImGuiCol_HeaderHovered] = ImVec4{0.3f, 0.305f, 0.31f, 1.0f};
+  colors[ImGuiCol_HeaderActive]  = ImVec4{0.15f, 0.1505f, 0.151f, 1.0f};
+
+  // Buttons
+  colors[ImGuiCol_Button]        = ImVec4{0.2f, 0.205f, 0.21f, 1.0f};
+  colors[ImGuiCol_ButtonHovered] = ImVec4{0.3f, 0.305f, 0.31f, 1.0f};
+  colors[ImGuiCol_ButtonActive]  = ImVec4{0.15f, 0.1505f, 0.151f, 1.0f};
+
+  // Frame BG
+  colors[ImGuiCol_FrameBg]        = ImVec4{0.2f, 0.205f, 0.21f, 1.0f};
+  colors[ImGuiCol_FrameBgHovered] = ImVec4{0.3f, 0.305f, 0.31f, 1.0f};
+  colors[ImGuiCol_FrameBgActive]  = ImVec4{0.15f, 0.1505f, 0.151f, 1.0f};
+
+  // Tabs
+  colors[ImGuiCol_Tab]                = ImVec4{0.15f, 0.1505f, 0.151f, 1.0f};
+  colors[ImGuiCol_TabHovered]         = ImVec4{0.38f, 0.3805f, 0.381f, 1.0f};
+  colors[ImGuiCol_TabActive]          = ImVec4{0.28f, 0.2805f, 0.281f, 1.0f};
+  colors[ImGuiCol_TabUnfocused]       = ImVec4{0.15f, 0.1505f, 0.151f, 1.0f};
+  colors[ImGuiCol_TabUnfocusedActive] = ImVec4{0.2f, 0.205f, 0.21f, 1.0f};
+
+  // Title
+  colors[ImGuiCol_TitleBg]          = ImVec4{0.15f, 0.1505f, 0.151f, 1.0f};
+  colors[ImGuiCol_TitleBgActive]    = ImVec4{0.15f, 0.1505f, 0.151f, 1.0f};
+  colors[ImGuiCol_TitleBgCollapsed] = ImVec4{0.15f, 0.1505f, 0.151f, 1.0f};
+}
+
+uint32_t EditorLayer::GetActiveWidgetID() const { return GImGui->ActiveId; }
+
 void EditorLayer::OnImGuiRender()
 {
-  bool open    = true;
-  auto* p_open = &open;
 
-  struct ImGuiDemoDockspaceArgs {
-    bool IsFullscreen = true;
-    bool KeepWindowPadding =
-        false; // Keep WindowPadding to help understand that DockSpace() is a
-               // widget inside the window.
-    ImGuiDockNodeFlags DockSpaceFlags = ImGuiDockNodeFlags_None;
-  };
-  static int opt_demo_mode          = 0;
-  static bool opt_demo_mode_changed = false;
-  static ImGuiDemoDockspaceArgs args;
+  ImGuiWindowFlags window_flags = 0;
+  window_flags |= ImGuiWindowFlags_MenuBar;
+  window_flags |= ImGuiWindowFlags_NoCollapse;
+  window_flags |= ImGuiWindowFlags_NoTitleBar;
 
-  ImGuiDockNodeFlags dockspace_flags = args.DockSpaceFlags;
-
-  // We are using the ImGuiWindowFlags_NoDocking flag to make the parent window
-  // not dockable into, because it would be confusing to have two docking
-  // targets within each others.
-  ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoDocking;
-  if (args.IsFullscreen) {
-    // Fullscreen dockspace: practically the same as calling
-    // DockSpaceOverViewport();
-    const ImGuiViewport* viewport = ImGui::GetMainViewport();
-    ImGui::SetNextWindowPos(viewport->WorkPos);
-    ImGui::SetNextWindowSize(viewport->WorkSize);
-    ImGui::SetNextWindowViewport(viewport->ID);
-    ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
-    ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
-    window_flags |= ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse |
-                    ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove;
-    window_flags |=
-        ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
-    window_flags |= ImGuiWindowFlags_NoBackground;
-  } else {
-    // Floating dockspace
-    dockspace_flags &= ~ImGuiDockNodeFlags_PassthruCentralNode;
+  if (!ImGui::Begin("Editor", nullptr, window_flags)) {
+    ImGui::End();
+    return;
   }
+  WindowMenuBar();
 
-  // Important: note that we proceed even if Begin() returns false (aka window
-  // is collapsed). This is because we want to keep our DockSpace() active. If a
-  // DockSpace() is inactive, all active windows docked into it will lose their
-  // parent and become undocked. We cannot preserve the docking relationship
-  // between an active window and an inactive docking, otherwise any change of
-  // dockspace/settings would lead to windows being stuck in limbo and never
-  // being visible.
-  if (!args.KeepWindowPadding)
-    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
-  ImGui::Begin("Window with a DockSpace", p_open, window_flags);
-  if (!args.KeepWindowPadding)
-    ImGui::PopStyleVar();
+  if (ImGui::BeginChild("FileView", ImVec2(250.0f, 0.0f),
+                        ImGuiChildFlags_Borders, ImGuiChildFlags_None)) {
+    if (ImGui::TreeNode("FileViewer")) {
+      static ImGuiTreeNodeFlags base_flags =
+          ImGuiTreeNodeFlags_DrawLinesToNodes;
 
-  if (args.IsFullscreen)
-    ImGui::PopStyleVar(2);
+      if (ImGui::TreeNodeEx("Parent", base_flags)) {
+        if (ImGui::TreeNodeEx("Child 1", base_flags)) {
+          ImGui::Button("Button for Child 1");
+          ImGui::TreePop();
+        }
+        if (ImGui::TreeNodeEx("Child 2", base_flags)) {
+          ImGui::Button("Button for Child 2");
+          ImGui::TreePop();
+        }
+        ImGui::Text("Remaining contents");
+        ImGui::Text("Remaining contents");
+        ImGui::TreePop();
+      }
 
-  // Submit the DockSpace widget inside our window
-  // - Note that the id here is different from the one used by
-  // DockSpaceOverViewport(), so docking state won't get transfered between
-  // "Basic" and "Advanced" demos.
-  // - If we made the ShowExampleAppDockSpaceBasic() calculate its own ID and
-  // pass it to DockSpaceOverViewport() the ID could easily match.
-  ImGuiID dockspace_id = ImGui::GetID("MyDockSpace");
-  ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), dockspace_flags);
-
-  ImGui::End();
-
-  // Refocus our window to minimize perceived loss of focus when changing mode
-  // (caused by the fact that each use a different window, which would not
-  // happen in a real app)
-  if (opt_demo_mode_changed)
-    ImGui::SetNextWindowFocus();
-  ImGui::Begin("Examples: Dockspace", p_open, ImGuiWindowFlags_MenuBar);
-  opt_demo_mode_changed = false;
-  opt_demo_mode_changed |=
-      ImGui::RadioButton("Basic demo mode", &opt_demo_mode, 0);
-  opt_demo_mode_changed |=
-      ImGui::RadioButton("Advanced demo mode", &opt_demo_mode, 1);
-
-  ImGui::SeparatorText("Options");
-
-  ImGui::Checkbox("Fullscreen", &args.IsFullscreen);
-  ImGui::Checkbox("Keep Window Padding", &args.KeepWindowPadding);
-  ImGui::SameLine();
-
-  ImGui::BeginDisabled(args.IsFullscreen == false);
-  ImGui::CheckboxFlags("Flag: PassthruCentralNode", &args.DockSpaceFlags,
-                       ImGuiDockNodeFlags_PassthruCentralNode);
-  ImGui::EndDisabled();
-  ImGui::CheckboxFlags("Flag: NoDockingOverCentralNode", &args.DockSpaceFlags,
-                       ImGuiDockNodeFlags_NoDockingOverCentralNode);
-  ImGui::CheckboxFlags("Flag: NoDockingSplit", &args.DockSpaceFlags,
-                       ImGuiDockNodeFlags_NoDockingSplit);
-  ImGui::CheckboxFlags("Flag: NoUndocking", &args.DockSpaceFlags,
-                       ImGuiDockNodeFlags_NoUndocking);
-  ImGui::CheckboxFlags("Flag: NoResize", &args.DockSpaceFlags,
-                       ImGuiDockNodeFlags_NoResize);
-  ImGui::CheckboxFlags("Flag: AutoHideTabBar", &args.DockSpaceFlags,
-                       ImGuiDockNodeFlags_AutoHideTabBar);
-
-  // Show demo options and help
-  if (ImGui::BeginMenuBar()) {
-    if (ImGui::BeginMenu("Help")) {
-      ImGui::TextUnformatted(
-          "This demonstrates the use of ImGui::DockSpace() which allows you to "
-          "manually\ncreate a docking node _within_ another window."
-          "\n"
-          "The \"Basic\" version uses the ImGui::DockSpaceOverViewport() "
-          "helper. Most applications can probably use this.");
-      ImGui::Separator();
-      ImGui::TextUnformatted(
-          "When docking is enabled, you can ALWAYS dock MOST window into "
-          "another! Try it now!"
-          "\n"
-          "- Drag from window title bar or their tab to dock/undock."
-          "\n"
-          "- Drag from window menu button (upper-left button) to undock an "
-          "entire node (all windows)."
-          "\n"
-          "- Hold SHIFT to disable docking (if io.ConfigDockingWithShift == "
-          "false, default)"
-          "\n"
-          "- Hold SHIFT to enable docking (if io.ConfigDockingWithShift == "
-          "true)");
-      ImGui::Separator();
-      ImGui::TextUnformatted("More details:");
-      ImGui::Bullet();
-      ImGui::SameLine();
-      ImGui::TextLinkOpenURL("Docking Wiki page",
-                             "https://github.com/ocornut/imgui/wiki/Docking");
-      ImGui::BulletText("Read comments in ShowExampleAppDockSpace()");
-      ImGui::EndMenu();
+      ImGui::TreePop();
     }
-    ImGui::EndMenuBar();
   }
-
+  ImGui::EndChild();
   ImGui::End();
 }
+
+void EditorLayer::OnRender() {}
+void EditorLayer::OnUpdate(float ts) {}
+
 } // namespace ge

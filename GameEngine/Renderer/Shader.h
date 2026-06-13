@@ -54,7 +54,7 @@ public:
   void Add(const Shared<Shader>& shader, const std::string& name);
   Shared<Shader> Load(const std::string& vertexSrc, const std::string& fragSrc,
                       const std::string& name);
-  util::expected<Shared<Shader>, ShaderLibraryError>
+  Expected<Shared<Shader>, ShaderLibraryError>
   Get(const std::string& name) const;
   bool Exists(const std::string& name) const;
 

@@ -8,13 +8,9 @@
 
 namespace ge::util
 {
-void Filesystem::Init(const std::filesystem::path& dataDirectory)
+void Filesystem::Init()
 {
   s_CurrentWorkingDir_ = std::filesystem::current_path();
-  s_DataDirectory_ =
-      dataDirectory.is_absolute() ? dataDirectory
-                                  : s_CurrentWorkingDir_ / dataDirectory;
-  std::cout << "CWD: " + s_CurrentWorkingDir_.string() << "\n";
 }
 
 void Filesystem::Shutdown() {}

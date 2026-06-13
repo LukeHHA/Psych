@@ -31,7 +31,7 @@ HeadlessWindow::~HeadlessWindow()
   }
 }
 
-util::expected<void, errors::WindowError>
+Expected<void, errors::WindowError>
 HeadlessWindow::Init(const std::string& title, unsigned int width,
                      unsigned int height, Shared<EventHandler> eventHandler)
 {
@@ -54,10 +54,10 @@ HeadlessWindow::Init(const std::string& title, unsigned int width,
     // future safety if i decide to handle window creation errors with a
     // fallback on the caller side.
     if (!success)
-      return util::unexpected(errors::WindowError::InitializationFailed);
+      return Unexpected(errors::WindowError::InitializationFailed);
   } else {
     CORE_ASSERT(false, "Window already exists!");
-    return util::unexpected(errors::WindowError::WindowAlreadyExists);
+    return Unexpected(errors::WindowError::WindowAlreadyExists);
   }
 
   {
@@ -88,7 +88,7 @@ HeadlessWindow::Init(const std::string& title, unsigned int width,
   return {};
 }
 
-util::expected<void, errors::WindowError> HeadlessWindow::Shutdown()
+Expected<void, errors::WindowError> HeadlessWindow::Shutdown()
 {
   CORE_PROFILE_FUNCTION();
   CORE_LOG_INFO("HeadlessWindow Shutdown successfully");

@@ -26,16 +26,8 @@ GameEngine::GameEngine(const GameEngineSpecification& specification)
   Renderer::Init(m_Specification);
   m_Window = Window::Create("Game Engine", 1280, 720, m_EventHandler_);
 
-  if (m_Specification.RenderingAPI != RendererAPIType::TEST_HEADLESS) {
-    auto imgui    = CreateUnique<ImGuiLayer>();
-    m_ImGuiLayer_ = imgui.get();
-    PushOverlay(std::move(imgui));
-  } else {
-    auto imgui    = CreateUnique<NullImguiLayer>();
-    m_ImGuiLayer_ = imgui.get();
-    PushOverlay(std::move(imgui));
-  }
-
+  // WARN: Do not remove
+  PushLayer(CreateUnique<ImGuiLayer>());
   CORE_ASSERT(m_EventHandler_, "EventHandler creation failed")
   CORE_ASSERT(m_EventHandler_, "EventHandler creation failed")
   CORE_ASSERT(m_Window, "Window Creation failed returning nullptr")
@@ -86,9 +78,13 @@ void GameEngine::Run()
 
     for (const auto& layer : Layers()) layer->OnRender();
 
-    m_ImGuiLayer_->Begin();
+    // NOTE: Imgui context is setup here using static methods
+    // while the imgui frames are injected by the client. This
+    // may change to a more complete imgui layer depending on
+    // how much the core editor should take on UI wise.
+    ImGuiLayer::Begin();
     for (const auto& layer : Layers()) layer->OnImGuiRender();
-    m_ImGuiLayer_->End();
+    ImGuiLayer::End();
 
     m_Window->OnUpdate();
 

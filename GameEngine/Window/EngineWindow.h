@@ -24,10 +24,10 @@ public:
                unsigned int height, Shared<EventHandler> eventHandler);
   virtual ~EngineWindow();
 
-  virtual util::expected<void, errors::WindowError>
+  virtual Expected<void, errors::WindowError>
   Init(const std::string& title, unsigned int width, unsigned int height,
        Shared<EventHandler> eventHandler) override;
-  virtual util::expected<void, errors::WindowError> Shutdown() override;
+  virtual Expected<void, errors::WindowError> Shutdown() override;
   virtual void PollEvents() override;
   virtual unsigned int GetWidth() const override { return m_Data.Width; }
   virtual unsigned int GetHeight() const override { return m_Data.Height; }

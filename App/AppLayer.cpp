@@ -21,7 +21,7 @@ void AppLayer::OnAttach()
 {
   CORE_PROFILE_FUNCTION();
   const auto shader = ge::Shader::Create(
-      "out/Shaders/vertex.glsl", "out/Shaders/fragment.glsl", "TestShader");
+      "data/Shaders/vertex.glsl", "data/Shaders/fragment.glsl", "TestShader");
 
   shader->Bind();
   static const float s_TriangleVertices[] = {

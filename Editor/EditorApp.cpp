@@ -12,7 +12,8 @@ public:
 };
 } // namespace ge
 
-ge::Unique<ge::GameEngine> ge::CreateGameEngine()
+ge::Unique<ge::GameEngine>
+ge::CreateGameEngine(ge::GameEngineSpecification& spec)
 {
   return CreateUnique<EditorApp>();
 }

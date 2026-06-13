@@ -55,10 +55,8 @@ private:
   bool m_Running = false;
   static GameEngine* s_Application;
   Unique<LayerStack> m_LayerStack;
-  IImGuiLayer* m_ImGuiLayer_;
   Shared<Window> m_Window;
   Shared<EventHandler> m_EventHandler_;
-  Shared<AssetManager> m_AssetManager_;
 };
 Unique<GameEngine> CreateGameEngine(GameEngineSpecification& spec);
 } // namespace ge
