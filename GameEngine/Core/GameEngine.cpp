@@ -28,6 +28,7 @@ GameEngine::GameEngine(const GameEngineSpecification& specification)
 
   // WARN: Do not remove
   PushLayer(CreateUnique<ImGuiLayer>());
+
   CORE_ASSERT(m_EventHandler_, "EventHandler creation failed")
   CORE_ASSERT(m_EventHandler_, "EventHandler creation failed")
   CORE_ASSERT(m_Window, "Window Creation failed returning nullptr")
@@ -74,16 +75,19 @@ void GameEngine::Run()
 
     HandleEvents();
 
-    for (const auto& layer : Layers()) layer->OnUpdate();
+    for (const auto& layer : Layers())
+      layer->OnUpdate();
 
-    for (const auto& layer : Layers()) layer->OnRender();
+    for (const auto& layer : Layers())
+      layer->OnRender();
 
     // NOTE: Imgui context is setup here using static methods
     // while the imgui frames are injected by the client. This
     // may change to a more complete imgui layer depending on
     // how much the core editor should take on UI wise.
     ImGuiLayer::Begin();
-    for (const auto& layer : Layers()) layer->OnImGuiRender();
+    for (const auto& layer : Layers())
+      layer->OnImGuiRender();
     ImGuiLayer::End();
 
     m_Window->OnUpdate();

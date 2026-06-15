@@ -1,69 +1,94 @@
 #include "FileSystem.h"
+#include "Core/Base.h"
 #include "Debug/Assert.h"
-#include "Logging/Logging.h"
+#include "FileSystem/CoreFilesystemAPI.h"
+#include "Platform/MacOSFilesystemAPI.h"
 #include <filesystem>
-#include <fstream>
-#include <iostream>
-#include <sstream>
 
 namespace ge::util
 {
 void Filesystem::Init()
 {
-  s_CurrentWorkingDir_ = std::filesystem::current_path();
+  if (s_OSFilesystemAPI_ == nullptr) {
+#if defined(GE_PLATFORM_MACOS)
+    s_OSFilesystemAPI_ = CreateShared<MacOSFilesystemAPI>();
+#else
+    CORE_ASSERT(false, "Unknow Operating system. Unable to init filesystem")
+#endif
+  }
 }
 
-void Filesystem::Shutdown() {}
+void Filesystem::Shutdown() { s_OSFilesystemAPI_ = nullptr; }
 
 void Filesystem::DeleteFile(const std::filesystem::path& path)
 {
-  if (FileExists(path)) {
-    std::filesystem::remove(path);
-  }
+  CoreFilesystemAPI::DeleteFile(path);
 }
 
 bool Filesystem::FileExists(const std::filesystem::path& path)
 {
-  std::error_code ec;
-  const std::filesystem::path resolvedPath = ResolvePath(path);
-  auto res = std::filesystem::is_regular_file(resolvedPath, ec);
-  CORE_ASSERT(ec, "{}: FileExists Failed", ec.message());
-  return res;
+  return CoreFilesystemAPI::FileExists(path);
 }
 
 bool Filesystem::DirExists(const std::filesystem::path& path)
 {
-  std::error_code ec;
-  const std::filesystem::path resolvedPath = ResolvePath(path);
-  auto res = std::filesystem::is_directory(resolvedPath, ec);
-  CORE_ASSERT(ec, "{}: DirectoryExists Failed", ec.message());
-  return res;
+  return CoreFilesystemAPI::DirExists(path);
 }
 
-const std::string Filesystem::StreamFile(const std::string& path)
+std::string Filesystem::StreamFile(const std::string& path)
 {
-  const std::filesystem::path resolvedPath = ResolvePath(path);
-  std::ifstream file(resolvedPath);
-  if (!file.is_open()) {
-    CORE_LOG_ERROR("Path: {}", resolvedPath.string());
-    CORE_ASSERT(false, "Failed to open file");
-  }
-
-  std::stringstream contents;
-  contents << file.rdbuf();
-  return contents.str();
+  return CoreFilesystemAPI::StreamFile(path);
 }
 
-std::filesystem::path Filesystem::ResolvePath(const std::filesystem::path& path)
+DirPath Filesystem::GetBaseConfigPath()
 {
-  if (path.is_absolute()) {
-    return path;
+  DirPath basePath   = s_OSFilesystemAPI_->GetOSAppDataPath();
+  DirPath configPath = basePath / GameEngineName / "config";
+  if (CoreFilesystemAPI::DirExists(configPath)) {
+    return configPath;
   }
 
-  if (!s_DataDirectory_.empty()) {
-    return s_DataDirectory_ / path;
+  if (!CoreFilesystemAPI::CreateDirs(configPath)) {
+    CORE_ASSERT(false, "Unable to create config directory")
+    return {};
   }
 
-  return s_CurrentWorkingDir_ / path;
+  return {};
 }
+
+DirPath Filesystem::GetBaseCachePath()
+{
+  DirPath basePath  = s_OSFilesystemAPI_->GetOSCacheDataPath();
+  DirPath cachePath = basePath / GameEngineName;
+
+  if (CoreFilesystemAPI::DirExists(cachePath)) {
+    return cachePath;
+  }
+
+  if (!CoreFilesystemAPI::CreateDirs(cachePath)) {
+    CORE_ASSERT(false, "Unable to create a cache directory")
+    return {};
+  }
+
+  return cachePath;
+}
+
+Unique<FileNode>
+Filesystem::CreateDirectoryTree(const std::filesystem::path& path)
+{
+  const bool isDir = std::filesystem::is_directory(path);
+
+  auto node        = CreateUnique<FileNode>(path, isDir);
+
+  if (!isDir) {
+    return node;
+  }
+
+  for (const auto& entry : std::filesystem::directory_iterator(path)) {
+    node->children.emplace_back(CreateDirectoryTree(entry.path()));
+  }
+
+  return node;
+}
+
 } // namespace ge::util

@@ -5,6 +5,21 @@
 
 namespace ge
 {
+// MACROS
+//
+inline constexpr const char* GameEngineName = "gameEngine";
+
+#if defined(__APPLE__)
+#include <TargetConditionals.h>
+
+#if TARGET_OS_MAC && !TARGET_OS_IPHONE
+#define GE_PLATFORM_MACOS
+#elif TARGET_OS_IPHONE
+#define GE_PLATFORM_IOS
+#endif
+#endif
+
+// Pointer Utils
 template <typename T, typename Deleter = std::default_delete<T>>
 using Unique = std::unique_ptr<T, Deleter>;
 template <typename T, typename... Args>

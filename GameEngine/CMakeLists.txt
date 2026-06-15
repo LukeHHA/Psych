@@ -25,6 +25,8 @@ set(SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/Renderer/Renderer.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Renderer/RendererAPI.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/FileSystem/FileSystem.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/FileSystem/CoreFilesystemAPI.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/FileSystem/Platform/MacOSFilesystemAPI.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Imgui/ImguiLayer.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Vendor/imgui/imgui.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Vendor/imgui/imgui_draw.cpp
@@ -40,11 +42,19 @@ add_library(GameEngine STATIC)
 target_sources(GameEngine PRIVATE ${SOURCES})
 
 if(APPLE)
+  enable_language(OBJCXX)
+  enable_language(OBJC)
+
+  target_sources(GameEngine PRIVATE
+        FileSystem/Platform/MacOSFilesystem.mm
+    )
+
   target_link_libraries(GameEngine PUBLIC
         "-framework Cocoa"
         "-framework IOKit"
         "-framework CoreVideo"
         "-framework OpenGL"
+        "-framework Foundation"
     )
 elseif(UNIX AND NOT APPLE)
   target_link_libraries(GameEngine PUBLIC

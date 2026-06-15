@@ -2,8 +2,10 @@
 #include "Core/GameEngine.h"
 #include "Debug/Instrumentor.h"
 #include "UI/Modules/EditorMenuBar.h"
+#include "UI/Modules/MainFileTree.h"
 #include "imgui/imgui.h"
 #include "imgui/imgui_internal.h"
+#include <filesystem>
 
 #ifndef IMGUI_IMPL_API
 #define IMGUI_IMPL_API
@@ -54,8 +56,11 @@ void EditorLayer::OnAttach()
   float dpi_scale      = ImGui_ImplGlfw_GetContentScaleForWindow(window);
   float base_font_size = 18.0f;
   float font_size      = base_font_size * dpi_scale;
-  io.FontDefault       = io.Fonts->AddFontFromFileTTF(
-      "Editor/Assets/Fonts/JetBrainsMonoNerdFont-Regular.ttf", font_size);
+
+  ImFontConfig config;
+  io.FontDefault = io.Fonts->AddFontFromFileTTF(
+      "Editor/Assets/Fonts/JetBrainsMonoNerdFont-Regular.ttf", font_size,
+      &config);
 
   style.ScaleAllSizes(dpi_scale);
 }
@@ -118,37 +123,23 @@ void EditorLayer::OnImGuiRender()
   window_flags |= ImGuiWindowFlags_MenuBar;
   window_flags |= ImGuiWindowFlags_NoCollapse;
   window_flags |= ImGuiWindowFlags_NoTitleBar;
+  window_flags |= ImGuiWindowFlags_NoResize;
 
   if (!ImGui::Begin("Editor", nullptr, window_flags)) {
     ImGui::End();
     return;
   }
-  WindowMenuBar();
+  ui::WindowMenuBar();
 
-  if (ImGui::BeginChild("FileView", ImVec2(250.0f, 0.0f),
-                        ImGuiChildFlags_Borders, ImGuiChildFlags_None)) {
-    if (ImGui::TreeNode("FileViewer")) {
-      static ImGuiTreeNodeFlags base_flags =
-          ImGuiTreeNodeFlags_DrawLinesToNodes;
+  static std::unique_ptr<util::FileNode> FileTree;
 
-      if (ImGui::TreeNodeEx("Parent", base_flags)) {
-        if (ImGui::TreeNodeEx("Child 1", base_flags)) {
-          ImGui::Button("Button for Child 1");
-          ImGui::TreePop();
-        }
-        if (ImGui::TreeNodeEx("Child 2", base_flags)) {
-          ImGui::Button("Button for Child 2");
-          ImGui::TreePop();
-        }
-        ImGui::Text("Remaining contents");
-        ImGui::Text("Remaining contents");
-        ImGui::TreePop();
-      }
-
-      ImGui::TreePop();
-    }
+  if (!FileTree) {
+    FileTree =
+        util::Filesystem::CreateDirectoryTree(std::filesystem::current_path());
   }
-  ImGui::EndChild();
+
+  ui::MainFileTree(FileTree.get());
+
   ImGui::End();
 }
 

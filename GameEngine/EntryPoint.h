@@ -9,6 +9,7 @@
 #include "Renderer/RendererAPI.h"
 #include "Util/CommandLine.h"
 
+// MAIN
 extern std::unique_ptr<ge::GameEngine>
 ge::CreateGameEngine(ge::GameEngineSpecification& spec);
 
@@ -28,11 +29,8 @@ int main(int argc, char** argv)
       return 0;
     }
 
-    ge::util::Filesystem::Init();
     ge::Log::Init();
-
-    CORE_LOG_INFO("Logging Init");
-    CORE_LOG_INFO("Filesystem Init");
+    ge::util::Filesystem::Init();
 
     ge::GameEngineSpecification spec;
     spec.Name          = "Game Engine";
