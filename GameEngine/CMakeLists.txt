@@ -93,6 +93,7 @@ add_subdirectory(Vendor/glfw-3.4)
 find_package(Boost REQUIRED)
 
 set(BUILD_SHARED_LIBS OFF)
+set(ASSIMP_BUILD_TESTS OFF CACHE BOOL "Disable Assimp tests in engine builds" FORCE)
 add_subdirectory(Vendor/assimp)
 set(BUILD_SHARED_LIBS ON)
 

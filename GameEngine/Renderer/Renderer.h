@@ -1,8 +1,8 @@
 #pragma once
 
 #include "Core/Core.h"
-#include "Core/GameEngine.h"
 #include "Renderer/Mesh.h"
+#include "Renderer/RenderTarget.h"
 #include "Renderer/RendererAPI.h"
 #include "Renderer/RendererCommandBuffer.h"
 #include "Renderer/RendererContext.h"
@@ -12,6 +12,8 @@
 
 namespace ge
 {
+struct GameEngineSpecification;
+
 struct MeshData {
 };
 
@@ -41,7 +43,7 @@ public:
     return RendererAPI::Current();
   }
   static void SetRendererAPI(RendererAPIType type);
-  static void BeginScene();
+  static void BeginScene(RenderTarget& target);
   static void EndScene();
   static void SubmitMesh(Shared<Mesh> mesh);
   static void SubmitStaticMesh(Shared<Mesh> mesh);
@@ -61,7 +63,8 @@ private:
   inline static Unique<RendererContext> s_RendererContext_ = nullptr;
   inline static Unique<RendererCommandBuffer> s_RendererCommandBuffer_ =
       nullptr;
-  inline static bool s_Initialized_ = false;
+  inline static RenderTarget* s_ActiveRenderTarget_ = nullptr;
+  inline static bool s_Initialized_                 = false;
   inline static RenderData s_Data;
 };
 } // namespace ge

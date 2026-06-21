@@ -7,6 +7,9 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
+option(GAME_ENGINE_BUILD_TESTS "Build GameEngine unit tests" OFF)
+set(BUILD_TESTING ${GAME_ENGINE_BUILD_TESTS} CACHE BOOL "Build tests" FORCE)
+
 add_compile_definitions(
     GE_ENABLE_ASSERTS
     GE_PROFILE
@@ -19,9 +22,6 @@ else()
 endif()
 
 include(CTest)
-if (BUILD_TESTING)
-  add_subdirectory(tests)
-endif()
 
 option(BUILD_EDITOR "Build the editor target" OFF)
 
@@ -30,4 +30,8 @@ if (BUILD_EDITOR)
   add_subdirectory(Editor)
 else()
   add_subdirectory(App)
+endif()
+
+if (GAME_ENGINE_BUILD_TESTS)
+  add_subdirectory(tests)
 endif()

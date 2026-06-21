@@ -19,7 +19,7 @@ void Renderer::Init(GameEngineSpecification& specs)
 
   s_RendererAPI_->Init();
   s_RendererCommandBuffer_ = CreateUnique<RendererCommandBuffer>();
-  s_Initialized_ = true;
+  s_Initialized_           = true;
 }
 
 void Renderer::Shutdown()
@@ -30,16 +30,27 @@ void Renderer::Shutdown()
 
   s_RendererCommandBuffer_.reset();
   s_RendererAPI_.reset();
-  s_Data         = {};
-  s_Initialized_ = false;
+  s_ActiveRenderTarget_ = nullptr;
+  s_Data                = {};
+  s_Initialized_        = false;
 
   RendererAPI::SetAPI(RendererAPIType::NONE);
 }
 
-void Renderer::BeginScene()
+void Renderer::BeginScene(RenderTarget& target)
 {
   CORE_ASSERT(s_Initialized_ && s_RendererCommandBuffer_,
               "Renderer command buffer is not initialized")
+  CORE_ASSERT(s_RendererAPI_, "Renderer API is not initialized")
+  CORE_ASSERT(s_ActiveRenderTarget_ == nullptr,
+              "Renderer::BeginScene called while another scene is active")
+  s_ActiveRenderTarget_ = &target;
+  s_ActiveRenderTarget_->Bind();
+  s_RendererAPI_->SetViewPort(0,
+                              0,
+                              s_ActiveRenderTarget_->GetWidth(),
+                              s_ActiveRenderTarget_->GetHeight());
+  Clear();
   s_RendererCommandBuffer_->Begin();
 }
 
@@ -47,8 +58,12 @@ void Renderer::EndScene()
 {
   CORE_ASSERT(s_Initialized_ && s_RendererCommandBuffer_,
               "Renderer command buffer is not initialized")
+  CORE_ASSERT(s_ActiveRenderTarget_,
+              "Renderer::EndScene called without an active scene")
   s_RendererCommandBuffer_->End();
   Flush();
+  s_ActiveRenderTarget_->Unbind();
+  s_ActiveRenderTarget_ = nullptr;
 }
 
 void Renderer::SubmitMesh(Shared<Mesh> mesh)

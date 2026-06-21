@@ -28,8 +28,14 @@ GameEngine::GameEngine(const GameEngineSpecification& specification)
   m_Window = Window::Create("Game Engine", 1280, 720, m_EventHandler_);
 
   Renderer::Init(m_Specification);
-  m_Framebuffer_ =
-      Framebuffer::Create(m_Window->GetWidth(), m_Window->GetHeight());
+
+  if (m_Specification.EnableImGui) {
+    m_Framebuffer_ =
+        Framebuffer::Create(m_Window->GetWidth(), m_Window->GetHeight());
+    m_RenderTarget_ = CreateUnique<FramebufferRenderTarget>(m_Framebuffer_);
+  } else {
+    m_RenderTarget_ = CreateUnique<WindowRenderTarget>(*m_Window);
+  }
 
   if (m_Specification.EnableImGui) {
     PushLayer(CreateUnique<ImGuiLayer>());
@@ -47,6 +53,7 @@ GameEngine::~GameEngine()
   CORE_PROFILE_SCOPE("GameEngine::Shutdown");
 
   m_LayerStack.reset();
+  m_RenderTarget_.reset();
   m_Framebuffer_.reset();
   Renderer::Shutdown();
   m_Window.reset();
@@ -88,25 +95,16 @@ void GameEngine::Run()
     for (const auto& layer : Layers())
       layer->OnUpdate();
 
-    if (m_Specification.EnableImGui) {
-      CORE_ASSERT(m_Framebuffer_,
-                  "Engine framebuffer is required when ImGui is enabled")
-      m_Framebuffer_->Bind();
-      Renderer::Clear();
+    CORE_ASSERT(m_RenderTarget_, "Engine render target is not initialized")
+    Renderer::BeginScene(*m_RenderTarget_);
 
-      for (const auto& layer : Layers())
-        layer->OnRender();
+    for (const auto& layer : Layers())
+      layer->OnRender();
 
-      m_Framebuffer_->Unbind();
-      Renderer::Clear();
-    } else {
-      Renderer::Clear();
-
-      for (const auto& layer : Layers())
-        layer->OnRender();
-    }
+    Renderer::EndScene();
 
     if (m_Specification.EnableImGui) {
+      Renderer::Clear();
       ImGuiLayer::Begin();
 
       for (const auto& layer : Layers())

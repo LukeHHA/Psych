@@ -1,0 +1,41 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            build-essential \
+            cmake \
+            libgl1-mesa-dev \
+            libglu1-mesa-dev \
+            libx11-dev \
+            libxcursor-dev \
+            libxi-dev \
+            libxinerama-dev \
+            libxrandr-dev \
+            ninja-build
+
+      - name: Configure
+        run: cmake -S . -B build -G Ninja -DGAME_ENGINE_BUILD_TESTS=ON -DCMAKE_BUILD_TYPE=Debug
+
+      - name: Build engine
+        run: cmake --build build --target GameEngine --parallel
+
+      - name: Build tests
+        run: cmake --build build --target GameEngineTests --parallel
+
+      - name: Run tests
+        run: ctest --test-dir build --output-on-failure

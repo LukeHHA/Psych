@@ -7,6 +7,7 @@
 #include "FileSystem/FileSystem.h"
 #include "Layers/LayerStack.h"
 #include "Renderer/Framebuffer.h"
+#include "Renderer/RenderTarget.h"
 #include "Renderer/RendererAPI.h"
 
 namespace ge
@@ -65,6 +66,7 @@ private:
   Shared<Window> m_Window;
   Shared<EventHandler> m_EventHandler_;
   Shared<Framebuffer> m_Framebuffer_;
+  Unique<RenderTarget> m_RenderTarget_;
 };
 Unique<GameEngine> CreateGameEngine(GameEngineSpecification& spec);
 } // namespace ge
