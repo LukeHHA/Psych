@@ -2,42 +2,45 @@
 
 #include <string>
 
-namespace ge::errors {
+namespace ge::errors
+{
 
-    template <class C>
-    struct ErrorInfo {
-        ErrorInfo() = default;
-        ErrorInfo(std::string msg) : message(msg) {}
-        C ErrorCodes;
-        std::string message;
-    };
+template <class C> struct ErrorInfo {
+  ErrorInfo() = default;
+  ErrorInfo(std::string msg) : message(msg) {}
+  C ErrorCodes;
+  std::string message;
+};
 
-    enum class WindowError {
-        None = 0,
-        InitializationFailed,
-        WindowAlreadyExists,
-        InvalidDimensions,
-        TitleTooLong
-    };
+enum class WindowError {
+  None = 0,
+  InitializationFailed,
+  WindowAlreadyExists,
+  InvalidDimensions,
+  TitleTooLong
+};
 
-    enum class EngineError {
-        None = 0,
-        WindowCreationFailed,
-        RendererInitializationFailed,
-        InvalidGameEngineState,
-        GameEngineInitializationFailed
-    };
+enum class EngineError {
+  None = 0,
+  WindowCreationFailed,
+  RendererInitializationFailed,
+  InvalidGameEngineState,
+  GameEngineInitializationFailed
+};
 
-    enum class EventError {
-        None = 0,
-        SomeEventsNotHandled
-    };
+enum class EventError { None = 0, SomeEventsNotHandled };
 
-    template <class CodeEnum>
-    using ErrorCategory = ErrorInfo<CodeEnum>;
+template <class CodeEnum> using ErrorCategory = ErrorInfo<CodeEnum>;
 
-    using WindowErrors = ErrorCategory<WindowError>;
-    using EngineErrors = ErrorCategory<EngineError>;
-    using EventErrors = ErrorCategory<EventError>;
+using WindowErrors = ErrorCategory<WindowError>;
+using EngineErrors = ErrorCategory<EngineError>;
+using EventErrors  = ErrorCategory<EventError>;
+
+template <class C> struct IErrors {
+  IErrors(C ErrorCode) : m_ErrorCode(ErrorCode) {}
+  virtual ~IErrors() = default;
+  C m_ErrorCode;
+  virtual std::string ToString(C ErrorCode) const = 0;
+};
 
 } // namespace ge::errors

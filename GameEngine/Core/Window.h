@@ -1,9 +1,9 @@
 #pragma once
 
-#include "Core/Base.h"
+#include "Core/Core.h"
+#include "Core/glad_glfw_incl.h"
 #include "Errors/Errors.h"
 #include "Events/Event.h"
-#include "GLFW/glfw3.h"
 #include "Renderer/RendererContext.h"
 #include "ge_expected"
 
@@ -30,8 +30,8 @@ using UniqueGLFWwindow = Unique<GLFWwindow, GLFWwindowDeleter>;
 class Window
 {
 public:
-  using EventCallbackFn = std::function<void(Event&)>;
-  using QueueEventFn    = EventCallbackFn;
+  using EventCallbackFn       = std::function<void(Event&)>;
+  using QueueEventFn          = EventCallbackFn;
 
   Window()                    = default;
   virtual ~Window()           = default;
@@ -41,10 +41,10 @@ public:
   Window& operator=(const Window& other) = delete;
   Window& operator=(Window&& other)      = delete;
 
-  virtual util::expected<void, errors::WindowError>
+  virtual Expected<void, errors::WindowError>
   Init(const std::string& title, unsigned int width, unsigned int height,
        Shared<EventHandler> eventHandler)                        = 0;
-  virtual util::expected<void, errors::WindowError> Shutdown()   = 0;
+  virtual Expected<void, errors::WindowError> Shutdown()         = 0;
   virtual void OnUpdate()                                        = 0;
   virtual void PollEvents()                                      = 0;
   virtual unsigned int GetWidth() const                          = 0;
@@ -66,7 +66,7 @@ private:
     std::string Title;
     unsigned int Width, Height;
     bool VSync;
-    Shared<EventHandler> EventHandler;
+    Shared<EventHandler> EventsHandler;
     EventCallbackFn EventCallback;
   };
 

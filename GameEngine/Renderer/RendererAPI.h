@@ -1,8 +1,11 @@
 #pragma once
 
-#include "Core/Base.h"
+#include "Core/Core.h"
+#include "Debug/Assert.h"
+#include "Renderer/Buffer.h"
+#include "Renderer/VertexArray.h"
 #include "glm/vec3.hpp"
-#include <Debug/Assert.h>
+#include <cstdint>
 
 namespace ge
 {
@@ -13,6 +16,8 @@ class RendererAPI
 public:
   RendererAPI()          = default;
   virtual ~RendererAPI() = default;
+
+  virtual void Init()    = 0;
   static void SetAPI(RendererAPIType api) { s_RendererAPI = api; }
 
   static RendererAPIType Current()
@@ -22,8 +27,12 @@ public:
     return s_RendererAPI;
   }
 
-  virtual void SetClearColour(const glm::vec3& colour) = 0;
-  virtual void Clear()                                 = 0;
+  virtual void SetClearColour(const glm::vec3& colour)                  = 0;
+  virtual void SetViewPort(const uint32_t x, const uint32_t y,
+                           const uint32_t width, const uint32_t height) = 0;
+  virtual void Clear()                                                  = 0;
+  virtual void DrawIndexed(const Shared<VertexArray>& vertexArray,
+                           const uint32_t indexCount)                   = 0;
   static Unique<RendererAPI> Create();
 
 private:

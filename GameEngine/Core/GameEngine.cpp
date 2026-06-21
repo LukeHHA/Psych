@@ -1,8 +1,10 @@
 #include "GameEngine.h"
-#include "Core/Base.h"
+#include "Core/Core.h"
 #include "Debug/Assert.h"
 #include "Debug/Instrumentor.h"
+#include "Imgui/ImguiLayer.h"
 #include "Renderer/Renderer.h"
+#include "Util/Time.h"
 
 namespace ge
 {
@@ -12,49 +14,58 @@ GameEngine* GameEngine::s_Application = nullptr;
 GameEngine::GameEngine(const GameEngineSpecification& specification)
     : m_Specification(specification)
 {
-  CORE_PROFILE_FUNCTION();
-  Init();
-  CORE_LOG_INFO("Game Engine Initialized");
   CORE_LOG_INFO("Game engine startup");
+  CORE_PROFILE_FUNCTION();
+  CORE_PROFILE_SCOPE("GameEngine::Init");
+
+  CORE_ASSERT(!s_Application, "Application already exists")
+  s_Application   = this;
+
+  m_LayerStack    = CreateUnique<LayerStack>();
+  m_EventHandler_ = CreateShared<EventHandler>();
+
+  Renderer::SetRendererAPI(m_Specification.RenderingAPI);
+  m_Window = Window::Create("Game Engine", 1280, 720, m_EventHandler_);
+
+  Renderer::Init(m_Specification);
+
+  if (m_Specification.EnableImGui) {
+    m_Framebuffer_ =
+        Framebuffer::Create(m_Window->GetWidth(), m_Window->GetHeight());
+    m_RenderTarget_ = CreateUnique<FramebufferRenderTarget>(m_Framebuffer_);
+  } else {
+    m_RenderTarget_ = CreateUnique<WindowRenderTarget>(*m_Window);
+  }
+
+  if (m_Specification.EnableImGui) {
+    PushLayer(CreateUnique<ImGuiLayer>());
+  }
+
+  CORE_ASSERT(m_EventHandler_, "EventHandler creation failed")
+  CORE_ASSERT(m_EventHandler_, "EventHandler creation failed")
+  CORE_ASSERT(m_Window, "Window Creation failed returning nullptr")
+  CORE_LOG_INFO("GameEngine Init");
 }
 
 GameEngine::~GameEngine()
 {
   CORE_PROFILE_FUNCTION();
-  Shutdown();
-  CORE_LOG_INFO("Game Engine Shutdown Complete");
-}
-
-util::expected<void, errors::EngineError> GameEngine::Init()
-{
-  CORE_PROFILE_FUNCTION();
-  CORE_PROFILE_SCOPE("GameEngine::Init");
-
-  CORE_ASSERT(!s_Application, "Application already exists")
-  s_Application = this;
-
-  m_EventHandler_ = CreateShared<EventHandler>();
-  CORE_ASSERT(m_EventHandler_ != nullptr,
-              "Event handler failed to initalize within Application")
-  Renderer::Init(m_Specification);
-  m_Window = Window::Create("Game Engine", 1280, 720, m_EventHandler_);
-  CORE_ASSERT(m_Window != nullptr, "Window Creation failed returning nullptr")
-
-  return {};
-}
-
-util::expected<void, errors::EngineError> GameEngine::Shutdown()
-{
-  CORE_PROFILE_FUNCTION();
   CORE_PROFILE_SCOPE("GameEngine::Shutdown");
-  CORE_ASSERT(s_Application == this,
-              "Static Application Pointer Is Corrupt On Teardown");
+
+  m_LayerStack.reset();
+  m_RenderTarget_.reset();
+  m_Framebuffer_.reset();
+  Renderer::Shutdown();
+  m_Window.reset();
+  m_EventHandler_.reset();
+
   s_Application = nullptr;
-  return {};
+  CORE_LOG_INFO("GameEngine Shutdown");
 }
 
 void GameEngine::HandleEvents()
 {
+  CORE_PROFILE_FUNCTION();
   Unique<Event> event = nullptr;
   while (m_EventHandler_->TryDequeueEvent(event)) {
     switch (event->GetEventType()) {
@@ -75,17 +86,34 @@ void GameEngine::Run()
 
   // Main Application loop
   while (m_Running) {
+    Time::Update();
+
     m_Window->PollEvents();
 
     HandleEvents();
 
-    for (const auto& layer : m_LayerStack) layer->OnUpdate();
+    for (const auto& layer : Layers())
+      layer->OnUpdate();
 
-    for (const auto& layer : m_LayerStack) layer->OnRender();
+    CORE_ASSERT(m_RenderTarget_, "Engine render target is not initialized")
+    Renderer::BeginScene(*m_RenderTarget_);
+
+    for (const auto& layer : Layers())
+      layer->OnRender();
+
+    Renderer::EndScene();
+
+    if (m_Specification.EnableImGui) {
+      Renderer::Clear();
+      ImGuiLayer::Begin();
+
+      for (const auto& layer : Layers())
+        layer->OnImGuiRender();
+
+      ImGuiLayer::End();
+    }
 
     m_Window->OnUpdate();
-
-    Renderer::Clear();
   }
 }
 
@@ -107,12 +135,12 @@ GameEngine& GameEngine::Get()
 void GameEngine::PushLayer(std::unique_ptr<Layer> layer)
 {
   CORE_PROFILE_FUNCTION();
-  m_LayerStack.PushLayer(std::move(layer));
+  m_LayerStack->PushLayer(std::move(layer));
 }
 
 void GameEngine::PushOverlay(std::unique_ptr<Layer> layer)
 {
   CORE_PROFILE_FUNCTION();
-  m_LayerStack.PushOverlay(std::move(layer));
+  m_LayerStack->PushOverlay(std::move(layer));
 }
 } // namespace ge

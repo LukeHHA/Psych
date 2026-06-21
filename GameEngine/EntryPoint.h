@@ -1,34 +1,58 @@
 #pragma once
 
-#include "Core.h"
-#include "Core/GameEngine.h"
+#include <iostream>
+#include <memory>
 
-extern std::unique_ptr<ge::GameEngine> ge::CreateGameEngine();
+#include "Core/GameEngine.h"
+#include "Debug/Instrumentor.h"
+#include "FileSystem/FileSystem.h"
+#include "Renderer/RendererAPI.h"
+#include "Util/CommandLine.h"
+
+// MAIN
+extern std::unique_ptr<ge::GameEngine>
+ge::CreateGameEngine(ge::GameEngineSpecification& spec);
 
 int main(int argc, char** argv)
 {
-  /* Ensure that no Logging is attempted befoire this point
-   * otherwise a segmentation fault occurs
-   */
-  ge::Log::Init();
-  CORE_LOG_INFO("Core Library Initializing");
-  CORE_LOG_INFO("Initialized Core Logger");
-  APP_LOG_INFO("Initialized App Logger");
-  CORE_LOG_INFO("Core Library Initialized");
+  {
+    const ge::cli::ParseResult parseResult =
+        ge::cli::CommandLineParser::Parse(argc, argv);
 
-  CORE_PROFILE_BEGIN_SESSION("Startup", "CoreProfile-Startup.json");
-  auto app = ge::CreateGameEngine();
-  CORE_LOG_INFO("App Session Created Successfully");
-  CORE_PROFILE_END_SESSION();
+    if (!parseResult.Success) {
+      std::cerr << parseResult.ErrorMessage;
+      return 1;
+    }
 
-  CORE_PROFILE_BEGIN_SESSION("Runtime", "CoreProfile-Runtime.json");
-  CORE_ASSERT(app != nullptr, "Application is nullptr on startup");
-  app->Run();
-  CORE_PROFILE_END_SESSION();
+    if (parseResult.Options.ShowHelp) {
+      std::cout << ge::cli::CommandLineParser::HelpText();
+      return 0;
+    }
 
-  CORE_PROFILE_BEGIN_SESSION("Shutdown", "CoreProfile-Shutdown.json");
-  CORE_PROFILE_END_SESSION();
-  ge::Log::Shutdown();
+    ge::Log::Init();
+    ge::util::Filesystem::Init();
+
+    ge::GameEngineSpecification spec;
+    spec.Name          = "Game Engine";
+    spec.RenderingAPI  = parseResult.Options.RenderingAPI;
+    spec.AssetBasePath = parseResult.Options.DataDirectory;
+
+    CORE_PROFILE_BEGIN_SESSION("Startup", "CoreProfile-Startup.json");
+    auto app = ge::CreateGameEngine(spec);
+    CORE_LOG_INFO("App Session Created Successfully");
+    CORE_PROFILE_END_SESSION();
+
+    CORE_PROFILE_BEGIN_SESSION("Runtime", "CoreProfile-Runtime.json");
+    CORE_ASSERT(app != nullptr, "Application is nullptr on startup");
+    app->Run();
+    CORE_PROFILE_END_SESSION();
+
+    CORE_PROFILE_BEGIN_SESSION("Shutdown", "CoreProfile-Shutdown.json");
+    CORE_PROFILE_END_SESSION();
+
+    ge::util::Filesystem::Shutdown();
+    CORE_LOG_INFO("Filesystem Shutdown");
+  }
 
   return 0;
 }

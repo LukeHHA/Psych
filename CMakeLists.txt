@@ -1,4 +1,5 @@
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.11)
+
 cmake_policy(SET CMP0135 NEW)
 project(Template VERSION 1.0)
 
@@ -6,15 +7,31 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
+option(GAME_ENGINE_BUILD_TESTS "Build GameEngine unit tests" OFF)
+set(BUILD_TESTING ${GAME_ENGINE_BUILD_TESTS} CACHE BOOL "Build tests" FORCE)
+
 add_compile_definitions(
     GE_ENABLE_ASSERTS
     GE_PROFILE
 )
 
-include(CTest)
-if (BUILD_TESTING)
-    add_subdirectory(tests)
+if(GE_ENABLE_ASSERTS)
+  message(STATUS "Asserts are ENABLED")
+else()
+  message(STATUS "Asserts are DISABLED")
 endif()
 
+include(CTest)
+
+option(BUILD_EDITOR "Build the editor target" OFF)
+
 add_subdirectory(GameEngine)
-add_subdirectory(App)
+if (BUILD_EDITOR)
+  add_subdirectory(Editor)
+else()
+  add_subdirectory(App)
+endif()
+
+if (GAME_ENGINE_BUILD_TESTS)
+  add_subdirectory(tests)
+endif()

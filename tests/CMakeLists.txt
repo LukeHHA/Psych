@@ -1,23 +1,51 @@
 include(FetchContent)
-FetchContent_Declare(
-    googletest
-    URL https://github.com/google/googletest/archive/refs/tags/v1.17.0.zip
-)
-FetchContent_MakeAvailable(googletest)
 
-add_executable(UnitTests
-    TestMain.cpp
+find_package(GTest CONFIG QUIET)
+if(GTest_FOUND)
+    if(TARGET GTest::gtest)
+        set(GAME_ENGINE_GTEST_TARGET GTest::gtest)
+    else()
+        set(GAME_ENGINE_GTEST_TARGET GTest::GTest)
+    endif()
+elseif(EXISTS "${PROJECT_SOURCE_DIR}/GameEngine/Vendor/assimp/contrib/googletest/CMakeLists.txt")
+    set(BUILD_GMOCK OFF CACHE BOOL "" FORCE)
+    set(INSTALL_GTEST OFF CACHE BOOL "" FORCE)
+    add_subdirectory(
+        "${PROJECT_SOURCE_DIR}/GameEngine/Vendor/assimp/contrib/googletest"
+        "${CMAKE_BINARY_DIR}/_deps/game_engine_googletest-build"
+        EXCLUDE_FROM_ALL
+    )
+    set(GAME_ENGINE_GTEST_TARGET gtest)
+else()
+    set(INSTALL_GTEST OFF CACHE BOOL "" FORCE)
+    FetchContent_Declare(
+        googletest
+        URL https://github.com/google/googletest/archive/refs/tags/v1.17.0.zip
+    )
+    FetchContent_MakeAvailable(googletest)
+    set(GAME_ENGINE_GTEST_TARGET GTest::gtest)
+endif()
+
+add_executable(GameEngineTests
+    main.cpp
+    core/UUIDTests.cpp
+    events/EventTests.cpp
+    events/EventQueueTests.cpp
+    filesystem/FilesystemTests.cpp
+    layers/LayerStackTests.cpp
+    util/CommandLineTests.cpp
 )
 
-target_link_libraries(UnitTests PRIVATE
+target_link_libraries(GameEngineTests PRIVATE
     GameEngine
-    GTest::gtest_main
+    ${GAME_ENGINE_GTEST_TARGET}
 )
 
-target_compile_definitions(UnitTests PRIVATE GE_TESTS_ENABLED)
+target_compile_definitions(GameEngineTests PRIVATE GE_TESTS_ENABLED)
 
-target_compile_options(UnitTests PRIVATE -fsanitize=address -fno-omit-frame-pointer)
-target_link_options(UnitTests PRIVATE -fsanitize=address)
+file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/runtime")
 
 include(GoogleTest)
-gtest_discover_tests(UnitTests)
+gtest_discover_tests(GameEngineTests
+    WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/runtime"
+)

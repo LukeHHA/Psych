@@ -1,10 +1,28 @@
 BasedOnStyle: LLVM
-DerivePointerAlignment: false
 PointerAlignment: Left
-
-AlignConsecutiveAssignments: Consecutive
-
-AllowShortLoopsOnASingleLine: true
-
+AlignConsecutiveAssignments:
+  Enabled: true
+  AcrossEmptyLines: true
+  AcrossComments: false
+AlignConsecutiveMacros:
+  Enabled: true
+  AcrossEmptyLines: true
+  AcrossComments: false
+AlignConsecutiveShortCaseStatements:
+  Enabled: true
+  AcrossEmptyLines: true
+  AcrossComments: true
+  AlignCaseColons: false
+AlignEscapedNewlines: Right
+AlignTrailingComments:
+  Kind: Always
+  OverEmptyLines: 2
 BreakBeforeBraces: Linux
 
+BinPackArguments: false
+
+AllowAllArgumentsOnNextLine: false
+
+BinPackParameters: false
+
+AllowAllParametersOfDeclarationOnNextLine: false

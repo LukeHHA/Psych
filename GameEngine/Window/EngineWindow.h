@@ -1,10 +1,10 @@
 #pragma once
 
-#include "Core/Base.h"
+#include "Core/Core.h"
 #include "Core/Window.h"
+#include "Core/glad_glfw_incl.h"
 #include "Errors/Errors.h"
 #include "Events/Event.h"
-#include "GLFW/glfw3.h"
 #include "Renderer/RendererContext.h"
 #include "ge_expected"
 
@@ -24,10 +24,10 @@ public:
                unsigned int height, Shared<EventHandler> eventHandler);
   virtual ~EngineWindow();
 
-  virtual util::expected<void, errors::WindowError>
+  virtual Expected<void, errors::WindowError>
   Init(const std::string& title, unsigned int width, unsigned int height,
        Shared<EventHandler> eventHandler) override;
-  virtual util::expected<void, errors::WindowError> Shutdown() override;
+  virtual Expected<void, errors::WindowError> Shutdown() override;
   virtual void PollEvents() override;
   virtual unsigned int GetWidth() const override { return m_Data.Width; }
   virtual unsigned int GetHeight() const override { return m_Data.Height; }
@@ -52,7 +52,7 @@ private:
     std::string Title;
     unsigned int Width, Height;
     bool VSync;
-    Shared<EventHandler> EventHandler;
+    Shared<EventHandler> EventsHandler;
     EventCallbackFn EventCallback;
   };
 
