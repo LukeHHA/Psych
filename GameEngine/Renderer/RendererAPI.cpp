@@ -1,5 +1,5 @@
 #include "RendererAPI.h"
-#include "Core/Base.h"
+#include "Core/Core.h"
 #include "Renderer/Platform/Opengl/OpenglRendererAPI.h"
 
 namespace ge

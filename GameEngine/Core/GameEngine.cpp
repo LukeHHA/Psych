@@ -1,10 +1,10 @@
 #include "GameEngine.h"
-#include "Core/Base.h"
+#include "Core/Core.h"
 #include "Debug/Assert.h"
 #include "Debug/Instrumentor.h"
-#include "FileSystem/FileSystem.h"
 #include "Imgui/ImguiLayer.h"
 #include "Renderer/Renderer.h"
+#include "Util/Time.h"
 
 namespace ge
 {
@@ -23,11 +23,17 @@ GameEngine::GameEngine(const GameEngineSpecification& specification)
 
   m_LayerStack    = CreateUnique<LayerStack>();
   m_EventHandler_ = CreateShared<EventHandler>();
-  Renderer::Init(m_Specification);
+
+  Renderer::SetRendererAPI(m_Specification.RenderingAPI);
   m_Window = Window::Create("Game Engine", 1280, 720, m_EventHandler_);
 
-  // WARN: Do not remove
-  PushLayer(CreateUnique<ImGuiLayer>());
+  Renderer::Init(m_Specification);
+  m_Framebuffer_ =
+      Framebuffer::Create(m_Window->GetWidth(), m_Window->GetHeight());
+
+  if (m_Specification.EnableImGui) {
+    PushLayer(CreateUnique<ImGuiLayer>());
+  }
 
   CORE_ASSERT(m_EventHandler_, "EventHandler creation failed")
   CORE_ASSERT(m_EventHandler_, "EventHandler creation failed")
@@ -41,8 +47,10 @@ GameEngine::~GameEngine()
   CORE_PROFILE_SCOPE("GameEngine::Shutdown");
 
   m_LayerStack.reset();
-  m_EventHandler_.reset();
+  m_Framebuffer_.reset();
+  Renderer::Shutdown();
   m_Window.reset();
+  m_EventHandler_.reset();
 
   s_Application = nullptr;
   CORE_LOG_INFO("GameEngine Shutdown");
@@ -71,6 +79,8 @@ void GameEngine::Run()
 
   // Main Application loop
   while (m_Running) {
+    Time::Update();
+
     m_Window->PollEvents();
 
     HandleEvents();
@@ -78,21 +88,34 @@ void GameEngine::Run()
     for (const auto& layer : Layers())
       layer->OnUpdate();
 
-    for (const auto& layer : Layers())
-      layer->OnRender();
+    if (m_Specification.EnableImGui) {
+      CORE_ASSERT(m_Framebuffer_,
+                  "Engine framebuffer is required when ImGui is enabled")
+      m_Framebuffer_->Bind();
+      Renderer::Clear();
 
-    // NOTE: Imgui context is setup here using static methods
-    // while the imgui frames are injected by the client. This
-    // may change to a more complete imgui layer depending on
-    // how much the core editor should take on UI wise.
-    ImGuiLayer::Begin();
-    for (const auto& layer : Layers())
-      layer->OnImGuiRender();
-    ImGuiLayer::End();
+      for (const auto& layer : Layers())
+        layer->OnRender();
+
+      m_Framebuffer_->Unbind();
+      Renderer::Clear();
+    } else {
+      Renderer::Clear();
+
+      for (const auto& layer : Layers())
+        layer->OnRender();
+    }
+
+    if (m_Specification.EnableImGui) {
+      ImGuiLayer::Begin();
+
+      for (const auto& layer : Layers())
+        layer->OnImGuiRender();
+
+      ImGuiLayer::End();
+    }
 
     m_Window->OnUpdate();
-
-    Renderer::Clear();
   }
 }
 

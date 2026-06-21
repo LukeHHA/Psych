@@ -4,6 +4,8 @@ set(SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/Layers/Layer.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Layers/LayerStack.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Core/Window.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Renderer/Renderer.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Renderer/RendererAPI.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Renderer/RendererContext.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Renderer/RendererContextHeadless.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Renderer/Shader.cpp
@@ -11,19 +13,19 @@ set(SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/Renderer/Buffer.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Renderer/VertexArray.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Renderer/VertexFormat.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Renderer/Framebuffer.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Renderer/Platform/Opengl/OpenglContext.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Renderer/Platform/Opengl/OpenglShader.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Renderer/Platform/Opengl/OpenglRendererAPI.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Renderer/Platform/Opengl/OpenglBuffer.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Renderer/Platform/Opengl/OpenglVertexArray.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Renderer/Platform/Opengl/OpenglFramebuffer.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Renderer/Platform/Vulkan/VulkanContext.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Renderer/Platform/Metal/MetalContext.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Window/EngineWindow.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Window/HeadlessWindow.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Events/EventHandler.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Events/EventQueue.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/Renderer/Renderer.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/Renderer/RendererAPI.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/FileSystem/FileSystem.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/FileSystem/CoreFilesystemAPI.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/FileSystem/Platform/MacOSFilesystemAPI.cpp

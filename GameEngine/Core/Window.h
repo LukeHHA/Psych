@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Core/Base.h"
+#include "Core/Core.h"
 #include "Core/glad_glfw_incl.h"
 #include "Errors/Errors.h"
 #include "Events/Event.h"

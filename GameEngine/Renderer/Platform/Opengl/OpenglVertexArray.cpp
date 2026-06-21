@@ -1,5 +1,5 @@
 #include "OpenglVertexArray.h"
-#include "Core/Base.h"
+#include "Core/Core.h"
 #include "Debug/Assert.h"
 
 namespace ge

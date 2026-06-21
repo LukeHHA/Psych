@@ -5,8 +5,11 @@
 
 namespace ge::ui
 {
-void TraverseFileTreeNode(util::FileNode* node)
+void TraverseFileTreeNode(const util::FileNode* node)
 {
+  if (!node)
+    return;
+
   if (node == nullptr) {
     return;
   }
@@ -33,8 +36,11 @@ void TraverseFileTreeNode(util::FileNode* node)
   }
 }
 
-void MainFileTree(util::FileNode* node)
+void MainFileTree(const util::FileNode* node)
 {
+  if (!node)
+    return;
+
   ImGuiChildFlags child_flags = 0;
   child_flags |= ImGuiChildFlags_Borders;
   child_flags |= ImGuiChildFlags_ResizeX;

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Core/Base.h"
+#include "Core/Core.h"
 #include <cstdint>
 
 namespace ge

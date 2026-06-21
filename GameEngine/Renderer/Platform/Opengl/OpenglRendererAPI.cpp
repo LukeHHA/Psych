@@ -32,14 +32,22 @@ void OpenglRendererAPI::Init()
 {
   CORE_PROFILE_FUNCTION();
 
-  // #ifdef CORE_DEBUG
-  glEnable(GL_DEBUG_OUTPUT);
-  glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
-  glDebugMessageCallback(OpenGLMessageCallback, nullptr);
+  const bool debugOutputAvailable =
+      (GLAD_GL_VERSION_4_3 || GLAD_GL_KHR_debug) &&
+      glad_glDebugMessageCallback != nullptr &&
+      glad_glDebugMessageControl != nullptr;
 
-  glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE,
-                        GL_DEBUG_SEVERITY_NOTIFICATION, 0, NULL, GL_FALSE);
-  // #endif
+  if (debugOutputAvailable) {
+    glEnable(GL_DEBUG_OUTPUT);
+    glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+    glDebugMessageCallback(OpenGLMessageCallback, nullptr);
+
+    glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE,
+                          GL_DEBUG_SEVERITY_NOTIFICATION, 0, nullptr,
+                          GL_FALSE);
+  } else {
+    CORE_LOG_WARN("OpenGL debug output is not available for this context");
+  }
 
   glEnable(GL_BLEND);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);

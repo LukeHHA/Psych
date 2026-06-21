@@ -1,5 +1,5 @@
 #include "Logging.h"
-#include "Core/Base.h"
+#include "Core/Core.h"
 #include "spdlog/common.h"
 #include "spdlog/sinks/basic_file_sink.h"
 #include "spdlog/sinks/stdout_color_sinks.h"
@@ -16,7 +16,7 @@ void Log::Init()
   using COUTColorSink_mt = spdlog::sinks::stdout_color_sink_mt;
   using FileSink_mt      = spdlog::sinks::basic_file_sink_mt;
 
-  s_CoreConsoleLogger_ = spdlog::stdout_color_mt("CORE");
+  s_CoreConsoleLogger_   = spdlog::stdout_color_mt("CORE");
   s_CoreConsoleLogger_->set_pattern("%^[%T] [%n] [%s:%#]: %v%$");
   s_CoreConsoleLogger_->set_level(spdlog::level::trace);
 
@@ -32,7 +32,7 @@ void Log::Init()
   s_ConsoleSink_->set_level(spdlog::level::debug);
 
   s_CoreMultiLogger_ = CreateShared<spdlog::logger>(
-      "CORE_MULTI_SINK_LOGGER",
+      "CORE",
       spdlog::sinks_init_list{s_ConsoleSink_, s_JSONSink_});
   s_CoreMultiLogger_->set_level(spdlog::level::trace);
 
@@ -82,7 +82,7 @@ void Log::Shutdown()
   s_CoreMultiLogger_->trace("finished.");
   s_JSONSink_->set_pattern("]\n}");
   s_CoreMultiLogger_->trace("");
-  spdlog::drop("CORE_MULTI_SINK_LOGGER");
+  spdlog::drop("CORE");
   std::cout << "logging shutdown\n";
 }
 } // namespace ge

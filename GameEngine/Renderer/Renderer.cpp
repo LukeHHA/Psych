@@ -12,17 +12,41 @@ void Renderer::Init(GameEngineSpecification& specs)
   CORE_ASSERT(!s_Initialized_, "Renderer has already been initialized")
   CORE_ASSERT(s_RendererAPI_ == nullptr,
               "Currently only one API can be used per context")
-  SetRendererAPI(specs.RenderingAPI);
+  RendererAPI::SetAPI(specs.RenderingAPI);
   s_RendererAPI_ = RendererAPI::Create();
   CORE_ASSERT(s_RendererAPI_ != nullptr,
               "Creation of the render API failed and returned nullptr")
+
+  s_RendererAPI_->Init();
+  s_RendererCommandBuffer_ = CreateUnique<RendererCommandBuffer>();
   s_Initialized_ = true;
 }
 
-void Renderer::BeginScene() { s_RendererCommandBuffer_->Begin(); }
+void Renderer::Shutdown()
+{
+  if (!s_Initialized_) {
+    return;
+  }
+
+  s_RendererCommandBuffer_.reset();
+  s_RendererAPI_.reset();
+  s_Data         = {};
+  s_Initialized_ = false;
+
+  RendererAPI::SetAPI(RendererAPIType::NONE);
+}
+
+void Renderer::BeginScene()
+{
+  CORE_ASSERT(s_Initialized_ && s_RendererCommandBuffer_,
+              "Renderer command buffer is not initialized")
+  s_RendererCommandBuffer_->Begin();
+}
 
 void Renderer::EndScene()
 {
+  CORE_ASSERT(s_Initialized_ && s_RendererCommandBuffer_,
+              "Renderer command buffer is not initialized")
   s_RendererCommandBuffer_->End();
   Flush();
 }
@@ -38,21 +62,20 @@ void Renderer::Flush() { s_Data.drawCalls = 0; }
 
 void Renderer::SetRendererAPI(RendererAPIType type)
 {
-  switch (type) {
-  case ge::RendererAPIType::TEST_HEADLESS:
-    s_RendererAPI_->SetAPI(RendererAPIType::TEST_HEADLESS);
-    return;
-  case RendererAPIType::OPENGL:
-    s_RendererAPI_->SetAPI(RendererAPIType::OPENGL);
-    return;
-  }
-  CORE_ASSERT(false, "Currently Opengl is the only supported API")
+  RendererAPI::SetAPI(type);
 }
 
 void Renderer::SetClearColour(const glm::vec3& colour)
 {
+  CORE_ASSERT(s_Initialized_ && s_RendererAPI_,
+              "Renderer API is not initialized")
   s_RendererAPI_->SetClearColour(colour);
 }
 
-void Renderer::Clear() { s_RendererAPI_->Clear(); }
+void Renderer::Clear()
+{
+  CORE_ASSERT(s_Initialized_ && s_RendererAPI_,
+              "Renderer API is not initialized")
+  s_RendererAPI_->Clear();
+}
 } // namespace ge

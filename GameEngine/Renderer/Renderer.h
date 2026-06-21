@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Core/Base.h"
+#include "Core/Core.h"
 #include "Core/GameEngine.h"
 #include "Renderer/Mesh.h"
 #include "Renderer/RendererAPI.h"
@@ -34,7 +34,12 @@ public:
   static void Shutdown();
   static void SetClearColour(const glm::vec3& color);
   static void Clear();
-  static RendererAPIType GetCurrentAPI() { return s_RendererAPI_->Current(); }
+  static RendererAPIType GetCurrentAPI()
+  {
+    CORE_ASSERT(s_Initialized_ && s_RendererAPI_,
+                "Renderer API is not initialized")
+    return RendererAPI::Current();
+  }
   static void SetRendererAPI(RendererAPIType type);
   static void BeginScene();
   static void EndScene();
@@ -44,6 +49,8 @@ public:
 private:
   static void Submit(auto&& func)
   {
+    CORE_ASSERT(s_Initialized_ && s_RendererCommandBuffer_,
+                "Renderer command buffer is not initialized")
     s_RendererCommandBuffer_->Push(std::forward<decltype(func)>(func));
   }
 

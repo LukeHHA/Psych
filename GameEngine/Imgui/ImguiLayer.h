@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Layers/Layer.h"
-#include <cstdint>
 namespace ge
 {
 

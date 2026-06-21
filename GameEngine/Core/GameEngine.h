@@ -1,12 +1,12 @@
 #pragma once
 
-#include "Core/Base.h"
+#include "Core/Core.h"
 #include "Core/Window.h"
 #include "Debug/Assert.h"
 #include "Events/EventHandler.h"
 #include "FileSystem/FileSystem.h"
-#include "Imgui/ImguiLayer.h"
 #include "Layers/LayerStack.h"
+#include "Renderer/Framebuffer.h"
 #include "Renderer/RendererAPI.h"
 
 namespace ge
@@ -15,6 +15,7 @@ struct GameEngineSpecification {
   std::string Name             = "Application";
   RendererAPIType RenderingAPI = RendererAPIType::OPENGL;
   util::FilePath AssetBasePath;
+  bool EnableImGui = false;
 };
 
 class GameEngine
@@ -35,6 +36,12 @@ public:
     CORE_ASSERT(m_Window != nullptr,
                 "Call to: GetWindow() failed. m_Window is nullptr!");
     return *m_Window;
+  }
+  Framebuffer& GetFramebuffer()
+  {
+    CORE_ASSERT(m_Framebuffer_ != nullptr,
+                "Call to: GetFramebuffer() failed. m_Framebuffer_ is nullptr!");
+    return *m_Framebuffer_;
   }
   static GameEngine& Get();
 
@@ -57,6 +64,7 @@ private:
   Unique<LayerStack> m_LayerStack;
   Shared<Window> m_Window;
   Shared<EventHandler> m_EventHandler_;
+  Shared<Framebuffer> m_Framebuffer_;
 };
 Unique<GameEngine> CreateGameEngine(GameEngineSpecification& spec);
 } // namespace ge

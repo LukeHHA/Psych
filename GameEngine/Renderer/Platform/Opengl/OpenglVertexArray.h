@@ -4,7 +4,7 @@
 #include <vector>
 
 #include "../../VertexArray.h"
-#include "Core/Base.h"
+#include "Core/Core.h"
 #include "Core/glad_glfw_incl.h"
 #include "Debug/Assert.h"
 #include "Renderer/Buffer.h"

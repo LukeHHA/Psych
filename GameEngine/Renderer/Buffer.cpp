@@ -1,5 +1,5 @@
 #include "Buffer.h"
-#include "Core/Base.h"
+#include "Core/Core.h"
 #include "Renderer/Platform/Opengl/OpenglBuffer.h"
 #include <cstdint>
 
