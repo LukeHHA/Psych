@@ -1,4 +1,5 @@
 build/
+build-*/
 .vscode/
 .cache/
 out/
@@ -6,4 +7,3 @@ out/
 CoreProfile*.json
 .icloud*
 duplicate-report.json 
-

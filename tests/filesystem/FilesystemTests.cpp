@@ -14,12 +14,12 @@ class FilesystemTest : public ::testing::Test
 protected:
   void SetUp() override
   {
-    const auto* testInfo = ::testing::UnitTest::GetInstance()
-                               ->current_test_info();
-    m_Root_ = std::filesystem::temp_directory_path() /
-              ("game_engine_fs_tests_" +
-               std::string(testInfo->test_suite_name()) + "_" +
-               std::string(testInfo->name()));
+    const auto* testInfo =
+        ::testing::UnitTest::GetInstance()->current_test_info();
+    m_Root_ =
+        std::filesystem::temp_directory_path() /
+        ("game_engine_fs_tests_" + std::string(testInfo->test_suite_name()) +
+         "_" + std::string(testInfo->name()));
     std::filesystem::remove_all(m_Root_);
     std::filesystem::create_directories(m_Root_);
   }
@@ -62,10 +62,42 @@ TEST_F(FilesystemTest, DeleteFileRemovesOnlyExistingRegularFiles)
   EXPECT_NO_THROW(ge::CoreFilesystemAPI::DeleteFile(file));
 }
 
+TEST_F(FilesystemTest, TryCreateFileCreatesParentDirectories)
+{
+  const std::filesystem::path file = m_Root_ / "config" / "settings.xml";
+
+  const auto result                = ge::CoreFilesystemAPI::TryCreateFile(file);
+
+  ASSERT_TRUE(result);
+  EXPECT_TRUE(ge::CoreFilesystemAPI::FileExists(file));
+}
+
+TEST_F(FilesystemTest, TryCreateFileReportsWrongTypeWhenPathIsDirectory)
+{
+  const std::filesystem::path directory = m_Root_ / "config";
+  std::filesystem::create_directories(directory);
+
+  const auto result = ge::CoreFilesystemAPI::TryCreateFile(directory);
+
+  ASSERT_FALSE(result);
+  EXPECT_EQ(result.error(),
+            ge::errors::FilesystemError::PathExistsWithWrongType);
+}
+
+TEST_F(FilesystemTest, PlatformConfigPathRequiresFilesystemInitialization)
+{
+  ge::util::Filesystem::Shutdown();
+
+  const auto result = ge::util::Filesystem::TryGetBaseConfigPath();
+
+  ASSERT_FALSE(result);
+  EXPECT_EQ(result.error(), ge::errors::FilesystemError::NotInitialized);
+}
+
 TEST_F(FilesystemTest, CreateDirectoryTreeBuildsFileAndDirectoryNodes)
 {
-  const std::filesystem::path rootFile = m_Root_ / "root.txt";
-  const std::filesystem::path childDir = m_Root_ / "child";
+  const std::filesystem::path rootFile  = m_Root_ / "root.txt";
+  const std::filesystem::path childDir  = m_Root_ / "child";
   const std::filesystem::path childFile = childDir / "nested.txt";
 
   std::filesystem::create_directories(childDir);

@@ -2,6 +2,8 @@
 
 #include "Logging/Logging.h"
 
+#include <cstdio>
+
 #if defined(__APPLE__) || defined(__linux__)
 
 // --- Breakpoint for debugger on MacOS ---
@@ -20,8 +22,11 @@
 #ifdef GE_ENABLE_ASSERTS
 #define DEBUG_TRACE()                                                          \
   do {                                                                         \
-    std::fprintf(stderr, "\033[31;1;4mDEBUG TRACE: %s:%d in %s()\033[0m\n",    \
-                 __FILE__, __LINE__, __func__);                                \
+    std::fprintf(stderr,                                                       \
+                 "\033[31;1;4mDEBUG TRACE: %s:%d in %s()\033[0m\n",            \
+                 __FILE__,                                                     \
+                 __LINE__,                                                     \
+                 __func__);                                                    \
   } while (0)
 
 #define CORE_ASSERT(x, ...)                                                    \
@@ -40,6 +45,15 @@
       DEBUG_TRACE();                                                           \
       DEBUG_BREAK();                                                           \
     }                                                                          \
+  }
+#else
+#define CORE_ASSERT(x, ...)                                                    \
+  {                                                                            \
+    (void)sizeof(x);                                                           \
+  }
+#define APP_ASSERT(x, ...)                                                     \
+  {                                                                            \
+    (void)sizeof(x);                                                           \
   }
 #endif
 

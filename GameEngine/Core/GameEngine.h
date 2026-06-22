@@ -12,11 +12,21 @@
 
 namespace ge
 {
+struct EditorUISpec {
+  bool EnableDocking            = true;
+  bool EnableMultiViewports     = true;
+  bool EnableKeyboardNavigation = true;
+  bool EnableGamepadNavigation  = false;
+  util::FilePath FontPath;
+  float FontSize = 18.0f;
+};
+
 struct GameEngineSpecification {
   std::string Name             = "Application";
   RendererAPIType RenderingAPI = RendererAPIType::OPENGL;
   util::FilePath AssetBasePath;
-  bool EnableImGui = false;
+  bool EnableEditorUI = false;
+  EditorUISpec EditorUI;
 };
 
 class GameEngine
@@ -32,6 +42,7 @@ public:
   void HandleEvents();
   void PushLayer(std::unique_ptr<Layer> layer);
   void PushOverlay(std::unique_ptr<Layer> layer);
+  const GameEngineSpecification& GetEngineSpecification();
   Window& GetWindow()
   {
     CORE_ASSERT(m_Window != nullptr,

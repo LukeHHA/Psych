@@ -1,19 +1,19 @@
+#pragma once
+
 #include "FileSystem/OSFilesystemAPI.h"
+
 namespace ge
 {
 class MacOSFilesystemAPI : public OSFilesystemAPI
 {
 
 public:
-  MacOSFilesystemAPI()                                     = default;
-  MacOSFilesystemAPI(MacOSFilesystemAPI&&)                 = default;
-  MacOSFilesystemAPI(const MacOSFilesystemAPI&)            = default;
-  MacOSFilesystemAPI& operator=(MacOSFilesystemAPI&&)      = default;
-  MacOSFilesystemAPI& operator=(const MacOSFilesystemAPI&) = default;
-  ~MacOSFilesystemAPI()                                    = default;
+  MacOSFilesystemAPI()           = default;
+  ~MacOSFilesystemAPI() override = default;
+  CORE_NO_COPY_NO_MOVE(MacOSFilesystemAPI);
 
-  virtual DirPath GetOSAppDataPath() const override;
-  virtual DirPath GetOSCacheDataPath() const override;
+  DirPath GetOSAppDataPath() const override;
+  DirPath GetOSCacheDataPath() const override;
 
 private:
   std::filesystem::path GetApplicationSupportPath() const;

@@ -9,7 +9,6 @@
 #include "Util/Time.h"
 #include "glm/gtc/matrix_transform.hpp"
 #include "imgui/imgui.h"
-#include "imgui/imgui_internal.h"
 #include <cstdint>
 #include <filesystem>
 
@@ -21,46 +20,6 @@ void EditorLayer::OnAttach()
 {
   CORE_PROFILE_FUNCTION();
   CORE_LOG_INFO("EditorLayer Attached");
-
-  ImGuiIO& io = ImGui::GetIO();
-  (void)io;
-  io.ConfigFlags |=
-      ImGuiConfigFlags_NavEnableKeyboard; // Enable Keyboard Controls
-  // io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad
-  // Controls
-  io.ConfigFlags |= ImGuiConfigFlags_DockingEnable; // Enable Docking
-  // io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable; // Enable
-  // Multi-Viewport / Platform Windows
-  // io.ConfigFlags |= ImGuiConfigFlags_ViewportsNoTaskBarIcons;
-  // io.ConfigFlags |= ImGuiConfigFlags_ViewportsNoMerge;
-
-  // Setup Platform/Renderer bindings
-  // Setup Dear ImGui style
-  ImGui::StyleColorsDark();
-  // ImGui::StyleColorsClassic();
-
-  // When viewports are enabled we tweak WindowRounding/WindowBg so platform
-  // windows can look identical to regular ones.
-  ImGuiStyle& style = ImGui::GetStyle();
-  if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
-    style.WindowRounding              = 0.5f;
-    style.Colors[ImGuiCol_WindowBg].w = 1.0f;
-  }
-
-  SetDarkThemeColors();
-
-  float dpi_scale =
-      io.DisplayFramebufferScale.x > 0.0f ? io.DisplayFramebufferScale.x : 1.0f;
-  float base_font_size = 18.0f;
-  float font_size      = base_font_size * dpi_scale;
-
-  ImFontConfig config;
-  io.FontDefault = io.Fonts->AddFontFromFileTTF(
-      "Editor/Assets/Fonts/JetBrainsMonoNerdFont-Regular.ttf",
-      font_size,
-      &config);
-
-  style.ScaleAllSizes(dpi_scale);
 
   static const float cubeVertices[] = {
       // position           // color
@@ -116,73 +75,27 @@ void EditorLayer::Begin() { CORE_PROFILE_FUNCTION(); }
 
 void EditorLayer::End() { CORE_PROFILE_FUNCTION(); }
 
-void EditorLayer::SetDarkThemeColors()
-{
-  auto& colors              = ImGui::GetStyle().Colors;
-  colors[ImGuiCol_WindowBg] = ImVec4{0.1f, 0.105f, 0.11f, 1.0f};
-
-  // Headers
-  colors[ImGuiCol_Header]        = ImVec4{0.2f, 0.205f, 0.21f, 1.0f};
-  colors[ImGuiCol_HeaderHovered] = ImVec4{0.3f, 0.305f, 0.31f, 1.0f};
-  colors[ImGuiCol_HeaderActive]  = ImVec4{0.15f, 0.1505f, 0.151f, 1.0f};
-
-  // Buttons
-  colors[ImGuiCol_Button]        = ImVec4{0.2f, 0.205f, 0.21f, 1.0f};
-  colors[ImGuiCol_ButtonHovered] = ImVec4{0.3f, 0.305f, 0.31f, 1.0f};
-  colors[ImGuiCol_ButtonActive]  = ImVec4{0.15f, 0.1505f, 0.151f, 1.0f};
-
-  // Frame BG
-  colors[ImGuiCol_FrameBg]        = ImVec4{0.2f, 0.205f, 0.21f, 1.0f};
-  colors[ImGuiCol_FrameBgHovered] = ImVec4{0.3f, 0.305f, 0.31f, 1.0f};
-  colors[ImGuiCol_FrameBgActive]  = ImVec4{0.15f, 0.1505f, 0.151f, 1.0f};
-
-  // Tabs
-  colors[ImGuiCol_Tab]                = ImVec4{0.15f, 0.1505f, 0.151f, 1.0f};
-  colors[ImGuiCol_TabHovered]         = ImVec4{0.38f, 0.3805f, 0.381f, 1.0f};
-  colors[ImGuiCol_TabActive]          = ImVec4{0.28f, 0.2805f, 0.281f, 1.0f};
-  colors[ImGuiCol_TabUnfocused]       = ImVec4{0.15f, 0.1505f, 0.151f, 1.0f};
-  colors[ImGuiCol_TabUnfocusedActive] = ImVec4{0.2f, 0.205f, 0.21f, 1.0f};
-
-  // Title
-  colors[ImGuiCol_TitleBg]          = ImVec4{0.15f, 0.1505f, 0.151f, 1.0f};
-  colors[ImGuiCol_TitleBgActive]    = ImVec4{0.15f, 0.1505f, 0.151f, 1.0f};
-  colors[ImGuiCol_TitleBgCollapsed] = ImVec4{0.15f, 0.1505f, 0.151f, 1.0f};
-}
-
-uint32_t EditorLayer::GetActiveWidgetID() const { return GImGui->ActiveId; }
-
 void EditorLayer::OnImGuiRender()
 {
-  ImGuiWindowFlags window_flags = 0;
-  window_flags |= ImGuiWindowFlags_MenuBar;
-  window_flags |= ImGuiWindowFlags_NoCollapse;
-  window_flags |= ImGuiWindowFlags_NoTitleBar;
-  window_flags |= ImGuiWindowFlags_NoResize;
-
-  if (!ImGui::Begin("Editor", nullptr, window_flags)) {
-    ImGui::End();
-    return;
-  }
-  ui::WindowMenuBar();
+  ui::MainMenuBar();
 
   static std::unique_ptr<util::FileNode> FileTree;
 
   if (!FileTree) {
-    FileTree =
-        util::Filesystem::CreateDirectoryTree(std::filesystem::current_path());
+    FileTree = util::Filesystem::CreateDirectoryTree(
+        ge::GameEngine::Get().GetEngineSpecification().AssetBasePath);
   }
 
-  ui::MainFileTree(FileTree.get());
-  ImGui::SameLine();
+  if (ImGui::Begin("File Tree")) {
+    ui::MainFileTree(FileTree.get());
+  }
+  ImGui::End();
 
   ImGuiWindowFlags viewportWindowFlags = 0;
   viewportWindowFlags |= ImGuiWindowFlags_NoScrollbar;
   viewportWindowFlags |= ImGuiWindowFlags_NoScrollWithMouse;
 
-  if (ImGui::BeginChild("Viewport",
-                        ImVec2(0.0f, 0.0f),
-                        ImGuiChildFlags_Borders,
-                        viewportWindowFlags)) {
+  if (ImGui::Begin("Viewport", nullptr, viewportWindowFlags)) {
     ImVec2 viewportSize = ImGui::GetContentRegionAvail();
 
     if (viewportSize.x > 0.0f && viewportSize.y > 0.0f) {
@@ -207,8 +120,6 @@ void EditorLayer::OnImGuiRender()
                    ImVec2(1.0f, 0.0f));
     }
   }
-  ImGui::EndChild();
-
   ImGui::End();
 }
 

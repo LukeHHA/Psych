@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<engine>
+    <application>
+        <name>Sandbox</name>
+        <version>0.1.0</version>
+        <workingDirectory>./</workingDirectory>
+    </application>
+
+    <window>
+        <title>Game Engine Editor</title>
+        <width>1280</width>
+        <height>720</height>
+        <fullscreen>false</fullscreen>
+        <vsync>true</vsync>
+        <resizable>true</resizable>
+    </window>
+
+    <renderer>
+        <api>OpenGL</api>
+        <clearColor r="0.1" g="0.1" b="0.12" a="1.0" />
+        <debugMode>true</debugMode>
+        <enableDepthTesting>true</enableDepthTesting>
+        <enableBlending>true</enableBlending>
+    </renderer>
+
+    <editor>
+        <enabled>true</enabled>
+        <theme>Dark</theme>
+        <docking>true</docking>
+        <viewports>false</viewports>
+        <showDemoWindow>false</showDemoWindow>
+    </editor>
+
+    <assets>
+        <rootDirectory>Assets</rootDirectory>
+        <shadersDirectory>Assets/Shaders</shadersDirectory>
+        <texturesDirectory>Assets/Textures</texturesDirectory>
+        <modelsDirectory>Assets/Models</modelsDirectory>
+    </assets>
+
+    <logging>
+        <level>Debug</level>
+        <writeToFile>true</writeToFile>
+        <filePath>Logs/engine.log</filePath>
+    </logging>
+
+    <input>
+        <mouseSensitivity>1.0</mouseSensitivity>
+        <invertYAxis>false</invertYAxis>
+    </input>
+</engine>

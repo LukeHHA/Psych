@@ -1,24 +1,9 @@
 #pragma once
 
-#include <string>
-
 namespace ge::errors
 {
 
-template <class C> struct ErrorInfo {
-  ErrorInfo() = default;
-  ErrorInfo(std::string msg) : message(msg) {}
-  C ErrorCodes;
-  std::string message;
-};
-
-enum class WindowError {
-  None = 0,
-  InitializationFailed,
-  WindowAlreadyExists,
-  InvalidDimensions,
-  TitleTooLong
-};
+enum class WindowError { None = 0, InitializationFailed, WindowAlreadyExists, InvalidDimensions, TitleTooLong };
 
 enum class EngineError {
   None = 0,
@@ -30,17 +15,16 @@ enum class EngineError {
 
 enum class EventError { None = 0, SomeEventsNotHandled };
 
-template <class CodeEnum> using ErrorCategory = ErrorInfo<CodeEnum>;
-
-using WindowErrors = ErrorCategory<WindowError>;
-using EngineErrors = ErrorCategory<EngineError>;
-using EventErrors  = ErrorCategory<EventError>;
-
-template <class C> struct IErrors {
-  IErrors(C ErrorCode) : m_ErrorCode(ErrorCode) {}
-  virtual ~IErrors() = default;
-  C m_ErrorCode;
-  virtual std::string ToString(C ErrorCode) const = 0;
+enum class FilesystemError {
+  None = 0,
+  NotInitialized,
+  InvalidPath,
+  PathExistsWithWrongType,
+  DirectoryCreationFailed,
+  FileCreationFailed,
+  ReadFailed
 };
+
+enum class ShaderLibraryError { None = 0, NotFound };
 
 } // namespace ge::errors

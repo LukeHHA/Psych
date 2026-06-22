@@ -14,9 +14,9 @@ using recursive_directory_iterator =
 class OSFilesystemAPI
 {
 public:
-  OSFilesystemAPI()  = default;
-  ~OSFilesystemAPI() = default;
-  CORE_DELETE_COPY_OPS(OSFilesystemAPI);
+  OSFilesystemAPI()          = default;
+  virtual ~OSFilesystemAPI() = default;
+  CORE_NO_COPY_NO_MOVE(OSFilesystemAPI);
 
   virtual DirPath GetOSAppDataPath() const   = 0;
   virtual DirPath GetOSCacheDataPath() const = 0;

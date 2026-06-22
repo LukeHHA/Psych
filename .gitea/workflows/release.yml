@@ -19,6 +19,7 @@ jobs:
           sudo apt-get install -y \
             build-essential \
             cmake \
+            libboost-dev \
             libgl1-mesa-dev \
             libglu1-mesa-dev \
             libxext-dev \
@@ -30,7 +31,7 @@ jobs:
             ninja-build
 
       - name: Configure release
-        run: cmake -S . -B build -G Ninja -DBUILD_EDITOR=ON -DGAME_ENGINE_BUILD_TESTS=OFF -DGLFW_BUILD_X11=ON -DGLFW_BUILD_WAYLAND=OFF -DCMAKE_BUILD_TYPE=Release
+        run: cmake -S . -B build -G Ninja -DGAME_ENGINE_BUILD_EDITOR=ON -DGAME_ENGINE_BUILD_TESTS=OFF -DGE_ENABLE_ASSERTS=OFF -DGE_ENABLE_PROFILING=OFF -DGE_ENABLE_SANITIZERS=OFF -DGLFW_BUILD_X11=ON -DGLFW_BUILD_WAYLAND=OFF -DCMAKE_BUILD_TYPE=Release
 
       - name: Build release
         run: cmake --build build --parallel

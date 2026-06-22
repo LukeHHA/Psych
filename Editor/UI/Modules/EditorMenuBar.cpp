@@ -51,7 +51,9 @@ void ShowExampleMenuFile()
       const char* name = ImGui::GetStyleColorName((ImGuiCol)i);
       ImVec2 p         = ImGui::GetCursorScreenPos();
       ImGui::GetWindowDrawList()->AddRectFilled(
-          p, ImVec2(p.x + sz, p.y + sz), ImGui::GetColorU32((ImGuiCol)i));
+          p,
+          ImVec2(p.x + sz, p.y + sz),
+          ImGui::GetColorU32((ImGuiCol)i));
       ImGui::Dummy(ImVec2(sz, sz));
       ImGui::SameLine();
       ImGui::MenuItem(name);
@@ -97,6 +99,23 @@ void WindowMenuBar()
       ImGui::EndMenu();
     }
     ImGui::EndMenuBar();
+  }
+}
+
+void MainMenuBar()
+{
+  if (ImGui::BeginMainMenuBar()) {
+    if (ImGui::BeginMenu("File")) {
+      ShowExampleMenuFile();
+      ImGui::EndMenu();
+    }
+    if (ImGui::BeginMenu("Edit")) {
+      ImGui::EndMenu();
+    }
+    if (ImGui::BeginMenu("Tools")) {
+      ImGui::EndMenu();
+    }
+    ImGui::EndMainMenuBar();
   }
 }
 } // namespace ge::ui

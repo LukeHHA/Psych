@@ -35,42 +35,83 @@ bool Filesystem::DirExists(const std::filesystem::path& path)
   return CoreFilesystemAPI::DirExists(path);
 }
 
+bool Filesystem::CreateFile(const std::filesystem::path& path)
+{
+  return CoreFilesystemAPI::CreateFile(path);
+}
+
+Expected<void, errors::FilesystemError>
+Filesystem::TryCreateFile(const std::filesystem::path& path)
+{
+  return CoreFilesystemAPI::TryCreateFile(path);
+}
+
+Expected<void, errors::FilesystemError>
+Filesystem::TryCreateDirs(const std::filesystem::path& path)
+{
+  return CoreFilesystemAPI::TryCreateDirs(path);
+}
+
 std::string Filesystem::StreamFile(const std::string& path)
 {
   return CoreFilesystemAPI::StreamFile(path);
 }
 
-DirPath Filesystem::GetBaseConfigPath()
+bool Filesystem::IsInitialized() { return s_OSFilesystemAPI_ != nullptr; }
+
+Expected<DirPath, errors::FilesystemError> Filesystem::TryGetBaseConfigPath()
 {
-  DirPath basePath   = s_OSFilesystemAPI_->GetOSAppDataPath();
-  DirPath configPath = basePath / GameEngineName / "config";
-  if (CoreFilesystemAPI::DirExists(configPath)) {
-    return configPath;
+  if (!IsInitialized()) {
+    return Unexpected(errors::FilesystemError::NotInitialized);
   }
 
-  if (!CoreFilesystemAPI::CreateDirs(configPath)) {
-    CORE_ASSERT(false, "Unable to create config directory")
+  DirPath basePath   = s_OSFilesystemAPI_->GetOSAppDataPath();
+  DirPath configPath = basePath / GameEngineName / "config";
+  const auto result  = CoreFilesystemAPI::TryCreateDirs(configPath);
+  if (!result) {
+    return Unexpected(result.error());
+  }
+
+  return configPath;
+}
+
+DirPath Filesystem::GetBaseConfigPath()
+{
+  const auto result = TryGetBaseConfigPath();
+  if (!result) {
+    CORE_ASSERT(false, "Unable to get config directory")
     return {};
   }
 
-  return {};
+  return result.value();
+}
+
+Expected<DirPath, errors::FilesystemError> Filesystem::TryGetBaseCachePath()
+{
+  if (!IsInitialized()) {
+    return Unexpected(errors::FilesystemError::NotInitialized);
+  }
+
+  DirPath basePath  = s_OSFilesystemAPI_->GetOSCacheDataPath();
+  DirPath cachePath = basePath / GameEngineName;
+
+  const auto result = CoreFilesystemAPI::TryCreateDirs(cachePath);
+  if (!result) {
+    return Unexpected(result.error());
+  }
+
+  return cachePath;
 }
 
 DirPath Filesystem::GetBaseCachePath()
 {
-  DirPath basePath  = s_OSFilesystemAPI_->GetOSCacheDataPath();
-  DirPath cachePath = basePath / GameEngineName;
-
-  if (CoreFilesystemAPI::DirExists(cachePath)) {
-    return cachePath;
-  }
-
-  if (!CoreFilesystemAPI::CreateDirs(cachePath)) {
-    CORE_ASSERT(false, "Unable to create a cache directory")
+  const auto result = TryGetBaseCachePath();
+  if (!result) {
+    CORE_ASSERT(false, "Unable to get cache directory")
     return {};
   }
 
-  return cachePath;
+  return result.value();
 }
 
 Unique<FileNode>

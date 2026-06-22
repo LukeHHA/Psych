@@ -4,6 +4,7 @@ set(SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/Layers/Layer.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Layers/LayerStack.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Core/Window.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Config/Config.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Renderer/Renderer.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Renderer/RendererAPI.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Renderer/RendererContext.cpp
@@ -42,6 +43,8 @@ set(SOURCES
 
 add_library(GameEngine STATIC)
 target_sources(GameEngine PRIVATE ${SOURCES})
+target_compile_features(GameEngine PUBLIC cxx_std_20)
+set_target_properties(GameEngine PROPERTIES CXX_EXTENSIONS OFF)
 
 if(APPLE)
   enable_language(OBJCXX)
@@ -59,16 +62,12 @@ if(APPLE)
         "-framework Foundation"
     )
 elseif(UNIX AND NOT APPLE)
-  target_link_libraries(GameEngine PUBLIC
-        GL
-        GLU
-        pthread
-        Xrandr
-        Xi
-    )
+  find_package(OpenGL REQUIRED)
+  find_package(Threads REQUIRED)
+
+  target_link_libraries(GameEngine PUBLIC OpenGL::GL Threads::Threads)
 endif()
 
-option(GE_ENABLE_SANITIZERS "Enable ASan/UBSan" ON)
 if(
   (CMAKE_CXX_COMPILER_ID STREQUAL "GNU") OR
   (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
@@ -85,22 +84,50 @@ if(
   )
 endif()
 
-add_subdirectory(Vendor/spdlog)
-add_subdirectory(Vendor/kz)
-add_subdirectory(Vendor/glad)
-add_subdirectory(Vendor/glfw-3.4)
+set(SPDLOG_BUILD_EXAMPLE OFF CACHE BOOL "" FORCE)
+set(SPDLOG_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+set(SPDLOG_BUILD_BENCH OFF CACHE BOOL "" FORCE)
+set(SPDLOG_INSTALL OFF CACHE BOOL "" FORCE)
 
-find_package(Boost REQUIRED)
+set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
+set(GLFW_INSTALL OFF CACHE BOOL "" FORCE)
+if(UNIX AND NOT APPLE)
+  set(GLFW_BUILD_X11 ON CACHE BOOL "Build GLFW X11 support")
+  set(GLFW_BUILD_WAYLAND OFF CACHE BOOL "Build GLFW Wayland support")
+endif()
 
-set(BUILD_SHARED_LIBS OFF)
-set(ASSIMP_BUILD_TESTS OFF CACHE BOOL "Disable Assimp tests in engine builds" FORCE)
-add_subdirectory(Vendor/assimp)
-set(BUILD_SHARED_LIBS ON)
+set(ASSIMP_BUILD_ASSIMP_TOOLS OFF CACHE BOOL "" FORCE)
+set(ASSIMP_BUILD_SAMPLES OFF CACHE BOOL "" FORCE)
+set(ASSIMP_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+set(ASSIMP_INSTALL OFF CACHE BOOL "" FORCE)
+set(ASSIMP_WARNINGS_AS_ERRORS OFF CACHE BOOL "" FORCE)
+
+add_subdirectory(Vendor/spdlog EXCLUDE_FROM_ALL)
+add_subdirectory(Vendor/kz EXCLUDE_FROM_ALL)
+add_subdirectory(Vendor/glad EXCLUDE_FROM_ALL)
+add_subdirectory(Vendor/glfw-3.4 EXCLUDE_FROM_ALL)
+
+add_library(GameEnginePugixml STATIC
+  ${CMAKE_CURRENT_SOURCE_DIR}/Vendor/assimp/contrib/pugixml/src/pugixml.cpp
+)
+add_library(pugixml::pugixml ALIAS GameEnginePugixml)
+target_include_directories(GameEnginePugixml SYSTEM PUBLIC
+  ${CMAKE_CURRENT_SOURCE_DIR}/Vendor/assimp/contrib/pugixml/src
+)
+set_target_properties(GameEnginePugixml PROPERTIES POSITION_INDEPENDENT_CODE ON)
+
+add_subdirectory(Vendor/assimp EXCLUDE_FROM_ALL)
+add_subdirectory(Vendor/glm EXCLUDE_FROM_ALL)
+
+find_package(Boost CONFIG REQUIRED)
 
 target_link_libraries(GameEngine PUBLIC
   spdlog::spdlog
   glad
   kiznit::expected
+  pugixml::pugixml
   assimp
   glfw
   Boost::boost
@@ -108,27 +135,24 @@ target_link_libraries(GameEngine PUBLIC
 
 target_include_directories(GameEngine PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/
+    ${CMAKE_CURRENT_SOURCE_DIR}/include
+)
+
+target_include_directories(GameEngine SYSTEM PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/Vendor
     ${CMAKE_CURRENT_SOURCE_DIR}/Vendor/imgui
 )
 
-target_include_directories(GameEngine PUBLIC
-    ${CMAKE_CURRENT_SOURCE_DIR}/include
-)
-
-if(BUILD_TESTING)
+if(GAME_ENGINE_BUILD_TESTS)
   target_compile_definitions(GameEngine PRIVATE GE_TESTS_ENABLED)
 endif()
-target_compile_definitions(GameEngine PRIVATE GL_SILENCE_DEPRECATION)
 
-include(FetchContent)
-
-FetchContent_Declare(
- glm
- GIT_REPOSITORY https://github.com/g-truc/glm.git
- GIT_TAG 0af55ccecd98d4e5a8d1fad7de25ba429d60e863 #refs/tags/1.0.1
+target_compile_definitions(GameEngine
+  PUBLIC
+    $<$<BOOL:${GE_ENABLE_ASSERTS}>:GE_ENABLE_ASSERTS>
+    $<$<BOOL:${GE_ENABLE_PROFILING}>:GE_PROFILE>
+  PRIVATE
+    GL_SILENCE_DEPRECATION
 )
-
-FetchContent_MakeAvailable(glm)
 
 target_link_libraries(GameEngine PUBLIC glm::glm)

@@ -18,6 +18,9 @@ public:
 ge::Unique<ge::GameEngine>
 ge::CreateGameEngine(ge::GameEngineSpecification& spec)
 {
-  spec.EnableImGui = true;
+  spec.EnableEditorUI = true;
+  spec.EditorUI.FontPath =
+      "Editor/Assets/Fonts/JetBrainsMonoNerdFont-Regular.ttf";
+  spec.EditorUI.FontSize = 18.0f;
   return CreateUnique<EditorApp>(spec);
 }

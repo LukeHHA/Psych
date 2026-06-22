@@ -217,8 +217,8 @@ constexpr auto CleanupOutputString(const char (&expr)[N],
 {
   ChangeResult<N> result = {};
 
-  size_t srcIndex = 0;
-  size_t dstIndex = 0;
+  size_t srcIndex        = 0;
+  size_t dstIndex        = 0;
   while (srcIndex < N) {
     size_t matchIndex = 0;
     while (matchIndex < K - 1 && srcIndex + matchIndex < N - 1 &&
@@ -234,7 +234,12 @@ constexpr auto CleanupOutputString(const char (&expr)[N],
 } // namespace InstrumentorUtils
 } // namespace ge
 
+#if defined(GE_PROFILE)
 #define CORE_PROFILE 1
+#else
+#define CORE_PROFILE 0
+#endif
+
 #define CORE_PROFILE_PRINT_TRACE 0
 #if CORE_PROFILE
 // Resolve which function signature macro will be used. Note that this only
@@ -271,7 +276,8 @@ constexpr auto CleanupOutputString(const char (&expr)[N],
   constexpr auto fixedName##line =                                             \
       ::ge::InstrumentorUtils::CleanupOutputString(name, "__cdecl ");          \
   ::ge::InstrumentationTimer timer##line(                                      \
-      fixedName##line.Data, ::ge::PRINT_TRACE_CONTROL::PRINT_TRACE)
+      fixedName##line.Data,                                                    \
+      ::ge::PRINT_TRACE_CONTROL::PRINT_TRACE)
 #else
 #define CORE_PROFILE_SCOPE_LINE2(name, line)                                   \
   constexpr auto fixedName##line =                                             \
@@ -281,7 +287,7 @@ constexpr auto CleanupOutputString(const char (&expr)[N],
 
 #define CORE_PROFILE_SCOPE_LINE(name, line) CORE_PROFILE_SCOPE_LINE2(name, line)
 #define CORE_PROFILE_SCOPE(name) CORE_PROFILE_SCOPE_LINE(name, __LINE__)
-#define CORE_PROFILE_FUNCTION() CORE_PROFILE_SCOPE(CORE_FUNC_SIG)
+#define CORE_PROFILE_FUNCTION()  CORE_PROFILE_SCOPE(CORE_FUNC_SIG)
 
 #else // ----- if CORE_PROFILE disabled -----
 

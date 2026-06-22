@@ -10,9 +10,7 @@
 namespace ge
 {
 // SHADER
-Shared<Shader> Shader::Create(const std::string& vertexSrc,
-                              const std::string& fragSrc,
-                              const std::string& name)
+Shared<Shader> Shader::Create(const std::string& vertexSrc, const std::string& fragSrc, const std::string& name)
 {
   switch (RendererAPI::Current()) {
   case RendererAPIType::OPENGL:
@@ -33,10 +31,7 @@ Shared<Shader> Shader::Create(const std::string& vertexSrc,
 
 // SHADER LIBRARY
 
-Shared<ShaderLibrary> ShaderLibrary::Create()
-{
-  return CreateShared<ShaderLibrary>();
-}
+Shared<ShaderLibrary> ShaderLibrary::Create() { return CreateShared<ShaderLibrary>(); }
 
 void ShaderLibrary::Add(const Shared<Shader>& shader, const std::string& name)
 {
@@ -44,23 +39,18 @@ void ShaderLibrary::Add(const Shared<Shader>& shader, const std::string& name)
   m_Shaders_.insert({name, shader});
 }
 
-Shared<Shader> ShaderLibrary::Load(const std::string& vertexSrc,
-                                   const std::string& fragSrc,
-                                   const std::string& name)
+Shared<Shader> ShaderLibrary::Load(const std::string& vertexSrc, const std::string& fragSrc, const std::string& name)
 {
-  if (util::Filesystem::FileExists(vertexSrc) &&
-      util::Filesystem::FileExists(fragSrc)) {
+  if (util::Filesystem::FileExists(vertexSrc) && util::Filesystem::FileExists(fragSrc)) {
   }
 
-  auto [it, inserted] =
-      m_Shaders_.emplace(name, Shader::Create(vertexSrc, fragSrc, name));
+  auto [it, inserted] = m_Shaders_.emplace(name, Shader::Create(vertexSrc, fragSrc, name));
 
   CORE_ASSERT(inserted, "Shader '{}' already exists", name);
   return it->second;
 }
 
-Expected<Shared<Shader>, ShaderLibraryError>
-ShaderLibrary::Get(const std::string& name) const
+Expected<Shared<Shader>, errors::ShaderLibraryError> ShaderLibrary::Get(const std::string& name) const
 {
   // For now this function will assert if the shader is not found
   // however when the engine compiles as a editor it will need to
@@ -69,12 +59,9 @@ ShaderLibrary::Get(const std::string& name) const
   if (auto it = m_Shaders_.find(name); it != m_Shaders_.end()) {
     return it->second;
   } else {
-    return Unexpected(ShaderLibraryError{ShaderLibraryErrors::NotFound});
+    return Unexpected(errors::ShaderLibraryError::NotFound);
   }
 }
 
-bool ShaderLibrary::Exists(const std::string& name) const
-{
-  return m_Shaders_.contains(name);
-}
+bool ShaderLibrary::Exists(const std::string& name) const { return m_Shaders_.contains(name); }
 } // namespace ge

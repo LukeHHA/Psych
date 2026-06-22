@@ -1,7 +1,11 @@
 #pragma once
 
+#include "Errors/Errors.h"
 #include "FileSystem/OSFilesystemAPI.h"
+#include "ge_expected"
+
 #include <filesystem>
+
 namespace ge
 {
 class CoreFilesystemAPI
@@ -21,6 +25,14 @@ public:
                                        const DirPath& parent_path);
 
   static bool CreateDirs(const DirPath& path);
+
+  static bool CreateFile(const FilePath& path);
+
+  static Expected<void, errors::FilesystemError>
+  TryCreateDirs(const DirPath& path);
+
+  static Expected<void, errors::FilesystemError>
+  TryCreateFile(const FilePath& path);
 
   /// NOTE:Function needs to be updated to handle perms internall for
   /// create_directories

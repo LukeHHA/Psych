@@ -1,4 +1,5 @@
 #include "GameEngine.h"
+#include "Config/Config.h"
 #include "Core/Core.h"
 #include "Debug/Assert.h"
 #include "Debug/Instrumentor.h"
@@ -21,6 +22,8 @@ GameEngine::GameEngine(const GameEngineSpecification& specification)
   CORE_ASSERT(!s_Application, "Application already exists")
   s_Application   = this;
 
+  Config config   = Config{};
+
   m_LayerStack    = CreateUnique<LayerStack>();
   m_EventHandler_ = CreateShared<EventHandler>();
 
@@ -29,7 +32,7 @@ GameEngine::GameEngine(const GameEngineSpecification& specification)
 
   Renderer::Init(m_Specification);
 
-  if (m_Specification.EnableImGui) {
+  if (m_Specification.EnableEditorUI) {
     m_Framebuffer_ =
         Framebuffer::Create(m_Window->GetWidth(), m_Window->GetHeight());
     m_RenderTarget_ = CreateUnique<FramebufferRenderTarget>(m_Framebuffer_);
@@ -37,7 +40,7 @@ GameEngine::GameEngine(const GameEngineSpecification& specification)
     m_RenderTarget_ = CreateUnique<WindowRenderTarget>(*m_Window);
   }
 
-  if (m_Specification.EnableImGui) {
+  if (m_Specification.EnableEditorUI) {
     PushLayer(CreateUnique<ImGuiLayer>());
   }
 
@@ -103,7 +106,7 @@ void GameEngine::Run()
 
     Renderer::EndScene();
 
-    if (m_Specification.EnableImGui) {
+    if (m_Specification.EnableEditorUI) {
       Renderer::Clear();
       ImGuiLayer::Begin();
 
@@ -143,4 +146,11 @@ void GameEngine::PushOverlay(std::unique_ptr<Layer> layer)
   CORE_PROFILE_FUNCTION();
   m_LayerStack->PushOverlay(std::move(layer));
 }
+
+const GameEngineSpecification& GameEngine::GetEngineSpecification()
+{
+  CORE_ASSERT(s_Application, "GameEngine does not exist yet");
+  return m_Specification;
+}
+
 } // namespace ge
