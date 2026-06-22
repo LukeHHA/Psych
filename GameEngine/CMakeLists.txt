@@ -103,21 +103,14 @@ set(ASSIMP_BUILD_SAMPLES OFF CACHE BOOL "" FORCE)
 set(ASSIMP_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 set(ASSIMP_INSTALL OFF CACHE BOOL "" FORCE)
 set(ASSIMP_WARNINGS_AS_ERRORS OFF CACHE BOOL "" FORCE)
+set(PUGIXML_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+set(PUGIXML_INSTALL OFF CACHE BOOL "" FORCE)
 
 add_subdirectory(Vendor/spdlog EXCLUDE_FROM_ALL)
 add_subdirectory(Vendor/kz EXCLUDE_FROM_ALL)
 add_subdirectory(Vendor/glad EXCLUDE_FROM_ALL)
 add_subdirectory(Vendor/glfw-3.4 EXCLUDE_FROM_ALL)
-
-add_library(GameEnginePugixml STATIC
-  ${CMAKE_CURRENT_SOURCE_DIR}/Vendor/assimp/contrib/pugixml/src/pugixml.cpp
-)
-add_library(pugixml::pugixml ALIAS GameEnginePugixml)
-target_include_directories(GameEnginePugixml SYSTEM PUBLIC
-  ${CMAKE_CURRENT_SOURCE_DIR}/Vendor/assimp/contrib/pugixml/src
-)
-set_target_properties(GameEnginePugixml PROPERTIES POSITION_INDEPENDENT_CODE ON)
-
+add_subdirectory(Vendor/pugixml EXCLUDE_FROM_ALL)
 add_subdirectory(Vendor/assimp EXCLUDE_FROM_ALL)
 add_subdirectory(Vendor/glm EXCLUDE_FROM_ALL)
 
