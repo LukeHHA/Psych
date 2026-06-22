@@ -7,3 +7,4 @@ out/
 CoreProfile*.json
 .icloud*
 duplicate-report.json 
+logs/
