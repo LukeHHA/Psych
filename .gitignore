@@ -4,4 +4,5 @@ build/
 out/
 .DS_Store
 CoreProfile*.json
+.icloud*
 
