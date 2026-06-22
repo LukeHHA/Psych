@@ -6,17 +6,13 @@ namespace ge
 {
 OpenglVertexArray::OpenglVertexArray() { glGenVertexArrays(1, &m_RendererID_); }
 
-OpenglVertexArray::~OpenglVertexArray()
-{
-  glDeleteVertexArrays(1, &m_RendererID_);
-}
+OpenglVertexArray::~OpenglVertexArray() { glDeleteVertexArrays(1, &m_RendererID_); }
 
 void OpenglVertexArray::Bind() const { glBindVertexArray(m_RendererID_); }
 
 void OpenglVertexArray::Unbind() const { glBindVertexArray(0); }
 
-void OpenglVertexArray::AddVertexBuffer(
-    const Shared<VertexBuffer>& vertexBuffer)
+void OpenglVertexArray::AddVertexBuffer(const Shared<VertexBuffer>& vertexBuffer)
 {
   CORE_ASSERT(vertexBuffer, "vertex buffer is nullptr");
   glBindVertexArray(m_RendererID_);
@@ -24,8 +20,9 @@ void OpenglVertexArray::AddVertexBuffer(
   auto& fmt = vertexBuffer->GetVertexLayout();
 
   // set attributes
-  CORE_ASSERT(!fmt.attrs.empty(), "Vertex format has no attributes, You may "
-                                  "have forgotten to set the layout");
+  CORE_ASSERT(!fmt.attrs.empty(),
+              "Vertex format has no attributes, You may "
+              "have forgotten to set the layout");
   CORE_ASSERT(fmt.stride > 0, "Vertex format stride is 0");
 
   for (const auto& a : fmt.attrs) {
@@ -36,8 +33,7 @@ void OpenglVertexArray::AddVertexBuffer(
     const GLint count    = ComponentCount(a.type);
     const GLboolean norm = a.normalized ? GL_TRUE : GL_FALSE;
     const GLsizei stride = static_cast<GLsizei>(fmt.stride);
-    const void* ptr =
-        reinterpret_cast<const void*>(static_cast<uintptr_t>(a.offset));
+    const void* ptr      = reinterpret_cast<const void*>(static_cast<uintptr_t>(a.offset));
 
     if (IsIntegerType(a.type)) {
       glVertexAttribIPointer(loc, count, glType, stride, ptr);
@@ -56,8 +52,5 @@ void OpenglVertexArray::AddIndexBuffer(const Shared<IndexBuffer>& indexBuffer)
   m_IndexBuffer_ = indexBuffer;
 }
 
-Shared<VertexArray> OpenglVertexArray::Create()
-{
-  return CreateShared<OpenglVertexArray>();
-}
+Shared<VertexArray> OpenglVertexArray::Create() { return CreateShared<OpenglVertexArray>(); }
 } // namespace ge

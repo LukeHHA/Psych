@@ -10,14 +10,12 @@
 #include "Util/CommandLine.h"
 
 // MAIN
-extern std::unique_ptr<ge::GameEngine>
-ge::CreateGameEngine(ge::GameEngineSpecification& spec);
+extern ge::Expected<std::unique_ptr<ge::GameEngine>, ge::errors::EngineError> ge::CreateGameEngine(ge::GameEngineSpecification& spec);
 
 int main(int argc, char** argv)
 {
   {
-    const ge::cli::ParseResult parseResult =
-        ge::cli::CommandLineParser::Parse(argc, argv);
+    const ge::cli::ParseResult parseResult = ge::cli::CommandLineParser::Parse(argc, argv);
 
     if (!parseResult.Success) {
       std::cerr << parseResult.ErrorMessage;
@@ -38,7 +36,13 @@ int main(int argc, char** argv)
     spec.AssetBasePath = parseResult.Options.DataDirectory;
 
     CORE_PROFILE_BEGIN_SESSION("Startup", "CoreProfile-Startup.json");
-    auto app = ge::CreateGameEngine(spec);
+    auto appResult = ge::CreateGameEngine(spec);
+    if (!appResult) {
+      std::cerr << "Failed to create game engine\n";
+      return 1;
+    }
+
+    auto app = std::move(appResult.value());
     CORE_LOG_INFO("App Session Created Successfully");
     CORE_PROFILE_END_SESSION();
 

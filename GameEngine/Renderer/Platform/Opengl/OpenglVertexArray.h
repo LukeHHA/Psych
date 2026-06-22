@@ -20,17 +20,10 @@ public:
 
   virtual void Bind() const override;
   virtual void Unbind() const override;
-  virtual void
-  AddVertexBuffer(const Shared<VertexBuffer>& vertexBuffer) override;
+  virtual void AddVertexBuffer(const Shared<VertexBuffer>& vertexBuffer) override;
   virtual void AddIndexBuffer(const Shared<IndexBuffer>& indexBuffer) override;
-  virtual const Shared<VertexBuffer>& GetVertexBuffer() const override
-  {
-    return {};
-  }
-  virtual const Shared<IndexBuffer>& GetIndexBuffer() const override
-  {
-    return m_IndexBuffer_;
-  };
+  virtual const Shared<VertexBuffer>& GetVertexBuffer(const std::size_t index) const override { return m_VertexBuffers_.at(index); }
+  virtual const Shared<IndexBuffer>& GetIndexBuffer() const override { return m_IndexBuffer_; };
   static Shared<VertexArray> Create();
 
   inline static GLenum ToOpenGLBaseType(ShaderDataType t)

@@ -3,12 +3,14 @@
 #include "Core/Core.h"
 #include "Core/Window.h"
 #include "Debug/Assert.h"
+#include "Errors/Errors.h"
 #include "Events/EventHandler.h"
 #include "FileSystem/FileSystem.h"
 #include "Layers/LayerStack.h"
 #include "Renderer/Framebuffer.h"
 #include "Renderer/RenderTarget.h"
 #include "Renderer/RendererAPI.h"
+#include "ge_expected"
 
 namespace ge
 {
@@ -32,11 +34,11 @@ struct GameEngineSpecification {
 class GameEngine
 {
 public:
-  GameEngine(
-      const GameEngineSpecification& specification = GameEngineSpecification());
+  GameEngine(const GameEngineSpecification& specification = GameEngineSpecification());
   virtual ~GameEngine();
   CORE_NO_COPY_NO_MOVE(GameEngine);
 
+  Expected<void, errors::EngineError> Init();
   void Run();
   void Stop();
   void HandleEvents();
@@ -45,14 +47,12 @@ public:
   const GameEngineSpecification& GetEngineSpecification();
   Window& GetWindow()
   {
-    CORE_ASSERT(m_Window != nullptr,
-                "Call to: GetWindow() failed. m_Window is nullptr!");
+    CORE_ASSERT(m_Window != nullptr, "Call to: GetWindow() failed. m_Window is nullptr!");
     return *m_Window;
   }
   Framebuffer& GetFramebuffer()
   {
-    CORE_ASSERT(m_Framebuffer_ != nullptr,
-                "Call to: GetFramebuffer() failed. m_Framebuffer_ is nullptr!");
+    CORE_ASSERT(m_Framebuffer_ != nullptr, "Call to: GetFramebuffer() failed. m_Framebuffer_ is nullptr!");
     return *m_Framebuffer_;
   }
   static GameEngine& Get();
@@ -79,5 +79,5 @@ private:
   Shared<Framebuffer> m_Framebuffer_;
   Unique<RenderTarget> m_RenderTarget_;
 };
-Unique<GameEngine> CreateGameEngine(GameEngineSpecification& spec);
+Expected<Unique<GameEngine>, errors::EngineError> CreateGameEngine(GameEngineSpecification& spec);
 } // namespace ge

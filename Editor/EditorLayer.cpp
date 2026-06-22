@@ -48,10 +48,21 @@ void EditorLayer::OnAttach()
   m_CubeVertexArray_->AddVertexBuffer(vertexBuffer);
   m_CubeVertexArray_->AddIndexBuffer(indexBuffer);
 
-  m_CubeShader_  = Shader::Create("data/Shaders/editor_cube.vert.glsl",
-                                  "data/Shaders/editor_cube.frag.glsl",
-                                  "EditorCube");
-  m_RendererAPI_ = RendererAPI::Create();
+  auto shaderResult = Shader::Create("data/Shaders/editor_cube.vert.glsl",
+                                     "data/Shaders/editor_cube.frag.glsl",
+                                     "EditorCube");
+  if (!shaderResult) {
+    CORE_LOG_ERROR("Failed to create editor cube shader");
+  } else {
+    m_CubeShader_ = shaderResult.value();
+  }
+
+  auto rendererAPI = RendererAPI::Create();
+  if (!rendererAPI) {
+    CORE_LOG_ERROR("Failed to create editor renderer API");
+  } else {
+    m_RendererAPI_ = std::move(rendererAPI.value());
+  }
 }
 
 void EditorLayer::OnDetach()
@@ -82,8 +93,13 @@ void EditorLayer::OnImGuiRender()
   static std::unique_ptr<util::FileNode> FileTree;
 
   if (!FileTree) {
-    FileTree = util::Filesystem::CreateDirectoryTree(
+    auto fileTreeResult = util::Filesystem::TryCreateDirectoryTree(
         ge::GameEngine::Get().GetEngineSpecification().AssetBasePath);
+    if (!fileTreeResult) {
+      CORE_LOG_ERROR("Failed to create editor file tree");
+    } else {
+      FileTree = std::move(fileTreeResult.value());
+    }
   }
 
   if (ImGui::Begin("File Tree")) {

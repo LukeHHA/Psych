@@ -3,6 +3,7 @@
 #include "FileSystem/OSFilesystemAPI.h"
 #include <filesystem>
 #include <fstream>
+#include <sstream>
 
 namespace ge
 {
@@ -12,20 +13,14 @@ bool CoreFilesystemAPI::FileExists(const std::filesystem::path& path)
 
   if (!std::filesystem::exists(path, ec)) {
     if (ec) {
-      CORE_ASSERT(false,
-                  "exists() failed for '{}': {}",
-                  path.string(),
-                  ec.message());
+      CORE_ASSERT(false, "exists() failed for '{}': {}", path.string(), ec.message());
     }
     return false;
   }
 
   if (!std::filesystem::is_regular_file(path, ec)) {
     if (ec) {
-      CORE_ASSERT(false,
-                  "is_regular_file() failed for '{}': {}",
-                  path.string(),
-                  ec.message());
+      CORE_ASSERT(false, "is_regular_file() failed for '{}': {}", path.string(), ec.message());
     }
     return false;
   }
@@ -37,20 +32,14 @@ bool CoreFilesystemAPI::DirExists(const std::filesystem::path& path)
   std::error_code ec;
   if (!std::filesystem::exists(path, ec)) {
     if (ec) {
-      CORE_ASSERT(false,
-                  "exists() failed for '{}': {}",
-                  path.string(),
-                  ec.message());
+      CORE_ASSERT(false, "exists() failed for '{}': {}", path.string(), ec.message());
     }
     return false;
   }
 
   if (!std::filesystem::is_directory(path, ec)) {
     if (ec) {
-      CORE_ASSERT(false,
-                  "is_directory() failed for '{}': {}",
-                  path.string(),
-                  ec.message());
+      CORE_ASSERT(false, "is_directory() failed for '{}': {}", path.string(), ec.message());
     }
     return false;
   }
@@ -59,18 +48,44 @@ bool CoreFilesystemAPI::DirExists(const std::filesystem::path& path)
 
 void CoreFilesystemAPI::DeleteFile(const std::filesystem::path& path)
 {
-  if (FileExists(path)) {
-    std::filesystem::remove(path);
-  }
+  const auto result = TryDeleteFile(path);
+  CORE_ASSERT(result, "Failed to delete file '{}'", path.string());
 }
 
-bool CoreFilesystemAPI::CreateFile(const std::filesystem::path& path)
+Expected<void, errors::FilesystemError> CoreFilesystemAPI::TryDeleteFile(const std::filesystem::path& path)
 {
-  return static_cast<bool>(TryCreateFile(path));
+  if (path.empty()) {
+    return Unexpected(errors::FilesystemError::InvalidPath);
+  }
+
+  std::error_code ec;
+  const bool exists = std::filesystem::exists(path, ec);
+  if (ec) {
+    return Unexpected(errors::FilesystemError::DeleteFailed);
+  }
+
+  if (!exists) {
+    return {};
+  }
+
+  if (!std::filesystem::is_regular_file(path, ec)) {
+    if (ec) {
+      return Unexpected(errors::FilesystemError::DeleteFailed);
+    }
+    return Unexpected(errors::FilesystemError::PathExistsWithWrongType);
+  }
+
+  std::filesystem::remove(path, ec);
+  if (ec) {
+    return Unexpected(errors::FilesystemError::DeleteFailed);
+  }
+
+  return {};
 }
 
-Expected<void, errors::FilesystemError>
-CoreFilesystemAPI::TryCreateFile(const FilePath& path)
+bool CoreFilesystemAPI::CreateFile(const std::filesystem::path& path) { return static_cast<bool>(TryCreateFile(path)); }
+
+Expected<void, errors::FilesystemError> CoreFilesystemAPI::TryCreateFile(const FilePath& path)
 {
   if (path.empty()) {
     return Unexpected(errors::FilesystemError::InvalidPath);
@@ -112,10 +127,42 @@ CoreFilesystemAPI::TryCreateFile(const FilePath& path)
 
 const std::string CoreFilesystemAPI::StreamFile(const std::string& path)
 {
+  const auto result = TryReadFile(path);
+  if (!result) {
+    CORE_LOG_ERROR("Path: {}", path);
+    CORE_ASSERT(false, "Failed to read file");
+    return {};
+  }
+
+  return result.value();
+}
+
+Expected<std::string, errors::FilesystemError> CoreFilesystemAPI::TryReadFile(const std::filesystem::path& path)
+{
+  if (path.empty()) {
+    return Unexpected(errors::FilesystemError::InvalidPath);
+  }
+
+  std::error_code ec;
+  const bool exists = std::filesystem::exists(path, ec);
+  if (ec) {
+    return Unexpected(errors::FilesystemError::ReadFailed);
+  }
+
+  if (!exists) {
+    return Unexpected(errors::FilesystemError::FileNotFound);
+  }
+
+  if (!std::filesystem::is_regular_file(path, ec)) {
+    if (ec) {
+      return Unexpected(errors::FilesystemError::ReadFailed);
+    }
+    return Unexpected(errors::FilesystemError::PathExistsWithWrongType);
+  }
+
   std::ifstream file(path);
   if (!file.is_open()) {
-    CORE_LOG_ERROR("Path: {}", path);
-    CORE_ASSERT(false, "Failed to open file");
+    return Unexpected(errors::FilesystemError::ReadFailed);
   }
 
   std::stringstream contents;
@@ -123,24 +170,16 @@ const std::string CoreFilesystemAPI::StreamFile(const std::string& path)
   return contents.str();
 }
 
-bool CoreFilesystemAPI::CreateDir(const DirPath& path)
-{
-  return std::filesystem::create_directory(path);
-}
+bool CoreFilesystemAPI::CreateDir(const DirPath& path) { return std::filesystem::create_directory(path); }
 
-bool CoreFilesystemAPI::CreateDirWithParentPerms(const DirPath& path,
-                                                 const DirPath& parent_path)
+bool CoreFilesystemAPI::CreateDirWithParentPerms(const DirPath& path, const DirPath& parent_path)
 {
   return std::filesystem::create_directory(path, parent_path);
 }
 
-bool CoreFilesystemAPI::CreateDirs(const DirPath& path)
-{
-  return static_cast<bool>(TryCreateDirs(path));
-}
+bool CoreFilesystemAPI::CreateDirs(const DirPath& path) { return static_cast<bool>(TryCreateDirs(path)); }
 
-Expected<void, errors::FilesystemError>
-CoreFilesystemAPI::TryCreateDirs(const DirPath& path)
+Expected<void, errors::FilesystemError> CoreFilesystemAPI::TryCreateDirs(const DirPath& path)
 {
   if (path.empty()) {
     return Unexpected(errors::FilesystemError::InvalidPath);
@@ -171,9 +210,6 @@ CoreFilesystemAPI::TryCreateDirs(const DirPath& path)
   return {};
 }
 
-bool CoreFilesystemAPI::CreateDirsWithParentPerms(const DirPath& path)
-{
-  return std::filesystem::create_directories(path);
-}
+bool CoreFilesystemAPI::CreateDirsWithParentPerms(const DirPath& path) { return std::filesystem::create_directories(path); }
 
 } // namespace ge

@@ -1,5 +1,5 @@
 BasedOnStyle: LLVM
-ColumnLimit: 120
+ColumnLimit: 170
 PointerAlignment: Left
 AlignConsecutiveAssignments:
   Enabled: true

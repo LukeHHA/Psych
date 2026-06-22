@@ -10,11 +10,31 @@
 namespace ge
 {
 // SHADER
-Shared<Shader> Shader::Create(const std::string& vertexSrc, const std::string& fragSrc, const std::string& name)
+Expected<Shared<Shader>, errors::ShaderError>
+Shader::Create(const std::string& vertexSrc, const std::string& fragSrc,
+               const std::string& name)
 {
+  auto vertexSource = util::Filesystem::TryReadFile(vertexSrc);
+  if (!vertexSource) {
+    if (vertexSource.error() == errors::FilesystemError::FileNotFound) {
+      return Unexpected(errors::ShaderError::SourceFileNotFound);
+    }
+    return Unexpected(errors::ShaderError::SourceReadFailed);
+  }
+
+  auto fragmentSource = util::Filesystem::TryReadFile(fragSrc);
+  if (!fragmentSource) {
+    if (fragmentSource.error() == errors::FilesystemError::FileNotFound) {
+      return Unexpected(errors::ShaderError::SourceFileNotFound);
+    }
+    return Unexpected(errors::ShaderError::SourceReadFailed);
+  }
+
   switch (RendererAPI::Current()) {
   case RendererAPIType::OPENGL:
-    return CreateShared<OpenglShader>(vertexSrc, fragSrc, name);
+    return OpenglShader::Create(vertexSource.value(),
+                                fragmentSource.value(),
+                                name);
     /*
   case RendererAPIType::METAL:
     return CreateShared<MetalShader>(vertexSrc, fragSrc, name);
@@ -22,10 +42,11 @@ Shared<Shader> Shader::Create(const std::string& vertexSrc, const std::string& f
     return CreateShared<VulkanShader>(vertexSrc, fragSrc, name);
     */
   case RendererAPIType::TEST_HEADLESS:
-    return CreateShared<OpenglShader>(vertexSrc, fragSrc, name);
+    return OpenglShader::Create(vertexSource.value(),
+                                fragmentSource.value(),
+                                name);
   default:
-    CORE_ASSERT(false, "No renderer api has been set");
-    return {};
+    return Unexpected(errors::ShaderError::UnsupportedAPI);
   }
 }
 
@@ -39,14 +60,23 @@ void ShaderLibrary::Add(const Shared<Shader>& shader, const std::string& name)
   m_Shaders_.insert({name, shader});
 }
 
-Shared<Shader> ShaderLibrary::Load(const std::string& vertexSrc, const std::string& fragSrc, const std::string& name)
+Expected<Shared<Shader>, errors::ShaderError>
+ShaderLibrary::Load(const std::string& vertexSrc, const std::string& fragSrc,
+                    const std::string& name)
 {
-  if (util::Filesystem::FileExists(vertexSrc) && util::Filesystem::FileExists(fragSrc)) {
+  if (m_Shaders_.contains(name)) {
+    return Unexpected(errors::ShaderError::DuplicateName);
   }
 
-  auto [it, inserted] = m_Shaders_.emplace(name, Shader::Create(vertexSrc, fragSrc, name));
+  auto shader = Shader::Create(vertexSrc, fragSrc, name);
+  if (!shader) {
+    return Unexpected(shader.error());
+  }
 
-  CORE_ASSERT(inserted, "Shader '{}' already exists", name);
+  auto [it, inserted] = m_Shaders_.emplace(name, shader.value());
+  if (!inserted) {
+    return Unexpected(errors::ShaderError::DuplicateName);
+  }
   return it->second;
 }
 

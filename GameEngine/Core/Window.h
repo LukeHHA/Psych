@@ -36,27 +36,24 @@ public:
   Window()                    = default;
   virtual ~Window()           = default;
   Window(const Window& other) = delete;
-  Window(Window&& other) = delete; // Moving may be allowed in the future if it
-                                   // the window ever needs to change owners
+  Window(Window&& other)      = delete; // Moving may be allowed in the future if it
+                                        // the window ever needs to change owners
   Window& operator=(const Window& other) = delete;
   Window& operator=(Window&& other)      = delete;
 
-  virtual Expected<void, errors::WindowError>
-  Init(const std::string& title, unsigned int width, unsigned int height,
-       Shared<EventHandler> eventHandler)                        = 0;
-  virtual Expected<void, errors::WindowError> Shutdown()         = 0;
-  virtual void OnUpdate()                                        = 0;
-  virtual void PollEvents()                                      = 0;
-  virtual unsigned int GetWidth() const                          = 0;
-  virtual unsigned int GetHeight() const                         = 0;
-  virtual GLFWwindow* GetNativeWindow() const                    = 0;
-  virtual void SetEventCallback(const EventCallbackFn& callback) = 0;
-  virtual void SetVSync(bool enabled)                            = 0;
-  virtual bool IsVSync() const                                   = 0;
-  virtual void HandleEvents(Unique<Event> event)                 = 0;
-  static Shared<Window> Create(const std::string& title, unsigned int width,
-                               unsigned int height,
-                               Shared<EventHandler> eventHandler);
+  virtual Expected<void, errors::WindowError> Init(const std::string& title, unsigned int width, unsigned int height, Shared<EventHandler> eventHandler) = 0;
+  virtual Expected<void, errors::WindowError> Shutdown()                                                                                                 = 0;
+  virtual void OnUpdate()                                                                                                                                = 0;
+  virtual void PollEvents()                                                                                                                              = 0;
+  virtual unsigned int GetWidth() const                                                                                                                  = 0;
+  virtual unsigned int GetHeight() const                                                                                                                 = 0;
+  virtual GLFWwindow* GetNativeWindow() const                                                                                                            = 0;
+  virtual void SetEventCallback(const EventCallbackFn& callback)                                                                                         = 0;
+  virtual void SetVSync(bool enabled)                                                                                                                    = 0;
+  virtual bool IsVSync() const                                                                                                                           = 0;
+  virtual void HandleEvents(Unique<Event> event)                                                                                                         = 0;
+  static Expected<Shared<Window>, errors::WindowError>
+  Create(const std::string& title, unsigned int width, unsigned int height, Shared<EventHandler> eventHandler);
 
 private:
   Shared<RendererContext> m_RendererContext;

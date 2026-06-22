@@ -6,21 +6,7 @@
 namespace ge
 {
 
-static void GLFWErrorCallback(int error, const char* description)
-{
-  CORE_LOG_ERROR("GLFW Error ({0}): {1}", error, description);
-}
-
-HeadlessWindow::HeadlessWindow(const std::string& title, unsigned int width,
-                               unsigned int height,
-                               Shared<EventHandler> eventHandler)
-{
-  CORE_PROFILE_FUNCTION();
-  {
-    CORE_PROFILE_SCOPE("HeadlessWindow::Init");
-    Init(title, width, height, eventHandler);
-  }
-}
+static void GLFWErrorCallback(int error, const char* description) { CORE_LOG_ERROR("GLFW Error ({0}): {1}", error, description); }
 
 HeadlessWindow::~HeadlessWindow()
 {
@@ -31,11 +17,13 @@ HeadlessWindow::~HeadlessWindow()
   }
 }
 
-Expected<void, errors::WindowError>
-HeadlessWindow::Init(const std::string& title, unsigned int width,
-                     unsigned int height, Shared<EventHandler> eventHandler)
+Expected<void, errors::WindowError> HeadlessWindow::Init(const std::string& title, unsigned int width, unsigned int height, Shared<EventHandler> eventHandler)
 {
   CORE_PROFILE_FUNCTION();
+
+  if (width == 0 || height == 0) {
+    return Unexpected(errors::WindowError::InvalidDimensions);
+  }
 
   // This is just to ensure one window for now but will be reference counted in
   // the future
@@ -46,17 +34,13 @@ HeadlessWindow::Init(const std::string& title, unsigned int width,
     CORE_PROFILE_SCOPE("glfwInit");
     glfwInitHint(GLFW_PLATFORM, GLFW_PLATFORM_NULL);
     int success = glfwInit();
-    CORE_ASSERT(success, "GLFW initialization failed!");
+    if (!success) {
+      return Unexpected(errors::WindowError::InitializationFailed);
+    }
+
     CORE_LOG_INFO("GLFW initialized successfully");
     glfwSetErrorCallback(GLFWErrorCallback);
-
-    // This is redundant since we check m_Window above, but keeping it for
-    // future safety if i decide to handle window creation errors with a
-    // fallback on the caller side.
-    if (!success)
-      return Unexpected(errors::WindowError::InitializationFailed);
   } else {
-    CORE_ASSERT(false, "Window already exists!");
     return Unexpected(errors::WindowError::WindowAlreadyExists);
   }
 
@@ -73,16 +57,23 @@ HeadlessWindow::Init(const std::string& title, unsigned int width,
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     // glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 
-    m_Window = UniqueGLFWwindow(
-        glfwCreateWindow(width, height, title.c_str(), nullptr, nullptr),
-        GLFWwindowDeleter{});
+    m_Window = UniqueGLFWwindow(glfwCreateWindow(width, height, title.c_str(), nullptr, nullptr), GLFWwindowDeleter{});
 
-    CORE_ASSERT(m_Window, "Failed to create headless GLFW window");
+    if (!m_Window) {
+      return Unexpected(errors::WindowError::NativeWindowCreationFailed);
+    }
 
-    m_RendererContext = RendererContext::Create(m_Window.get());
-    CORE_ASSERT(m_RendererContext, "RendererContext creation failed");
+    auto contextResult = RendererContext::Create(m_Window.get());
+    if (!contextResult) {
+      return Unexpected(errors::WindowError::ContextCreationFailed);
+    }
 
-    m_RendererContext->Init();
+    m_RendererContext = contextResult.value();
+    auto contextInit  = m_RendererContext->Init();
+    if (!contextInit) {
+      return Unexpected(errors::WindowError::ContextInitializationFailed);
+    }
+
     CORE_LOG_INFO("HeadlessWindow Initialized successfully");
   }
   return {};

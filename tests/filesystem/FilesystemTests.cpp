@@ -14,12 +14,8 @@ class FilesystemTest : public ::testing::Test
 protected:
   void SetUp() override
   {
-    const auto* testInfo =
-        ::testing::UnitTest::GetInstance()->current_test_info();
-    m_Root_ =
-        std::filesystem::temp_directory_path() /
-        ("game_engine_fs_tests_" + std::string(testInfo->test_suite_name()) +
-         "_" + std::string(testInfo->name()));
+    const auto* testInfo = ::testing::UnitTest::GetInstance()->current_test_info();
+    m_Root_ = std::filesystem::temp_directory_path() / ("game_engine_fs_tests_" + std::string(testInfo->test_suite_name()) + "_" + std::string(testInfo->name()));
     std::filesystem::remove_all(m_Root_);
     std::filesystem::create_directories(m_Root_);
   }
@@ -45,6 +41,10 @@ TEST_F(FilesystemTest, CoreFilesystemDetectsFilesAndDirectories)
   EXPECT_TRUE(ge::CoreFilesystemAPI::FileExists(file));
   EXPECT_FALSE(ge::CoreFilesystemAPI::FileExists(directory));
   EXPECT_EQ(ge::CoreFilesystemAPI::StreamFile(file.string()), "scene-data");
+
+  const auto readResult = ge::CoreFilesystemAPI::TryReadFile(file);
+  ASSERT_TRUE(readResult);
+  EXPECT_EQ(readResult.value(), "scene-data");
 }
 
 TEST_F(FilesystemTest, DeleteFileRemovesOnlyExistingRegularFiles)
@@ -60,6 +60,27 @@ TEST_F(FilesystemTest, DeleteFileRemovesOnlyExistingRegularFiles)
   EXPECT_FALSE(ge::CoreFilesystemAPI::FileExists(file));
 
   EXPECT_NO_THROW(ge::CoreFilesystemAPI::DeleteFile(file));
+}
+
+TEST_F(FilesystemTest, TryDeleteFileReportsWrongTypeWhenPathIsDirectory)
+{
+  const std::filesystem::path directory = m_Root_ / "delete-dir";
+  std::filesystem::create_directories(directory);
+
+  const auto result = ge::CoreFilesystemAPI::TryDeleteFile(directory);
+
+  ASSERT_FALSE(result);
+  EXPECT_EQ(result.error(), ge::errors::FilesystemError::PathExistsWithWrongType);
+}
+
+TEST_F(FilesystemTest, TryReadFileReportsMissingFiles)
+{
+  const std::filesystem::path missingFile = m_Root_ / "missing.txt";
+
+  const auto result                       = ge::CoreFilesystemAPI::TryReadFile(missingFile);
+
+  ASSERT_FALSE(result);
+  EXPECT_EQ(result.error(), ge::errors::FilesystemError::FileNotFound);
 }
 
 TEST_F(FilesystemTest, TryCreateFileCreatesParentDirectories)
@@ -80,8 +101,7 @@ TEST_F(FilesystemTest, TryCreateFileReportsWrongTypeWhenPathIsDirectory)
   const auto result = ge::CoreFilesystemAPI::TryCreateFile(directory);
 
   ASSERT_FALSE(result);
-  EXPECT_EQ(result.error(),
-            ge::errors::FilesystemError::PathExistsWithWrongType);
+  EXPECT_EQ(result.error(), ge::errors::FilesystemError::PathExistsWithWrongType);
 }
 
 TEST_F(FilesystemTest, PlatformConfigPathRequiresFilesystemInitialization)
@@ -110,8 +130,7 @@ TEST_F(FilesystemTest, CreateDirectoryTreeBuildsFileAndDirectoryNodes)
     output << "nested";
   }
 
-  ge::Unique<ge::util::FileNode> root =
-      ge::util::Filesystem::CreateDirectoryTree(m_Root_);
+  ge::Unique<ge::util::FileNode> root = ge::util::Filesystem::CreateDirectoryTree(m_Root_);
 
   ASSERT_NE(root, nullptr);
   EXPECT_TRUE(root->isDir);
@@ -140,5 +159,13 @@ TEST_F(FilesystemTest, CreateDirectoryTreeBuildsFileAndDirectoryNodes)
   ASSERT_EQ(childDirectory->children.size(), 1u);
   EXPECT_EQ(childDirectory->children.front()->name, "nested.txt");
   EXPECT_FALSE(childDirectory->children.front()->isDir);
+}
+
+TEST_F(FilesystemTest, TryCreateDirectoryTreeReportsMissingRoot)
+{
+  const auto result = ge::util::Filesystem::TryCreateDirectoryTree(m_Root_ / "missing");
+
+  ASSERT_FALSE(result);
+  EXPECT_EQ(result.error(), ge::errors::FilesystemError::FileNotFound);
 }
 } // namespace

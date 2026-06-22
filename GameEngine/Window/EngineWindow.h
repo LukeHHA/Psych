@@ -20,25 +20,16 @@ public:
   using EventCallbackFn = std::function<void(Event&)>;
   using QueueEventFn    = EventCallbackFn;
 
-  EngineWindow(const std::string& title, unsigned int width,
-               unsigned int height, Shared<EventHandler> eventHandler);
+  EngineWindow()        = default;
   virtual ~EngineWindow();
 
-  virtual Expected<void, errors::WindowError>
-  Init(const std::string& title, unsigned int width, unsigned int height,
-       Shared<EventHandler> eventHandler) override;
+  virtual Expected<void, errors::WindowError> Init(const std::string& title, unsigned int width, unsigned int height, Shared<EventHandler> eventHandler) override;
   virtual Expected<void, errors::WindowError> Shutdown() override;
   virtual void PollEvents() override;
   virtual unsigned int GetWidth() const override { return m_Data.Width; }
   virtual unsigned int GetHeight() const override { return m_Data.Height; }
-  virtual GLFWwindow* GetNativeWindow() const override
-  {
-    return m_Window.get();
-  }
-  virtual void SetEventCallback(const EventCallbackFn& callback) override
-  {
-    m_Data.EventCallback = callback;
-  }
+  virtual GLFWwindow* GetNativeWindow() const override { return m_Window.get(); }
+  virtual void SetEventCallback(const EventCallbackFn& callback) override { m_Data.EventCallback = callback; }
   virtual void OnUpdate() override;
   virtual void HandleEvents(Unique<Event> event) override;
   virtual void SetVSync(bool enabled) override;

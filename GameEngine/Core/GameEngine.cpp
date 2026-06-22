@@ -12,15 +12,21 @@ namespace ge
 
 GameEngine* GameEngine::s_Application = nullptr;
 
-GameEngine::GameEngine(const GameEngineSpecification& specification)
-    : m_Specification(specification)
+GameEngine::GameEngine(const GameEngineSpecification& specification) : m_Specification(specification)
 {
   CORE_LOG_INFO("Game engine startup");
+  CORE_ASSERT(!s_Application, "Application already exists")
+  s_Application = this;
+}
+
+Expected<void, errors::EngineError> GameEngine::Init()
+{
   CORE_PROFILE_FUNCTION();
   CORE_PROFILE_SCOPE("GameEngine::Init");
 
-  CORE_ASSERT(!s_Application, "Application already exists")
-  s_Application   = this;
+  if (m_LayerStack || m_EventHandler_ || m_Window) {
+    return Unexpected(errors::EngineError::InvalidGameEngineState);
+  }
 
   Config config   = Config{};
 
@@ -28,26 +34,32 @@ GameEngine::GameEngine(const GameEngineSpecification& specification)
   m_EventHandler_ = CreateShared<EventHandler>();
 
   Renderer::SetRendererAPI(m_Specification.RenderingAPI);
-  m_Window = Window::Create("Game Engine", 1280, 720, m_EventHandler_);
+  auto window = Window::Create("Game Engine", 1280, 720, m_EventHandler_);
+  if (!window) {
+    return Unexpected(errors::EngineError::WindowCreationFailed);
+  }
+  m_Window      = window.value();
 
-  Renderer::Init(m_Specification);
+  auto renderer = Renderer::Init(m_Specification);
+  if (!renderer) {
+    return Unexpected(errors::EngineError::RendererInitializationFailed);
+  }
 
   if (m_Specification.EnableEditorUI) {
-    m_Framebuffer_ =
-        Framebuffer::Create(m_Window->GetWidth(), m_Window->GetHeight());
+    m_Framebuffer_ = Framebuffer::Create(m_Window->GetWidth(), m_Window->GetHeight());
+    if (!m_Framebuffer_) {
+      return Unexpected(errors::EngineError::FramebufferCreationFailed);
+    }
     m_RenderTarget_ = CreateUnique<FramebufferRenderTarget>(m_Framebuffer_);
+    PushLayer(CreateUnique<ImGuiLayer>());
   } else {
     m_RenderTarget_ = CreateUnique<WindowRenderTarget>(*m_Window);
   }
 
-  if (m_Specification.EnableEditorUI) {
-    PushLayer(CreateUnique<ImGuiLayer>());
-  }
-
-  CORE_ASSERT(m_EventHandler_, "EventHandler creation failed")
   CORE_ASSERT(m_EventHandler_, "EventHandler creation failed")
   CORE_ASSERT(m_Window, "Window Creation failed returning nullptr")
   CORE_LOG_INFO("GameEngine Init");
+  return {};
 }
 
 GameEngine::~GameEngine()
@@ -130,8 +142,7 @@ void GameEngine::Stop()
 GameEngine& GameEngine::Get()
 {
   CORE_PROFILE_FUNCTION();
-  CORE_ASSERT(s_Application != nullptr,
-              "Application is NULLPTR during call to GET()");
+  CORE_ASSERT(s_Application != nullptr, "Application is NULLPTR during call to GET()");
   return *s_Application;
 }
 

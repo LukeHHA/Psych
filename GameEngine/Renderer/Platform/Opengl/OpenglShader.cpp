@@ -1,21 +1,36 @@
 #include "OpenglShader.h"
 #include "Core/glad_glfw_incl.h"
 #include "Debug/Assert.h"
-#include "FileSystem/FileSystem.h"
 #include "glm/gtc/type_ptr.hpp"
 #include <iostream>
 
 namespace ge
 {
-OpenglShader::OpenglShader(const std::string& vertexPath,
-                           const std::string& fragPath, const std::string& name)
-    : m_ShaderName_(name)
-{
-  const std::string vertexSrc = util::Filesystem::StreamFile(vertexPath);
-  const std::string fragSrc   = util::Filesystem::StreamFile(fragPath);
+OpenglShader::OpenglShader(const std::string& name) : m_ShaderName_(name) {}
 
-  CORE_ASSERT(glfwGetCurrentContext() != nullptr,
-              "No current GLFW context before glCreateShader");
+OpenglShader::~OpenglShader()
+{
+  if (m_ShaderID_ != 0) {
+    glDeleteProgram(m_ShaderID_);
+  }
+}
+
+Expected<Shared<Shader>, errors::ShaderError> OpenglShader::Create(const std::string& vertexSrc, const std::string& fragSrc, const std::string& name)
+{
+  auto shader        = CreateShared<OpenglShader>(name);
+  const auto compile = shader->Compile(vertexSrc, fragSrc);
+  if (!compile) {
+    return Unexpected(compile.error());
+  }
+
+  return shader;
+}
+
+Expected<void, errors::ShaderError> OpenglShader::Compile(const std::string& vertexSrc, const std::string& fragSrc)
+{
+  if (glfwGetCurrentContext() == nullptr) {
+    return Unexpected(errors::ShaderError::NoGraphicsContext);
+  }
 
   const char* vertexCode = vertexSrc.c_str();
   const char* fragCode   = fragSrc.c_str();
@@ -25,22 +40,42 @@ OpenglShader::OpenglShader(const std::string& vertexPath,
   vertex = glCreateShader(GL_VERTEX_SHADER);
   glShaderSource(vertex, 1, &vertexCode, NULL);
   glCompileShader(vertex);
-  CheckCompileErrors(vertex, "VERTEX");
+  auto vertexResult = CheckCompileErrors(vertex, "VERTEX");
+  if (!vertexResult) {
+    glDeleteShader(vertex);
+    return Unexpected(vertexResult.error());
+  }
+
   // fragment Shader
   fragment = glCreateShader(GL_FRAGMENT_SHADER);
   glShaderSource(fragment, 1, &fragCode, NULL);
   glCompileShader(fragment);
-  CheckCompileErrors(fragment, "FRAGMENT");
+  auto fragmentResult = CheckCompileErrors(fragment, "FRAGMENT");
+  if (!fragmentResult) {
+    glDeleteShader(vertex);
+    glDeleteShader(fragment);
+    return Unexpected(fragmentResult.error());
+  }
+
   // shader Program
   m_ShaderID_ = glCreateProgram();
   glAttachShader(m_ShaderID_, vertex);
   glAttachShader(m_ShaderID_, fragment);
   glLinkProgram(m_ShaderID_);
-  CheckCompileErrors(m_ShaderID_, "PROGRAM");
+  auto linkResult = CheckCompileErrors(m_ShaderID_, "PROGRAM");
+  if (!linkResult) {
+    glDeleteShader(vertex);
+    glDeleteShader(fragment);
+    glDeleteProgram(m_ShaderID_);
+    m_ShaderID_ = 0;
+    return Unexpected(linkResult.error());
+  }
+
   // delete the shaders as they're linked into our program now and no longer
   // necessary
   glDeleteShader(vertex);
   glDeleteShader(fragment);
+  return {};
 }
 
 void OpenglShader::Bind() const { glUseProgram(m_ShaderID_); }
@@ -51,8 +86,7 @@ void OpenglShader::SetInt(const std::string& name, int value)
   glUniform1i(location, value);
 }
 
-void OpenglShader::SetIntArray(const std::string& name, int values[],
-                               uint32_t count)
+void OpenglShader::SetIntArray(const std::string& name, int values[], uint32_t count)
 {
   GLint location = glGetUniformLocation(m_ShaderID_, name.c_str());
   glUniform1iv(location, count, values);
@@ -83,8 +117,7 @@ void OpenglShader::SetMat4(const std::string& name, const glm::mat4& value)
   glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(value));
 }
 
-void OpenglShader::CheckCompileErrors(unsigned int shader,
-                                      const std::string& type)
+Expected<void, errors::ShaderError> OpenglShader::CheckCompileErrors(unsigned int shader, const std::string& type)
 {
   int success;
   char infoLog[1024];
@@ -92,24 +125,24 @@ void OpenglShader::CheckCompileErrors(unsigned int shader,
     glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
     if (!success) {
       glGetShaderInfoLog(shader, 1024, NULL, infoLog);
-      std::cout
-          << "ERROR::SHADER_COMPILATION_ERROR of type: " << type << "\n"
-          << infoLog
-          << "\n -- --------------------------------------------------- -- "
-          << "Shader Name: " << m_ShaderName_ << '\n'
-          << std::endl;
+      std::cout << "ERROR::SHADER_COMPILATION_ERROR of type: " << type << "\n"
+                << infoLog << "\n -- --------------------------------------------------- -- "
+                << "Shader Name: " << m_ShaderName_ << '\n'
+                << std::endl;
+      return Unexpected(errors::ShaderError::CompileFailed);
     }
   } else {
     glGetProgramiv(shader, GL_LINK_STATUS, &success);
     if (!success) {
       glGetProgramInfoLog(shader, 1024, NULL, infoLog);
-      std::cout
-          << "ERROR::PROGRAM_LINKING_ERROR of type: " << type << "\n"
-          << infoLog
-          << "\n -- --------------------------------------------------- -- "
-          << "Shader Name: " << m_ShaderName_ << '\n'
-          << std::endl;
+      std::cout << "ERROR::PROGRAM_LINKING_ERROR of type: " << type << "\n"
+                << infoLog << "\n -- --------------------------------------------------- -- "
+                << "Shader Name: " << m_ShaderName_ << '\n'
+                << std::endl;
+      return Unexpected(errors::ShaderError::LinkFailed);
     }
   }
+
+  return {};
 }
 } // namespace ge

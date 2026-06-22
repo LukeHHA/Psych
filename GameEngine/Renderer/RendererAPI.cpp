@@ -4,17 +4,19 @@
 
 namespace ge
 {
-Unique<RendererAPI> RendererAPI::Create()
+Expected<Unique<RendererAPI>, errors::RendererError> RendererAPI::Create()
 {
   switch (s_RendererAPI) {
   case ge::RendererAPIType::OPENGL:
   case ge::RendererAPIType::TEST_HEADLESS:
     return CreateUnique<OpenglRendererAPI>();
   case ge::RendererAPIType::NONE:
-    CORE_ASSERT(false, "No API type has been set")
+    return Unexpected(errors::RendererError::UnsupportedAPI);
+  case ge::RendererAPIType::VULKAN:
+  case ge::RendererAPIType::METAL:
+    return Unexpected(errors::RendererError::UnsupportedAPI);
   }
 
-  CORE_ASSERT(false, "Unknown Renderer API")
-  return {};
+  return Unexpected(errors::RendererError::UnsupportedAPI);
 }
 } // namespace ge

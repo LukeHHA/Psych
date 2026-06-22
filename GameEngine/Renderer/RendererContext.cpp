@@ -6,12 +6,17 @@
 
 namespace ge
 {
-Shared<RendererContext> RendererContext::Create(GLFWwindow* window)
+Expected<Shared<RendererContext>, errors::RendererError> RendererContext::Create(GLFWwindow* window)
 {
   CORE_PROFILE_FUNCTION();
+
+  if (window == nullptr) {
+    return Unexpected(errors::RendererError::ContextCreationFailed);
+  }
+
   switch (RendererAPI::Current()) {
   case RendererAPIType::NONE:
-    return nullptr;
+    return Unexpected(errors::RendererError::UnsupportedAPI);
   case RendererAPIType::TEST_HEADLESS:
     return CreateShared<RendererContextHeadless>(window);
   case RendererAPIType::OPENGL:
@@ -21,8 +26,7 @@ Shared<RendererContext> RendererContext::Create(GLFWwindow* window)
   case RendererAPIType::METAL:
     return CreateShared<OpenglContext>(window);
   default:
-    CORE_ASSERT(false, "Unknown Context during rendererContext::Create()")
-    return nullptr;
+    return Unexpected(errors::RendererError::UnsupportedAPI);
   }
 }
 } // namespace ge

@@ -20,42 +20,23 @@ void Filesystem::Init()
 
 void Filesystem::Shutdown() { s_OSFilesystemAPI_ = nullptr; }
 
-void Filesystem::DeleteFile(const std::filesystem::path& path)
-{
-  CoreFilesystemAPI::DeleteFile(path);
-}
+void Filesystem::DeleteFile(const std::filesystem::path& path) { CoreFilesystemAPI::DeleteFile(path); }
 
-bool Filesystem::FileExists(const std::filesystem::path& path)
-{
-  return CoreFilesystemAPI::FileExists(path);
-}
+Expected<void, errors::FilesystemError> Filesystem::TryDeleteFile(const std::filesystem::path& path) { return CoreFilesystemAPI::TryDeleteFile(path); }
 
-bool Filesystem::DirExists(const std::filesystem::path& path)
-{
-  return CoreFilesystemAPI::DirExists(path);
-}
+bool Filesystem::FileExists(const std::filesystem::path& path) { return CoreFilesystemAPI::FileExists(path); }
 
-bool Filesystem::CreateFile(const std::filesystem::path& path)
-{
-  return CoreFilesystemAPI::CreateFile(path);
-}
+bool Filesystem::DirExists(const std::filesystem::path& path) { return CoreFilesystemAPI::DirExists(path); }
 
-Expected<void, errors::FilesystemError>
-Filesystem::TryCreateFile(const std::filesystem::path& path)
-{
-  return CoreFilesystemAPI::TryCreateFile(path);
-}
+bool Filesystem::CreateFile(const std::filesystem::path& path) { return CoreFilesystemAPI::CreateFile(path); }
 
-Expected<void, errors::FilesystemError>
-Filesystem::TryCreateDirs(const std::filesystem::path& path)
-{
-  return CoreFilesystemAPI::TryCreateDirs(path);
-}
+Expected<void, errors::FilesystemError> Filesystem::TryCreateFile(const std::filesystem::path& path) { return CoreFilesystemAPI::TryCreateFile(path); }
 
-std::string Filesystem::StreamFile(const std::string& path)
-{
-  return CoreFilesystemAPI::StreamFile(path);
-}
+Expected<void, errors::FilesystemError> Filesystem::TryCreateDirs(const std::filesystem::path& path) { return CoreFilesystemAPI::TryCreateDirs(path); }
+
+std::string Filesystem::StreamFile(const std::string& path) { return CoreFilesystemAPI::StreamFile(path); }
+
+Expected<std::string, errors::FilesystemError> Filesystem::TryReadFile(const std::filesystem::path& path) { return CoreFilesystemAPI::TryReadFile(path); }
 
 bool Filesystem::IsInitialized() { return s_OSFilesystemAPI_ != nullptr; }
 
@@ -114,19 +95,56 @@ DirPath Filesystem::GetBaseCachePath()
   return result.value();
 }
 
-Unique<FileNode>
-Filesystem::CreateDirectoryTree(const std::filesystem::path& path)
+Unique<FileNode> Filesystem::CreateDirectoryTree(const std::filesystem::path& path)
 {
-  const bool isDir = std::filesystem::is_directory(path);
+  auto result = TryCreateDirectoryTree(path);
+  if (!result) {
+    CORE_ASSERT(false, "Unable to create directory tree")
+    return nullptr;
+  }
 
-  auto node        = CreateUnique<FileNode>(path, isDir);
+  return std::move(result.value());
+}
+
+Expected<Unique<FileNode>, errors::FilesystemError> Filesystem::TryCreateDirectoryTree(const std::filesystem::path& path)
+{
+  if (path.empty()) {
+    return Unexpected(errors::FilesystemError::InvalidPath);
+  }
+
+  std::error_code ec;
+  const bool exists = std::filesystem::exists(path, ec);
+  if (ec) {
+    return Unexpected(errors::FilesystemError::DirectoryIterationFailed);
+  }
+
+  if (!exists) {
+    return Unexpected(errors::FilesystemError::FileNotFound);
+  }
+
+  const bool isDir = std::filesystem::is_directory(path, ec);
+  if (ec) {
+    return Unexpected(errors::FilesystemError::DirectoryIterationFailed);
+  }
+
+  auto node = CreateUnique<FileNode>(path, isDir);
 
   if (!isDir) {
     return node;
   }
 
-  for (const auto& entry : std::filesystem::directory_iterator(path)) {
-    node->children.emplace_back(CreateDirectoryTree(entry.path()));
+  std::filesystem::directory_iterator iterator(path, ec);
+  if (ec) {
+    return Unexpected(errors::FilesystemError::DirectoryIterationFailed);
+  }
+
+  for (const auto& entry : iterator) {
+    auto child = TryCreateDirectoryTree(entry.path());
+    if (!child) {
+      return Unexpected(child.error());
+    }
+
+    node->children.emplace_back(std::move(child.value()));
   }
 
   return node;

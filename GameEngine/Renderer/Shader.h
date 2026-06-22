@@ -25,7 +25,9 @@ public:
   virtual void SetMat4(const std::string& name, const glm::mat4& value)          = 0;
   virtual const std::string& GetName() const                                     = 0;
 
-  static Shared<Shader> Create(const std::string& vertexSrc, const std::string& fragSrc, const std::string& name);
+  static Expected<Shared<Shader>, errors::ShaderError>
+  Create(const std::string& vertexSrc, const std::string& fragSrc,
+         const std::string& name);
 };
 
 class ShaderLibrary
@@ -34,7 +36,9 @@ public:
   ShaderLibrary()  = default;
   ~ShaderLibrary() = default;
   void Add(const Shared<Shader>& shader, const std::string& name);
-  Shared<Shader> Load(const std::string& vertexSrc, const std::string& fragSrc, const std::string& name);
+  Expected<Shared<Shader>, errors::ShaderError>
+  Load(const std::string& vertexSrc, const std::string& fragSrc,
+       const std::string& name);
   Expected<Shared<Shader>, errors::ShaderLibraryError> Get(const std::string& name) const;
   bool Exists(const std::string& name) const;
 
