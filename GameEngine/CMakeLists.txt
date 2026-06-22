@@ -114,8 +114,6 @@ add_subdirectory(Vendor/pugixml EXCLUDE_FROM_ALL)
 add_subdirectory(Vendor/assimp EXCLUDE_FROM_ALL)
 add_subdirectory(Vendor/glm EXCLUDE_FROM_ALL)
 
-find_package(Boost CONFIG REQUIRED)
-
 target_link_libraries(GameEngine PUBLIC
   spdlog::spdlog
   glad
@@ -123,7 +121,6 @@ target_link_libraries(GameEngine PUBLIC
   pugixml::pugixml
   assimp
   glfw
-  Boost::boost
 )
 
 target_include_directories(GameEngine PUBLIC

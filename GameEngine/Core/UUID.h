@@ -1,13 +1,21 @@
 #pragma once
 
-#include <boost/uuid.hpp>
+#include <algorithm>
+#include <array>
+#include <compare>
+#include <cstddef>
+#include <cstdint>
+#include <random>
+#include <utility>
 
 namespace ge
 {
 class UUID
 {
 public:
-  UUID() : m_id_(rg_())
+  using storage_type = std::array<std::uint8_t, 16>;
+
+  UUID() : m_id_(Generate())
   {
 #ifdef GE_DEBUG
     m_debug_value_ = m_debug_counter_++;
@@ -17,22 +25,22 @@ public:
   static UUID Nill()
   {
     UUID id;
-    id.m_id_ = {};
+    id.m_id_.fill(0);
     return id;
   }
 
   ~UUID()               = default;
 
-  using value_type      = std::uint8_t;
+  using value_type      = storage_type::value_type;
 
-  using reference       = std::uint8_t&;
-  using const_reference = std::uint8_t const&;
+  using reference       = storage_type::reference;
+  using const_reference = storage_type::const_reference;
 
-  using iterator        = std::uint8_t*;
-  using const_iterator  = std::uint8_t const*;
+  using iterator        = storage_type::iterator;
+  using const_iterator  = storage_type::const_iterator;
 
-  using size_type       = std::size_t;
-  using difference_type = std::ptrdiff_t;
+  using size_type       = storage_type::size_type;
+  using difference_type = storage_type::difference_type;
 
   iterator begin() noexcept { return m_id_.begin(); }
 
@@ -44,62 +52,40 @@ public:
 
   // data
 
-  std::uint8_t* data() noexcept { return m_id_.data; }
+  std::uint8_t* data() noexcept { return m_id_.data(); }
 
-  std::uint8_t const* data() const noexcept { return m_id_.data; }
+  std::uint8_t const* data() const noexcept { return m_id_.data(); }
 
   // size
 
   constexpr size_type size() const noexcept { return m_id_.size(); }
 
-  static constexpr size_type static_size() noexcept
-  {
-    return boost::uuids::uuid::static_size();
-  }
+  static constexpr size_type static_size() noexcept { return storage_type{}.size(); }
 
   // is_nil
 
-  bool is_nil() const noexcept { return m_id_.is_nil(); }
-
-  [[nodiscard]] const boost::uuids::uuid& Value() const noexcept
+  bool is_nil() const noexcept
   {
-    return m_id_;
+    return std::all_of(m_id_.begin(), m_id_.end(), [](std::uint8_t value) { return value == 0; });
   }
 
-  [[nodiscard]] boost::uuids::uuid& Value() noexcept { return m_id_; }
+  [[nodiscard]] const storage_type& Value() const noexcept { return m_id_; }
 
-  friend bool operator==(UUID const& lhs, UUID const& rhs) noexcept
-  {
-    return lhs.m_id_ == rhs.m_id_;
-  }
+  [[nodiscard]] storage_type& Value() noexcept { return m_id_; }
 
-  friend bool operator!=(UUID const& lhs, UUID const& rhs) noexcept
-  {
-    return lhs.m_id_ != rhs.m_id_;
-  }
+  friend bool operator==(UUID const& lhs, UUID const& rhs) noexcept { return lhs.m_id_ == rhs.m_id_; }
 
-  friend bool operator<(UUID const& lhs, UUID const& rhs) noexcept
-  {
-    return lhs.m_id_ < rhs.m_id_;
-  }
+  friend bool operator!=(UUID const& lhs, UUID const& rhs) noexcept { return lhs.m_id_ != rhs.m_id_; }
 
-  friend bool operator>(UUID const& lhs, UUID const& rhs) noexcept
-  {
-    return lhs.m_id_ > rhs.m_id_;
-  }
+  friend bool operator<(UUID const& lhs, UUID const& rhs) noexcept { return lhs.m_id_ < rhs.m_id_; }
 
-  friend bool operator<=(UUID const& lhs, UUID const& rhs) noexcept
-  {
-    return lhs.m_id_ <= rhs.m_id_;
-  }
+  friend bool operator>(UUID const& lhs, UUID const& rhs) noexcept { return lhs.m_id_ > rhs.m_id_; }
 
-  friend bool operator>=(UUID const& lhs, UUID const& rhs) noexcept
-  {
-    return lhs.m_id_ >= rhs.m_id_;
-  }
+  friend bool operator<=(UUID const& lhs, UUID const& rhs) noexcept { return lhs.m_id_ <= rhs.m_id_; }
 
-  friend std::strong_ordering operator<=>(UUID const& lhs,
-                                          UUID const& rhs) noexcept
+  friend bool operator>=(UUID const& lhs, UUID const& rhs) noexcept { return lhs.m_id_ >= rhs.m_id_; }
+
+  friend std::strong_ordering operator<=>(UUID const& lhs, UUID const& rhs) noexcept
   {
     if (lhs.m_id_ < rhs.m_id_)
       return std::strong_ordering::less;
@@ -112,12 +98,32 @@ public:
 
   friend std::size_t hash_value(UUID const& u) noexcept
   {
-    return boost::uuids::hash_value(u.m_id_);
+    std::size_t hash = static_cast<std::size_t>(1469598103934665603ull);
+    for (std::uint8_t byte : u.m_id_) {
+      hash ^= static_cast<std::size_t>(byte);
+      hash *= static_cast<std::size_t>(1099511628211ull);
+    }
+    return hash;
   }
 
 private:
-  boost::uuids::uuid m_id_;
-  inline static boost::uuids::random_generator rg_{};
+  static storage_type Generate()
+  {
+    storage_type id{};
+    static thread_local std::mt19937_64 generator{static_cast<std::mt19937_64::result_type>(std::random_device{}())};
+    std::uniform_int_distribution<unsigned int> distribution(0, 255);
+
+    for (std::uint8_t& byte : id) {
+      byte = static_cast<std::uint8_t>(distribution(generator));
+    }
+
+    // Mark generated IDs as RFC 4122-style version 4 UUIDs.
+    id[6] = static_cast<std::uint8_t>((id[6] & 0x0fU) | 0x40U);
+    id[8] = static_cast<std::uint8_t>((id[8] & 0x3fU) | 0x80U);
+    return id;
+  }
+
+  storage_type m_id_;
 
 #ifdef GE_DEBUG
   std::uint64_t m_debug_value_                 = 0;
