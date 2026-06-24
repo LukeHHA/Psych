@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Config/DefaultConfig.h"
 #include "Layers/Layer.h"
 namespace ge
 {
@@ -8,13 +9,17 @@ class ImGuiLayer : public Layer
 {
 public:
   ImGuiLayer();
-  ~ImGuiLayer() = default;
+  ImGuiLayer(const ImGuiLayer&)            = default;
+  ImGuiLayer(ImGuiLayer&&)                 = delete;
+  ImGuiLayer& operator=(const ImGuiLayer&) = delete;
+  ImGuiLayer& operator=(ImGuiLayer&&)      = delete;
+  ~ImGuiLayer() override                   = default;
 
-  virtual void OnAttach() override;
-  virtual void OnDetach() override;
-  virtual void OnEvent(Event& e) override;
-  virtual void OnUpdate(float ts = 1) override {}
-  virtual void OnRender() override {}
+  void OnAttach() override;
+  void OnDetach() override;
+  void OnEvent(Event& e) override;
+  void OnUpdate(float ts = 1) override {}
+  void OnRender() override {}
 
   static void Begin();
   static void End();
@@ -25,7 +30,13 @@ public:
   // uint32_t GetActiveWidgetID() const;
 
 private:
+  void ConfigureEditorUIRuntime();
+  void ApplyEditorTheme();
+  void LoadEditorFont();
+
+private:
   bool m_BlockEvents = true;
+  EditorUISpec m_EditorSpec_;
 };
 
 } // namespace ge

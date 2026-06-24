@@ -1,24 +1,46 @@
 #pragma once
 
-#include "FileSystem/FileSystem.h"
 #include "Renderer/RendererAPI.h"
+#include "cereal/cereal.hpp"
+#include <string>
 
-namespace ge::config
+namespace ge
 {
 struct EditorUISpec {
   bool EnableDocking            = true;
   bool EnableMultiViewports     = true;
   bool EnableKeyboardNavigation = true;
   bool EnableGamepadNavigation  = false;
-  util::FilePath FontPath;
-  float FontSize = 18.0f;
+  std::string FontPath          = "Assets://fonts/";
+  std::string ImGuiINIPath      = "Config://";
+  float FontSize                = 18.0f;
+
+  template <class Archive>
+  void serialize(Archive& archive)
+  {
+    archive(CEREAL_NVP(EnableDocking),
+            CEREAL_NVP(EnableMultiViewports),
+            CEREAL_NVP(EnableKeyboardNavigation),
+            CEREAL_NVP(EnableGamepadNavigation),
+            CEREAL_NVP(FontPath),
+            CEREAL_NVP(ImGuiINIPath),
+            CEREAL_NVP(FontSize));
+  }
 };
 
 struct GameEngineSpecification {
   std::string Name             = "Application";
   RendererAPIType RenderingAPI = RendererAPIType::OPENGL;
-  util::FilePath AssetBasePath;
-  bool EnableEditorUI = false;
+  std::string AssetBasePath    = "Assets://";
+  bool EnableEditorUI          = true;
   EditorUISpec EditorUI;
+
+  template <class Archive>
+  void serialize(Archive& archive)
+  {
+    int renderingApi = static_cast<int>(RenderingAPI);
+    archive(CEREAL_NVP(Name), cereal::make_nvp("RenderingAPI", renderingApi), CEREAL_NVP(EnableEditorUI), CEREAL_NVP(AssetBasePath), CEREAL_NVP(EditorUI));
+    RenderingAPI = static_cast<RendererAPIType>(renderingApi);
+  }
 };
-} // namespace ge::config
+} // namespace ge

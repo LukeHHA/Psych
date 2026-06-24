@@ -7,10 +7,10 @@
 #include "UI/Modules/EditorMenuBar.h"
 #include "UI/Modules/MainFileTree.h"
 #include "Util/Time.h"
-#include "glm/gtc/matrix_transform.hpp"
 #include "imgui/imgui.h"
 #include <cstdint>
-#include <filesystem>
+#include <glm/ext/matrix_clip_space.hpp>
+#include <glm/ext/matrix_transform.hpp>
 
 namespace ge
 {
@@ -23,11 +23,8 @@ void EditorLayer::OnAttach()
 
   static const float cubeVertices[] = {
       // position           // color
-      -0.5f, -0.5f, -0.5f, 1.0f, 0.1f,  0.1f,  0.5f, -0.5f, -0.5f, 0.1f,
-      1.0f,  0.1f,  0.5f,  0.5f, -0.5f, 0.1f,  0.4f, 1.0f,  -0.5f, 0.5f,
-      -0.5f, 1.0f,  0.9f,  0.1f, -0.5f, -0.5f, 0.5f, 1.0f,  0.1f,  0.8f,
-      0.5f,  -0.5f, 0.5f,  0.1f, 1.0f,  0.9f,  0.5f, 0.5f,  0.5f,  0.9f,
-      0.4f,  1.0f,  -0.5f, 0.5f, 0.5f,  1.0f,  0.5f, 0.1f,
+      -0.5f, -0.5f, -0.5f, 1.0f, 0.1f, 0.1f, 0.5f, -0.5f, -0.5f, 0.1f, 1.0f, 0.1f, 0.5f, 0.5f, -0.5f, 0.1f, 0.4f, 1.0f, -0.5f, 0.5f, -0.5f, 1.0f, 0.9f, 0.1f,
+      -0.5f, -0.5f, 0.5f,  1.0f, 0.1f, 0.8f, 0.5f, -0.5f, 0.5f,  0.1f, 1.0f, 0.9f, 0.5f, 0.5f, 0.5f,  0.9f, 0.4f, 1.0f, -0.5f, 0.5f, 0.5f,  1.0f, 0.5f, 0.1f,
   };
 
   static const uint32_t cubeIndices[] = {
@@ -48,9 +45,7 @@ void EditorLayer::OnAttach()
   m_CubeVertexArray_->AddVertexBuffer(vertexBuffer);
   m_CubeVertexArray_->AddIndexBuffer(indexBuffer);
 
-  auto shaderResult = Shader::Create("data/Shaders/editor_cube.vert.glsl",
-                                     "data/Shaders/editor_cube.frag.glsl",
-                                     "EditorCube");
+  auto shaderResult = Shader::Create("data/Shaders/editor_cube.vert.glsl", "data/Shaders/editor_cube.frag.glsl", "EditorCube");
   if (!shaderResult) {
     CORE_LOG_ERROR("Failed to create editor cube shader");
   } else {
@@ -93,8 +88,7 @@ void EditorLayer::OnImGuiRender()
   static std::unique_ptr<util::FileNode> FileTree;
 
   if (!FileTree) {
-    auto fileTreeResult = util::Filesystem::TryCreateDirectoryTree(
-        ge::GameEngine::Get().GetEngineSpecification().AssetBasePath);
+    auto fileTreeResult = util::Filesystem::TryCreateDirectoryTree(ge::GameEngine::Get().GetEngineSpecification().AssetBasePath);
     if (!fileTreeResult) {
       CORE_LOG_ERROR("Failed to create editor file tree");
     } else {
@@ -110,30 +104,26 @@ void EditorLayer::OnImGuiRender()
   ImGuiWindowFlags viewportWindowFlags = 0;
   viewportWindowFlags |= ImGuiWindowFlags_NoScrollbar;
   viewportWindowFlags |= ImGuiWindowFlags_NoScrollWithMouse;
+  viewportWindowFlags |= ImGuiWindowFlags_HorizontalScrollbar;
 
   if (ImGui::Begin("Viewport", nullptr, viewportWindowFlags)) {
     ImVec2 viewportSize = ImGui::GetContentRegionAvail();
 
     if (viewportSize.x > 0.0f && viewportSize.y > 0.0f) {
-      auto& framebuffer             = GameEngine::Get().GetFramebuffer();
+      auto& framebuffer         = GameEngine::Get().GetFramebuffer();
 
-      const uint32_t viewportWidth  = static_cast<uint32_t>(viewportSize.x);
-      const uint32_t viewportHeight = static_cast<uint32_t>(viewportSize.y);
+      const auto viewportWidth  = static_cast<uint32_t>(viewportSize.x);
+      const auto viewportHeight = static_cast<uint32_t>(viewportSize.y);
 
-      if (viewportWidth != m_ViewportWidth_ ||
-          viewportHeight != m_ViewportHeight_) {
+      if (viewportWidth != m_ViewportWidth_ || viewportHeight != m_ViewportHeight_) {
         framebuffer.Resize(viewportWidth, viewportHeight);
         m_ViewportWidth_  = viewportWidth;
         m_ViewportHeight_ = viewportHeight;
       }
 
-      const ImTextureID framebufferTexture =
-          static_cast<ImTextureID>(framebuffer.GetColorAttachmentID());
+      const auto framebufferTexture = static_cast<ImTextureID>(framebuffer.GetColorAttachmentID());
 
-      ImGui::Image(framebufferTexture,
-                   viewportSize,
-                   ImVec2(0.0f, 1.0f),
-                   ImVec2(1.0f, 0.0f));
+      ImGui::Image(framebufferTexture, viewportSize, ImVec2(0.0f, 1.0f), ImVec2(1.0f, 0.0f));
     }
   }
   ImGui::End();
@@ -145,19 +135,11 @@ void EditorLayer::OnRender()
     return;
   }
 
-  const float aspect = m_ViewportHeight_ > 0
-                           ? static_cast<float>(m_ViewportWidth_) /
-                                 static_cast<float>(m_ViewportHeight_)
-                           : 16.0f / 9.0f;
+  const float aspect         = m_ViewportHeight_ > 0 ? static_cast<float>(m_ViewportWidth_) / static_cast<float>(m_ViewportHeight_) : 16.0f / 9.0f;
 
-  const glm::mat4 projection =
-      glm::perspective(glm::radians(45.0f), aspect, 0.1f, 100.0f);
-  const glm::mat4 view =
-      glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -3.0f));
-  const glm::mat4 model =
-      glm::rotate(glm::mat4(1.0f),
-                  m_CubeRotation_,
-                  glm::normalize(glm::vec3(0.4f, 1.0f, 0.2f)));
+  const glm::mat4 projection = glm::perspective(glm::radians(45.0f), aspect, 0.1f, 100.0f);
+  const glm::mat4 view       = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -3.0f));
+  const glm::mat4 model      = glm::rotate(glm::mat4(1.0f), m_CubeRotation_, glm::normalize(glm::vec3(0.4f, 1.0f, 0.2f)));
 
   m_CubeShader_->Bind();
   m_CubeShader_->SetMat4("u_MVP", projection * view * model);

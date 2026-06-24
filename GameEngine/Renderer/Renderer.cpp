@@ -7,7 +7,7 @@
 
 namespace ge
 {
-Expected<void, errors::RendererError> Renderer::Init(GameEngineSpecification& specs)
+Expected<void, errors::RendererError> Renderer::Init(const GameEngineSpecification& specs)
 {
   if (s_Initialized_ || s_RendererAPI_ != nullptr) {
     return Unexpected(errors::RendererError::AlreadyInitialized);

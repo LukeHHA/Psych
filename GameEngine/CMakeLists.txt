@@ -4,7 +4,7 @@ set(SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/Layers/Layer.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Layers/LayerStack.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Core/Window.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/Config/Config.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Config/GameEngineConfig.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Renderer/Renderer.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Renderer/RendererAPI.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Renderer/RendererContext.cpp
@@ -31,6 +31,9 @@ set(SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/FileSystem/CoreFilesystemAPI.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/FileSystem/Platform/MacOSFilesystemAPI.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Imgui/ImguiLayer.cpp
+)
+
+set(IMGUI_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/Vendor/imgui/imgui.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Vendor/imgui/imgui_draw.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Vendor/imgui/imgui_demo.cpp
@@ -113,6 +116,24 @@ add_subdirectory(Vendor/glfw-3.4 EXCLUDE_FROM_ALL)
 add_subdirectory(Vendor/pugixml EXCLUDE_FROM_ALL)
 add_subdirectory(Vendor/assimp EXCLUDE_FROM_ALL)
 add_subdirectory(Vendor/glm EXCLUDE_FROM_ALL)
+add_subdirectory(Vendor/cereal EXCLUDE_FROM_ALL)
+
+add_library(GameEngineImgui OBJECT)
+target_sources(GameEngineImgui PRIVATE ${IMGUI_SOURCES})
+target_compile_features(GameEngineImgui PRIVATE cxx_std_20)
+set_target_properties(GameEngineImgui PROPERTIES CXX_EXTENSIONS OFF)
+
+target_link_libraries(GameEngineImgui PRIVATE
+  glad
+  glfw
+)
+
+target_include_directories(GameEngineImgui SYSTEM PUBLIC
+    ${CMAKE_CURRENT_SOURCE_DIR}/Vendor
+    ${CMAKE_CURRENT_SOURCE_DIR}/Vendor/imgui
+)
+
+target_compile_definitions(GameEngineImgui PRIVATE GL_SILENCE_DEPRECATION)
 
 target_link_libraries(GameEngine PUBLIC
   spdlog::spdlog
@@ -121,7 +142,10 @@ target_link_libraries(GameEngine PUBLIC
   pugixml::pugixml
   assimp
   glfw
+  cereal
 )
+
+target_link_libraries(GameEngine PRIVATE GameEngineImgui)
 
 target_include_directories(GameEngine PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/
@@ -146,3 +170,5 @@ target_compile_definitions(GameEngine
 )
 
 target_link_libraries(GameEngine PUBLIC glm::glm)
+
+game_engine_enable_clang_tidy(GameEngine)

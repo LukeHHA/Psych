@@ -52,7 +52,13 @@ int main(int argc, char** argv)
     CORE_PROFILE_END_SESSION();
 
     CORE_PROFILE_BEGIN_SESSION("Shutdown", "CoreProfile-Shutdown.json");
+    auto shutdownResult = app->Shutdown();
     CORE_PROFILE_END_SESSION();
+    if (!shutdownResult) {
+      std::cerr << "Failed to shutdown game engine\n";
+      ge::util::Filesystem::Shutdown();
+      return 1;
+    }
 
     ge::util::Filesystem::Shutdown();
     CORE_LOG_INFO("Filesystem Shutdown");

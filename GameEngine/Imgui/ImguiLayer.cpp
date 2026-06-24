@@ -13,14 +13,12 @@
 
 namespace ge
 {
-namespace
-{
-void ApplyEditorTheme()
+void ImGuiLayer::ApplyEditorTheme()
 {
   ImGui::StyleColorsDark();
 
   ImGuiStyle& style = ImGui::GetStyle();
-  if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
+  if ((ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable) != 0) {
     style.WindowRounding              = 0.5f;
     style.Colors[ImGuiCol_WindowBg].w = 1.0f;
   }
@@ -51,23 +49,19 @@ void ApplyEditorTheme()
   colors[ImGuiCol_TitleBgCollapsed]   = ImVec4{0.15f, 0.1505f, 0.151f, 1.0f};
 }
 
-void LoadEditorFont(const EditorUISpec& spec)
+void ImGuiLayer::LoadEditorFont()
 {
-  ImGuiIO& io = ImGui::GetIO();
+  ImGuiIO& io          = ImGui::GetIO();
 
-  const float dpiScale =
-      io.DisplayFramebufferScale.x > 0.0f ? io.DisplayFramebufferScale.x : 1.0f;
-  const float fontSize = spec.FontSize * dpiScale;
+  const float dpiScale = io.DisplayFramebufferScale.x > 0.0f ? io.DisplayFramebufferScale.x : 1.0f;
+  const float fontSize = m_EditorSpec_.FontSize * dpiScale;
 
   ImGuiStyle& style    = ImGui::GetStyle();
   style.ScaleAllSizes(dpiScale);
 
-  if (!spec.FontPath.empty() && std::filesystem::exists(spec.FontPath)) {
+  if (!m_EditorSpec_.FontPath.empty() && std::filesystem::exists(m_EditorSpec_.FontPath)) {
     ImFontConfig config;
-    io.FontDefault =
-        io.Fonts->AddFontFromFileTTF(spec.FontPath.string().c_str(),
-                                     fontSize,
-                                     &config);
+    io.FontDefault = io.Fonts->AddFontFromFileTTF(m_EditorSpec_.FontPath.c_str(), fontSize, &config);
   }
 
   if (io.FontDefault == nullptr) {
@@ -75,31 +69,34 @@ void LoadEditorFont(const EditorUISpec& spec)
   }
 }
 
-void ConfigureEditorUIRuntime(const EditorUISpec& spec)
+void ImGuiLayer::ConfigureEditorUIRuntime()
 {
   ImGuiIO& io = ImGui::GetIO();
 
-  if (spec.EnableKeyboardNavigation) {
+  if (m_EditorSpec_.EnableKeyboardNavigation) {
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
   }
 
-  if (spec.EnableGamepadNavigation) {
+  if (m_EditorSpec_.EnableGamepadNavigation) {
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
   }
 
-  if (spec.EnableDocking) {
+  if (m_EditorSpec_.EnableDocking) {
     io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
   }
 
-  if (spec.EnableMultiViewports) {
+  if (m_EditorSpec_.EnableMultiViewports) {
     io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
     io.ConfigDpiScaleViewports = true;
   }
 
+  io.IniFilename = m_EditorSpec_.ImGuiINIPath.c_str();
+
+  std::cout << io.IniFilename << std::endl;
+
   ApplyEditorTheme();
-  LoadEditorFont(spec);
+  LoadEditorFont();
 }
-} // namespace
 
 ImGuiLayer::ImGuiLayer() : Layer("ImGuiLayer") {}
 
@@ -113,10 +110,10 @@ void ImGuiLayer::OnAttach()
   ImGui::CreateContext();
 
   GameEngine& app = GameEngine::Get();
-  ConfigureEditorUIRuntime(app.GetEngineSpecification().EditorUI);
+  m_EditorSpec_   = app.GetConfig().GetGameEngineSpec().EditorUI;
+  ConfigureEditorUIRuntime();
 
-  GLFWwindow* window =
-      static_cast<GLFWwindow*>(app.GetWindow().GetNativeWindow());
+  auto* window = app.GetWindow().GetNativeWindow();
 
   // Setup Platform/Renderer bindings
   ImGui_ImplGlfw_InitForOpenGL(window, true);
@@ -141,10 +138,8 @@ void ImGuiLayer::Begin()
   // ImGuizmo::BeginFrame();
 
   const ImGuiIO& io = ImGui::GetIO();
-  if (io.ConfigFlags & ImGuiConfigFlags_DockingEnable) {
-    ImGui::DockSpaceOverViewport(0,
-                                 ImGui::GetMainViewport(),
-                                 ImGuiDockNodeFlags_PassthruCentralNode);
+  if ((io.ConfigFlags & ImGuiConfigFlags_DockingEnable) != 0) {
+    ImGui::DockSpaceOverViewport(0, ImGui::GetMainViewport(), ImGuiDockNodeFlags_PassthruCentralNode);
   }
 }
 
@@ -157,7 +152,7 @@ void ImGuiLayer::End()
   ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
   ImGuiIO& io = ImGui::GetIO();
-  if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
+  if ((io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable) != 0) {
     GLFWwindow* backup_current_context = glfwGetCurrentContext();
     ImGui::UpdatePlatformWindows();
     ImGui::RenderPlatformWindowsDefault();

@@ -16,19 +16,23 @@ class OpenglVertexArray : public VertexArray
 {
 public:
   OpenglVertexArray();
+  OpenglVertexArray(const OpenglVertexArray&)            = default;
+  OpenglVertexArray(OpenglVertexArray&&)                 = delete;
+  OpenglVertexArray& operator=(const OpenglVertexArray&) = default;
+  OpenglVertexArray& operator=(OpenglVertexArray&&)      = delete;
   ~OpenglVertexArray() override;
 
-  virtual void Bind() const override;
-  virtual void Unbind() const override;
-  virtual void AddVertexBuffer(const Shared<VertexBuffer>& vertexBuffer) override;
-  virtual void AddIndexBuffer(const Shared<IndexBuffer>& indexBuffer) override;
-  virtual const Shared<VertexBuffer>& GetVertexBuffer(const std::size_t index) const override { return m_VertexBuffers_.at(index); }
-  virtual const Shared<IndexBuffer>& GetIndexBuffer() const override { return m_IndexBuffer_; };
+  void Bind() const override;
+  void Unbind() const override;
+  void AddVertexBuffer(const Shared<VertexBuffer>& vertexBuffer) override;
+  void AddIndexBuffer(const Shared<IndexBuffer>& indexBuffer) override;
+  [[nodiscard]] const Shared<VertexBuffer>& GetVertexBuffer(const std::size_t index) const override { return m_VertexBuffers_.at(index); }
+  [[nodiscard]] const Shared<IndexBuffer>& GetIndexBuffer() const override { return m_IndexBuffer_; };
   static Shared<VertexArray> Create();
 
-  inline static GLenum ToOpenGLBaseType(ShaderDataType t)
+  static GLenum ToOpenGLBaseType(ShaderDataType type)
   {
-    switch (t) {
+    switch (type) {
     case ShaderDataType::Float2:
     case ShaderDataType::Float3:
       return GL_FLOAT;
@@ -40,9 +44,9 @@ public:
     }
   }
 
-  inline static GLint ComponentCount(ShaderDataType t)
+  static GLint ComponentCount(ShaderDataType type)
   {
-    switch (t) {
+    switch (type) {
     case ShaderDataType::Float2:
       return 2;
     case ShaderDataType::Float3:
@@ -53,11 +57,11 @@ public:
     }
   }
 
-  inline static bool IsIntegerType(ShaderDataType t)
+  static bool IsIntegerType(ShaderDataType type)
   {
-    switch (t) {
+    switch (type) {
     case ShaderDataType::Int2:
-    case ge::ShaderDataType::Int3:
+    case ShaderDataType::Int3:
       return true;
     default:
       return false;

@@ -27,28 +27,26 @@ struct FileNode {
 class Filesystem
 {
 public:
-  Filesystem()  = delete;
-  ~Filesystem() = delete;
-  CORE_DELETE_COPY_OPS(Filesystem);
+  Filesystem()                             = delete;
+  Filesystem(const Filesystem&)            = delete;
+  Filesystem& operator=(const Filesystem&) = delete;
+  Filesystem(Filesystem&&)                 = delete;
+  Filesystem& operator=(Filesystem&&)      = delete;
+  ~Filesystem()                            = delete;
 
   static void Init();
   static void Shutdown();
   static void DeleteFile(const std::filesystem::path& path);
-  static Expected<void, errors::FilesystemError>
-  TryDeleteFile(const std::filesystem::path& path);
+  static Expected<void, errors::FilesystemError> TryDeleteFile(const std::filesystem::path& path);
   static bool FileExists(const std::filesystem::path& path);
   static bool DirExists(const std::filesystem::path& path);
   static bool CreateFile(const std::filesystem::path& path);
-  static Expected<void, errors::FilesystemError>
-  TryCreateFile(const std::filesystem::path& path);
-  static Expected<void, errors::FilesystemError>
-  TryCreateDirs(const std::filesystem::path& path);
+  static Expected<void, errors::FilesystemError> TryCreateFile(const std::filesystem::path& path);
+  static Expected<void, errors::FilesystemError> TryCreateDirs(const std::filesystem::path& path);
   static std::string StreamFile(const std::string& path);
-  static Expected<std::string, errors::FilesystemError>
-  TryReadFile(const std::filesystem::path& path);
+  static Expected<std::string, errors::FilesystemError> TryReadFile(const std::filesystem::path& path);
   static Unique<FileNode> CreateDirectoryTree(const DirPath& rootPath);
-  static Expected<Unique<FileNode>, errors::FilesystemError>
-  TryCreateDirectoryTree(const DirPath& rootPath);
+  static Expected<Unique<FileNode>, errors::FilesystemError> TryCreateDirectoryTree(const DirPath& rootPath);
 
   static bool IsInitialized();
   static Expected<DirPath, errors::FilesystemError> TryGetBaseConfigPath();

@@ -1,50 +1,34 @@
 #pragma once
 
+#include "Config/GameEngineConfig.h"
 #include "Core/Core.h"
 #include "Core/Window.h"
 #include "Debug/Assert.h"
 #include "Errors/Errors.h"
 #include "Events/EventHandler.h"
-#include "FileSystem/FileSystem.h"
 #include "Layers/LayerStack.h"
 #include "Renderer/Framebuffer.h"
 #include "Renderer/RenderTarget.h"
-#include "Renderer/RendererAPI.h"
 #include "ge_expected"
 
 namespace ge
 {
-struct EditorUISpec {
-  bool EnableDocking            = true;
-  bool EnableMultiViewports     = true;
-  bool EnableKeyboardNavigation = true;
-  bool EnableGamepadNavigation  = false;
-  util::FilePath FontPath;
-  float FontSize = 18.0f;
-};
-
-struct GameEngineSpecification {
-  std::string Name             = "Application";
-  RendererAPIType RenderingAPI = RendererAPIType::OPENGL;
-  util::FilePath AssetBasePath;
-  bool EnableEditorUI = false;
-  EditorUISpec EditorUI;
-};
-
 class GameEngine
 {
 public:
-  GameEngine(const GameEngineSpecification& specification = GameEngineSpecification());
+  explicit GameEngine(GameEngineConfig config = GameEngineConfig());
   virtual ~GameEngine();
   CORE_NO_COPY_NO_MOVE(GameEngine);
 
   Expected<void, errors::EngineError> Init();
+  Expected<void, errors::EngineError> Shutdown();
   void Run();
   void Stop();
   void HandleEvents();
   void PushLayer(std::unique_ptr<Layer> layer);
   void PushOverlay(std::unique_ptr<Layer> layer);
-  const GameEngineSpecification& GetEngineSpecification();
+  [[nodiscard]] const GameEngineConfig& GetConfig() const;
+  [[nodiscard]] const GameEngineSpecification& GetEngineSpecification() const;
   Window& GetWindow()
   {
     CORE_ASSERT(m_Window != nullptr, "Call to: GetWindow() failed. m_Window is nullptr!");
@@ -58,19 +42,20 @@ public:
   static GameEngine& Get();
 
 private:
-  LayerStack& Layers()
+  [[nodiscard]] LayerStack& Layers()
   {
     CORE_ASSERT(m_LayerStack, "LayerStack is nullptr");
     return *m_LayerStack;
   }
-  const LayerStack& Layers() const
+  [[nodiscard]] const LayerStack& Layers() const
   {
     CORE_ASSERT(m_LayerStack, "Layerstack is nullptr");
     return *m_LayerStack;
   }
 
 private:
-  GameEngineSpecification m_Specification;
+  GameEngineConfig m_Config;
+  bool m_Initialized = false;
   bool m_Running = false;
   static GameEngine* s_Application;
   Unique<LayerStack> m_LayerStack;

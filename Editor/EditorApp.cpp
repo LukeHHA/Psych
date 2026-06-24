@@ -3,12 +3,14 @@
 #include "EditorLayer.h"
 #include "EntryPoint.h"
 
+#include <utility>
+
 namespace ge
 {
 class EditorApp : public GameEngine
 {
 public:
-  EditorApp(const GameEngineSpecification& spec) : GameEngine(spec) {}
+  explicit EditorApp(GameEngineConfig config) : GameEngine(std::move(config)) {}
 };
 } // namespace ge
 
@@ -20,12 +22,14 @@ ge::CreateGameEngine(ge::GameEngineSpecification& spec)
       "Editor/Assets/Fonts/JetBrainsMonoNerdFont-Regular.ttf";
   spec.EditorUI.FontSize = 18.0f;
 
-  auto app               = CreateUnique<EditorApp>(spec);
+  auto app               = CreateUnique<EditorApp>(GameEngineConfig(spec));
   auto result            = app->Init();
   if (!result) {
     return Unexpected(result.error());
   }
 
-  app->PushOverlay(CreateUnique<EditorLayer>());
+  if (app->GetConfig().GetGameEngineSpec().EnableEditorUI) {
+    app->PushOverlay(CreateUnique<EditorLayer>());
+  }
   return std::move(app);
 }

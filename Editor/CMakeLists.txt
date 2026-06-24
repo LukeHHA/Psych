@@ -14,3 +14,5 @@ target_link_libraries(Editor PRIVATE GameEngine)
 target_include_directories(Editor PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}
 )
+
+game_engine_enable_clang_tidy(Editor)

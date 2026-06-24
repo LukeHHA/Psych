@@ -1,9 +1,10 @@
 #pragma once
 
+#include <cstdint>
 namespace ge::errors
 {
 
-enum class WindowError {
+enum class WindowError : std::uint8_t {
   None = 0,
   InitializationFailed,
   WindowAlreadyExists,
@@ -15,7 +16,7 @@ enum class WindowError {
   TitleTooLong
 };
 
-enum class EngineError {
+enum class EngineError : std::uint8_t {
   None = 0,
   WindowCreationFailed,
   RendererInitializationFailed,
@@ -24,9 +25,9 @@ enum class EngineError {
   GameEngineInitializationFailed
 };
 
-enum class EventError { None = 0, SomeEventsNotHandled };
+enum class EventError : std::uint8_t { None = 0, SomeEventsNotHandled };
 
-enum class FilesystemError {
+enum class FilesystemError : std::uint8_t {
   None = 0,
   NotInitialized,
   InvalidPath,
@@ -39,9 +40,9 @@ enum class FilesystemError {
   ReadFailed
 };
 
-enum class ShaderLibraryError { None = 0, NotFound };
+enum class ShaderLibraryError : std::uint8_t { None = 0, NotFound };
 
-enum class RendererError {
+enum class RendererError : std::uint8_t {
   None = 0,
   UnsupportedAPI,
   AlreadyInitialized,
@@ -51,15 +52,8 @@ enum class RendererError {
   FramebufferCreationFailed
 };
 
-enum class ShaderError {
-  None = 0,
-  UnsupportedAPI,
-  SourceFileNotFound,
-  SourceReadFailed,
-  CompileFailed,
-  LinkFailed,
-  DuplicateName,
-  NoGraphicsContext
-};
+enum class ShaderError : std::uint8_t { None = 0, UnsupportedAPI, SourceFileNotFound, SourceReadFailed, CompileFailed, LinkFailed, DuplicateName, NoGraphicsContext };
+
+enum class SerializationError : std::uint8_t { None = 0, SerializationFailed, DeserializationFailed };
 
 } // namespace ge::errors
