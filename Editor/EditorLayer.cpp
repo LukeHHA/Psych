@@ -6,6 +6,7 @@
 #include "Renderer/RendererAPI.h"
 #include "Renderer/VertexArray.h"
 #include "UI/Modules/EditorMenuBar.h"
+#include "UI/Modules/FileViewer.h"
 #include "UI/Modules/MainFileTree.h"
 #include "Util/Time.h"
 #include "imgui/imgui.h"
@@ -128,6 +129,8 @@ void EditorLayer::OnImGuiRender()
     }
   }
   ImGui::End();
+
+  ui::FileViewer("./data/config.xml");
 }
 
 void EditorLayer::OnRender()

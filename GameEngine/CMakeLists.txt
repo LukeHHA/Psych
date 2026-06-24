@@ -69,14 +69,15 @@ if(APPLE)
         "-framework Foundation"
     )
 elseif(UNIX AND NOT APPLE)
-  find_package(OpenGL REQUIRED)
+  # find_package(OpenGL REQUIRED)
   find_package(Threads REQUIRED)
 
   target_sources(GameEngine PRIVATE
         FileSystem/Platform/LinuxFilesystemAPI.cpp
     )
 
-  target_link_libraries(GameEngine PUBLIC OpenGL::GL Threads::Threads)
+  # target_link_libraries(GameEngine PUBLIC OpenGL::GL Threads::Threads)
+  target_link_libraries(GameEngine PUBLIC Threads::Threads)
 endif()
 
 if(
@@ -105,8 +106,8 @@ set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
 set(GLFW_INSTALL OFF CACHE BOOL "" FORCE)
 if(UNIX AND NOT APPLE)
-  set(GLFW_BUILD_X11 ON CACHE BOOL "Build GLFW X11 support")
-  set(GLFW_BUILD_WAYLAND OFF CACHE BOOL "Build GLFW Wayland support")
+  set(GLFW_BUILD_X11 OFF CACHE BOOL "Build GLFW X11 support")
+  set(GLFW_BUILD_WAYLAND ON CACHE BOOL "Build GLFW Wayland support")
 endif()
 
 set(ASSIMP_BUILD_ASSIMP_TOOLS OFF CACHE BOOL "" FORCE)
@@ -116,6 +117,8 @@ set(ASSIMP_INSTALL OFF CACHE BOOL "" FORCE)
 set(ASSIMP_WARNINGS_AS_ERRORS OFF CACHE BOOL "" FORCE)
 set(PUGIXML_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 set(PUGIXML_INSTALL OFF CACHE BOOL "" FORCE)
+set(CEREAL_INSTALL OFF CACHE BOOL "" FORCE)
+set(CEREAL_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 
 add_subdirectory(Vendor/spdlog EXCLUDE_FROM_ALL)
 add_subdirectory(Vendor/kz EXCLUDE_FROM_ALL)
@@ -124,7 +127,7 @@ add_subdirectory(Vendor/glfw-3.4 EXCLUDE_FROM_ALL)
 add_subdirectory(Vendor/pugixml EXCLUDE_FROM_ALL)
 add_subdirectory(Vendor/assimp EXCLUDE_FROM_ALL)
 add_subdirectory(Vendor/glm EXCLUDE_FROM_ALL)
-add_subdirectory(Vendor/cereal EXCLUDE_FROM_ALL)
+# add_subdirectory(Vendor/cereal EXCLUDE_FROM_ALL)
 
 add_library(GameEngineImgui OBJECT)
 target_sources(GameEngineImgui PRIVATE ${IMGUI_SOURCES})
@@ -150,7 +153,7 @@ target_link_libraries(GameEngine PUBLIC
   pugixml::pugixml
   assimp
   glfw
-  cereal
+  # cereal
 )
 
 target_link_libraries(GameEngine PRIVATE GameEngineImgui)
@@ -163,6 +166,7 @@ target_include_directories(GameEngine PUBLIC
 target_include_directories(GameEngine SYSTEM PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/Vendor
     ${CMAKE_CURRENT_SOURCE_DIR}/Vendor/imgui
+    ${CMAKE_CURRENT_SOURCE_DIR}/Vendor/cereal/include
 )
 
 if(GAME_ENGINE_BUILD_TESTS)
