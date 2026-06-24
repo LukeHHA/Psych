@@ -2,10 +2,12 @@
 #include "Core/Core.h"
 #include "Debug/Assert.h"
 #include "Debug/Instrumentor.h"
+#include "FileSystem/EngineFilesystem.h"
 #include "Imgui/ImguiLayer.h"
 #include "Renderer/Renderer.h"
 #include "Util/Time.h"
 
+#include <filesystem>
 #include <utility>
 
 namespace ge
@@ -33,8 +35,20 @@ Expected<void, errors::EngineError> GameEngine::Init()
   if (!configResult) {
     return Unexpected(errors::EngineError::GameEngineInitializationFailed);
   }
+  auto spec = m_Config.GetGameEngineSpec();
 
-  const auto& spec = GetEngineSpecification();
+  std::error_code resourcePathError;
+  const auto resourcePath = std::filesystem::current_path(resourcePathError);
+  if (resourcePathError) {
+    return Unexpected(errors::EngineError::GameEngineInitializationFailed);
+  }
+  m_PathResolver_.SetEngineRoot(resourcePath);
+
+  const auto projectResult = m_ProjectManager_.Init(m_PathResolver_);
+  if (!projectResult) {
+    return Unexpected(errors::EngineError::GameEngineInitializationFailed);
+  }
+  util::EngineFilesystem::Init(m_PathResolver_);
 
   m_LayerStack    = CreateUnique<LayerStack>();
   m_EventHandler_ = CreateShared<EventHandler>();
@@ -96,6 +110,12 @@ Expected<void, errors::EngineError> GameEngine::Shutdown()
 
   m_Initialized = false;
   s_Application = nullptr;
+  const auto projectResult = m_ProjectManager_.Shutdown(m_PathResolver_);
+  util::EngineFilesystem::Shutdown();
+  m_PathResolver_.ClearEngineRoot();
+  if (!projectResult) {
+    return Unexpected(errors::EngineError::GameEngineInitializationFailed);
+  }
 
   const auto configResult = m_Config.Shutdown();
   if (!configResult) {
@@ -196,5 +216,9 @@ const GameEngineConfig& GameEngine::GetConfig() const
 }
 
 const GameEngineSpecification& GameEngine::GetEngineSpecification() const { return GetConfig().GetGameEngineSpec(); }
+
+ProjectManager& GameEngine::GetProjectManager() { return m_ProjectManager_; }
+
+const ProjectManager& GameEngine::GetProjectManager() const { return m_ProjectManager_; }
 
 } // namespace ge

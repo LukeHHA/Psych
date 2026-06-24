@@ -2,6 +2,8 @@
 
 #include "Debug/Assert.h"
 
+#include <cctype>
+#include <cstddef>
 #include <cstdint>
 #include <filesystem>
 #include <string>
@@ -10,7 +12,7 @@
 namespace ge::EnginePath
 {
 
-enum class Schema : std::uint8_t { None = 0, Config, Cache, Assets };
+enum class Schema : std::uint8_t { None = 0, Config, Cache, Assets, Engine, Editor };
 
 [[nodiscard]] inline std::string_view SchemaToString(const Schema schema)
 {
@@ -24,6 +26,12 @@ enum class Schema : std::uint8_t { None = 0, Config, Cache, Assets };
   case Schema::Assets:
     return "assets://";
 
+  case Schema::Engine:
+    return "engine://";
+
+  case Schema::Editor:
+    return "editor://";
+
   case Schema::None:
     break;
   }
@@ -32,21 +40,44 @@ enum class Schema : std::uint8_t { None = 0, Config, Cache, Assets };
   return {};
 }
 
+[[nodiscard]] inline bool SchemaEquals(const std::string_view lhs, const std::string_view rhs)
+{
+  if (lhs.size() != rhs.size()) {
+    return false;
+  }
+
+  for (std::size_t i = 0; i < lhs.size(); ++i) {
+    const auto lhsChar = static_cast<unsigned char>(lhs[i]);
+    if (static_cast<char>(std::tolower(lhsChar)) != rhs[i]) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
 [[nodiscard]] inline Schema SchemaFromString(const std::string_view schema)
 {
-  if (schema == "config://") {
+  if (SchemaEquals(schema, "config://")) {
     return Schema::Config;
   }
 
-  if (schema == "cache://") {
+  if (SchemaEquals(schema, "cache://")) {
     return Schema::Cache;
   }
 
-  if (schema == "assets://") {
+  if (SchemaEquals(schema, "assets://")) {
     return Schema::Assets;
   }
 
-  CORE_ASSERT(false, "Unknown Schema string");
+  if (SchemaEquals(schema, "engine://")) {
+    return Schema::Engine;
+  }
+
+  if (SchemaEquals(schema, "editor://")) {
+    return Schema::Editor;
+  }
+
   return Schema::None;
 }
 
@@ -55,13 +86,17 @@ class Path
 public:
   Path() = default;
 
-  Path(const char* path) { Convert(std::string_view{path}); }
+  explicit Path(const char* path)
+  {
+    if (path != nullptr) {
+      Convert(std::string_view{path});
+    }
+  }
 
-  Path(const std::string& path) { Convert(path); }
+  explicit Path(const std::string& path) { Convert(path); }
 
-  // validity is redundant here due to assertion but I plan to allow the caller to handle
-  // invalide paths in the future. It would not make sense for a user to type an invalid
-  // path in the editor and the engine crashes
+  // Keep malformed user-provided engine paths representable so higher-level Try*
+  // APIs can return errors instead of asserting during parsing.
   [[nodiscard]] bool IsValid() const { return m_IsValid; }
 
   [[nodiscard]] Schema GetSchema() const { return m_Schema; }
@@ -78,22 +113,18 @@ private:
     const auto schema_end = path.find("://");
 
     if (schema_end == std::string_view::npos) {
-      CORE_ASSERT(false, "Invalid engine path. Missing schema.");
       return;
     }
 
     const std::string_view schema_string = path.substr(0, schema_end + 3);
     m_Schema                             = SchemaFromString(schema_string);
-
-    const std::string_view relative_path = path.substr(schema_end + 3);
-
-    if (relative_path.empty()) {
-      CORE_ASSERT(false, "Invalid engine path. Missing relative path.");
+    if (m_Schema == Schema::None) {
       return;
     }
 
+    const std::string_view relative_path = path.substr(schema_end + 3);
+
     if (relative_path.find("..") != std::string_view::npos) {
-      CORE_ASSERT(false, "Engine path cannot contain '..'.");
       return;
     }
 

@@ -3,6 +3,7 @@
 #include "Debug/Assert.h"
 #include "FileSystem/CoreFilesystemAPI.h"
 #include "Platform/MacOSFilesystemAPI.h"
+#include "Platform/LinuxFilesystemAPI.h"
 #include <filesystem>
 
 namespace ge::util
@@ -12,6 +13,8 @@ void Filesystem::Init()
   if (s_OSFilesystemAPI_ == nullptr) {
 #if defined(GE_PLATFORM_MACOS)
     s_OSFilesystemAPI_ = CreateShared<MacOSFilesystemAPI>();
+#elif defined(GE_PLATFORM_LINUX)
+    s_OSFilesystemAPI_ = CreateShared<LinuxFilesystemAPI>();
 #else
     CORE_ASSERT(false, "Unknow Operating system. Unable to init filesystem")
 #endif
@@ -47,6 +50,10 @@ Expected<DirPath, errors::FilesystemError> Filesystem::TryGetBaseConfigPath()
   }
 
   DirPath basePath   = s_OSFilesystemAPI_->GetOSAppDataPath();
+  if (basePath.empty()) {
+    return Unexpected(errors::FilesystemError::OSPathFail);
+  }
+
   DirPath configPath = basePath / GameEngineName / "config";
   const auto result  = CoreFilesystemAPI::TryCreateDirs(configPath);
   if (!result) {
@@ -74,6 +81,10 @@ Expected<DirPath, errors::FilesystemError> Filesystem::TryGetBaseCachePath()
   }
 
   DirPath basePath  = s_OSFilesystemAPI_->GetOSCacheDataPath();
+  if (basePath.empty()) {
+    return Unexpected(errors::FilesystemError::OSPathFail);
+  }
+
   DirPath cachePath = basePath / GameEngineName;
 
   const auto result = CoreFilesystemAPI::TryCreateDirs(cachePath);

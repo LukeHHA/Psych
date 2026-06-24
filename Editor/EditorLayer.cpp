@@ -1,6 +1,7 @@
 #include "EditorLayer.h"
 #include "Core/GameEngine.h"
 #include "Debug/Instrumentor.h"
+#include "FileSystem/EngineFilesystem.h"
 #include "Renderer/Buffer.h"
 #include "Renderer/RendererAPI.h"
 #include "Renderer/VertexArray.h"
@@ -45,7 +46,7 @@ void EditorLayer::OnAttach()
   m_CubeVertexArray_->AddVertexBuffer(vertexBuffer);
   m_CubeVertexArray_->AddIndexBuffer(indexBuffer);
 
-  auto shaderResult = Shader::Create("data/Shaders/editor_cube.vert.glsl", "data/Shaders/editor_cube.frag.glsl", "EditorCube");
+  auto shaderResult = Shader::Create("engine://Editor/Assets/Shaders/editor_cube.vert.glsl", "engine://Editor/Assets/Shaders/editor_cube.frag.glsl", "EditorCube");
   if (!shaderResult) {
     CORE_LOG_ERROR("Failed to create editor cube shader");
   } else {
@@ -88,7 +89,7 @@ void EditorLayer::OnImGuiRender()
   static std::unique_ptr<util::FileNode> FileTree;
 
   if (!FileTree) {
-    auto fileTreeResult = util::Filesystem::TryCreateDirectoryTree(ge::GameEngine::Get().GetEngineSpecification().AssetBasePath);
+    auto fileTreeResult = util::EngineFilesystem::TryCreateDirectoryTree("assets://");
     if (!fileTreeResult) {
       CORE_LOG_ERROR("Failed to create editor file tree");
     } else {

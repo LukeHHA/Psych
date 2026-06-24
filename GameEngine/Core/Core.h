@@ -17,6 +17,8 @@ inline constexpr const char* GameEngineName = "gameEngine";
 #elif TARGET_OS_IPHONE
 #define GE_PLATFORM_IOS
 #endif
+#elif defined(__linux__)
+#define GE_PLATFORM_LINUX
 #endif
 
 // Pointer Utils

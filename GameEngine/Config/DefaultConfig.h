@@ -11,8 +11,8 @@ struct EditorUISpec {
   bool EnableMultiViewports     = true;
   bool EnableKeyboardNavigation = true;
   bool EnableGamepadNavigation  = false;
-  std::string FontPath          = "Assets://fonts/";
-  std::string ImGuiINIPath      = "Config://";
+  std::string FontPath;
+  std::string ImGuiINIPath      = "config://imgui.ini";
   float FontSize                = 18.0f;
 
   template <class Archive>
@@ -31,7 +31,7 @@ struct EditorUISpec {
 struct GameEngineSpecification {
   std::string Name             = "Application";
   RendererAPIType RenderingAPI = RendererAPIType::OPENGL;
-  std::string AssetBasePath    = "Assets://";
+  std::string AssetBasePath    = "assets://";
   bool EnableEditorUI          = true;
   EditorUISpec EditorUI;
 

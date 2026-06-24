@@ -5,6 +5,8 @@ set(SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/Layers/LayerStack.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Core/Window.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Config/GameEngineConfig.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Project/Project.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Project/ProjectManager.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Renderer/Renderer.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Renderer/RendererAPI.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Renderer/RendererContext.cpp
@@ -27,9 +29,10 @@ set(SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/Window/HeadlessWindow.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Events/EventHandler.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Events/EventQueue.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/FileSystem/EngineFilesystem.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/FileSystem/FileSystem.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/FileSystem/PathResolver.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/FileSystem/CoreFilesystemAPI.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/FileSystem/Platform/MacOSFilesystemAPI.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Imgui/ImguiLayer.cpp
 )
 
@@ -54,6 +57,7 @@ if(APPLE)
   enable_language(OBJC)
 
   target_sources(GameEngine PRIVATE
+        FileSystem/Platform/MacOSFilesystemAPI.cpp
         FileSystem/Platform/MacOSFilesystem.mm
     )
 
@@ -67,6 +71,10 @@ if(APPLE)
 elseif(UNIX AND NOT APPLE)
   find_package(OpenGL REQUIRED)
   find_package(Threads REQUIRED)
+
+  target_sources(GameEngine PRIVATE
+        FileSystem/Platform/LinuxFilesystemAPI.cpp
+    )
 
   target_link_libraries(GameEngine PUBLIC OpenGL::GL Threads::Threads)
 endif()

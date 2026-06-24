@@ -50,8 +50,7 @@ Expected<void, errors::SerializationError> GameEngineConfig::TrySerialize() cons
 
   try {
     cereal::XMLOutputArchive archive(stream);
-    auto engineSpec                  = m_EngineSpec_;
-    engineSpec.EditorUI.ImGuiINIPath = std::string(baseConfigPath.value().string() + "/imgui.ini");
+    auto engineSpec = m_EngineSpec_;
     archive(cereal::make_nvp("GameEngineSpecification", engineSpec));
   } catch (const cereal::Exception&) {
     CORE_ASSERT(false, "Failed to serialize config")

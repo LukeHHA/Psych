@@ -6,11 +6,10 @@
 #include "Core/GameEngine.h"
 #include "Debug/Instrumentor.h"
 #include "FileSystem/FileSystem.h"
-#include "Renderer/RendererAPI.h"
 #include "Util/CommandLine.h"
 
 // MAIN
-extern ge::Expected<std::unique_ptr<ge::GameEngine>, ge::errors::EngineError> ge::CreateGameEngine(ge::GameEngineSpecification& spec);
+extern ge::Expected<std::unique_ptr<ge::GameEngine>, ge::errors::EngineError> ge::CreateGameEngine();
 
 int main(int argc, char** argv)
 {
@@ -30,13 +29,8 @@ int main(int argc, char** argv)
     ge::Log::Init();
     ge::util::Filesystem::Init();
 
-    ge::GameEngineSpecification spec;
-    spec.Name          = "Game Engine";
-    spec.RenderingAPI  = parseResult.Options.RenderingAPI;
-    spec.AssetBasePath = parseResult.Options.DataDirectory;
-
     CORE_PROFILE_BEGIN_SESSION("Startup", "CoreProfile-Startup.json");
-    auto appResult = ge::CreateGameEngine(spec);
+    auto appResult = ge::CreateGameEngine();
     if (!appResult) {
       std::cerr << "Failed to create game engine\n";
       return 1;

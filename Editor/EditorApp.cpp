@@ -3,27 +3,32 @@
 #include "EditorLayer.h"
 #include "EntryPoint.h"
 
-#include <utility>
-
 namespace ge
 {
+namespace
+{
+GameEngineConfig CreateEditorConfig()
+{
+  GameEngineSpecification spec;
+  spec.EnableEditorUI    = true;
+  spec.EditorUI.FontPath = "engine://Editor/Assets/Fonts/JetBrainsMonoNerdFont-Regular.ttf";
+  spec.EditorUI.FontSize = 18.0f;
+  return GameEngineConfig(spec);
+}
+} // namespace
+
 class EditorApp : public GameEngine
 {
 public:
-  explicit EditorApp(GameEngineConfig config) : GameEngine(std::move(config)) {}
+  EditorApp() : GameEngine(CreateEditorConfig()) {}
 };
 } // namespace ge
 
 ge::Expected<ge::Unique<ge::GameEngine>, ge::errors::EngineError>
-ge::CreateGameEngine(ge::GameEngineSpecification& spec)
+ge::CreateGameEngine()
 {
-  spec.EnableEditorUI    = true;
-  spec.EditorUI.FontPath =
-      "Editor/Assets/Fonts/JetBrainsMonoNerdFont-Regular.ttf";
-  spec.EditorUI.FontSize = 18.0f;
-
-  auto app               = CreateUnique<EditorApp>(GameEngineConfig(spec));
-  auto result            = app->Init();
+  auto app    = CreateUnique<EditorApp>();
+  auto result = app->Init();
   if (!result) {
     return Unexpected(result.error());
   }

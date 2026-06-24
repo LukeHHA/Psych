@@ -1,8 +1,8 @@
 #include "ImguiLayer.h"
 #include "Core/GameEngine.h"
 #include "Debug/Instrumentor.h"
+#include "FileSystem/EngineFilesystem.h"
 #include "imgui/imgui.h"
-#include <filesystem>
 #include <string>
 
 #ifndef IMGUI_IMPL_API
@@ -59,9 +59,12 @@ void ImGuiLayer::LoadEditorFont()
   ImGuiStyle& style    = ImGui::GetStyle();
   style.ScaleAllSizes(dpiScale);
 
-  if (!m_EditorSpec_.FontPath.empty() && std::filesystem::exists(m_EditorSpec_.FontPath)) {
-    ImFontConfig config;
-    io.FontDefault = io.Fonts->AddFontFromFileTTF(m_EditorSpec_.FontPath.c_str(), fontSize, &config);
+  if (!m_EditorSpec_.FontPath.empty()) {
+    const auto resolvedFontPath = util::EngineFilesystem::TryResolve(m_EditorSpec_.FontPath);
+    if (resolvedFontPath && util::Filesystem::FileExists(resolvedFontPath.value())) {
+      ImFontConfig config;
+      io.FontDefault = io.Fonts->AddFontFromFileTTF(resolvedFontPath.value().string().c_str(), fontSize, &config);
+    }
   }
 
   if (io.FontDefault == nullptr) {
@@ -90,9 +93,13 @@ void ImGuiLayer::ConfigureEditorUIRuntime()
     io.ConfigDpiScaleViewports = true;
   }
 
+  if (m_EditorSpec_.ImGuiINIPath.find("://") != std::string::npos) {
+    const auto iniPath = util::EngineFilesystem::TryResolve(m_EditorSpec_.ImGuiINIPath);
+    if (iniPath) {
+      m_EditorSpec_.ImGuiINIPath = iniPath.value().string();
+    }
+  }
   io.IniFilename = m_EditorSpec_.ImGuiINIPath.c_str();
-
-  std::cout << io.IniFilename << std::endl;
 
   ApplyEditorTheme();
   LoadEditorFont();

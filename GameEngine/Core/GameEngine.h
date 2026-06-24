@@ -6,7 +6,9 @@
 #include "Debug/Assert.h"
 #include "Errors/Errors.h"
 #include "Events/EventHandler.h"
+#include "FileSystem/PathResolver.h"
 #include "Layers/LayerStack.h"
+#include "Project/ProjectManager.h"
 #include "Renderer/Framebuffer.h"
 #include "Renderer/RenderTarget.h"
 #include "ge_expected"
@@ -29,6 +31,8 @@ public:
   void PushOverlay(std::unique_ptr<Layer> layer);
   [[nodiscard]] const GameEngineConfig& GetConfig() const;
   [[nodiscard]] const GameEngineSpecification& GetEngineSpecification() const;
+  [[nodiscard]] ProjectManager& GetProjectManager();
+  [[nodiscard]] const ProjectManager& GetProjectManager() const;
   Window& GetWindow()
   {
     CORE_ASSERT(m_Window != nullptr, "Call to: GetWindow() failed. m_Window is nullptr!");
@@ -55,8 +59,10 @@ private:
 
 private:
   GameEngineConfig m_Config;
+  util::PathResolver m_PathResolver_;
+  ProjectManager m_ProjectManager_;
   bool m_Initialized = false;
-  bool m_Running = false;
+  bool m_Running     = false;
   static GameEngine* s_Application;
   Unique<LayerStack> m_LayerStack;
   Shared<Window> m_Window;
@@ -64,5 +70,5 @@ private:
   Shared<Framebuffer> m_Framebuffer_;
   Unique<RenderTarget> m_RenderTarget_;
 };
-Expected<Unique<GameEngine>, errors::EngineError> CreateGameEngine(GameEngineSpecification& spec);
+Expected<Unique<GameEngine>, errors::EngineError> CreateGameEngine();
 } // namespace ge
