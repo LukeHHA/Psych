@@ -3,6 +3,7 @@
 #include "Debug/Instrumentor.h"
 #include "FileSystem/EngineFilesystem.h"
 #include "imgui/imgui.h"
+#include <limits>
 #include <string>
 
 #ifndef IMGUI_IMPL_API
@@ -59,12 +60,16 @@ void ImGuiLayer::LoadEditorFont()
   ImGuiStyle& style    = ImGui::GetStyle();
   style.ScaleAllSizes(dpiScale);
 
-  if (!m_EditorSpec_.FontPath.empty()) {
-    const auto resolvedFontPath = util::EngineFilesystem::TryResolve(m_EditorSpec_.FontPath);
-    if (resolvedFontPath && util::Filesystem::FileExists(resolvedFontPath.value())) {
-      ImFontConfig config;
-      io.FontDefault = io.Fonts->AddFontFromFileTTF(resolvedFontPath.value().string().c_str(), fontSize, &config);
-    }
+  const auto& fontLibrary = GameEngine::Get().GetFontLibrary();
+  const auto& font        = fontLibrary.GetFontFromLibrary("jetbrainsmononerdfont");
+
+  if (font.IsValid()) {
+    CORE_ASSERT(font.size() <= static_cast<std::size_t>(std::numeric_limits<int>::max()), "Embedded font is too large")
+
+    ImFontConfig config{};
+    config.FontDataOwnedByAtlas = false;
+
+    io.FontDefault              = io.Fonts->AddFontFromMemoryTTF(font.data(), static_cast<int>(font.size()), fontSize, &config);
   }
 
   if (io.FontDefault == nullptr) {

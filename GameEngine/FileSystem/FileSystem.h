@@ -6,6 +6,7 @@
 #include "ge_expected"
 
 #include <filesystem>
+#include <fstream>
 
 namespace ge::util
 {
@@ -34,6 +35,7 @@ public:
   Filesystem& operator=(Filesystem&&)      = delete;
   ~Filesystem()                            = delete;
 
+  static std::vector<std::byte> ReadBinaryFile(const std::filesystem::path& path);
   static void Init();
   static void Shutdown();
   static void DeleteFile(const std::filesystem::path& path);

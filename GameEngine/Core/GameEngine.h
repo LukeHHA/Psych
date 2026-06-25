@@ -7,6 +7,7 @@
 #include "Errors/Errors.h"
 #include "Events/EventHandler.h"
 #include "FileSystem/PathResolver.h"
+#include "Fonts/FontManager.h"
 #include "Layers/LayerStack.h"
 #include "Project/ProjectManager.h"
 #include "Renderer/Framebuffer.h"
@@ -18,7 +19,7 @@ namespace ge
 class GameEngine
 {
 public:
-  explicit GameEngine(GameEngineConfig config = GameEngineConfig());
+  explicit GameEngine();
   virtual ~GameEngine();
   CORE_NO_COPY_NO_MOVE(GameEngine);
 
@@ -33,6 +34,7 @@ public:
   [[nodiscard]] const GameEngineSpecification& GetEngineSpecification() const;
   [[nodiscard]] ProjectManager& GetProjectManager();
   [[nodiscard]] const ProjectManager& GetProjectManager() const;
+  [[nodiscard]] const FontManager& GetFontLibrary() const;
   Window& GetWindow()
   {
     CORE_ASSERT(m_Window != nullptr, "Call to: GetWindow() failed. m_Window is nullptr!");
@@ -68,6 +70,7 @@ private:
   Shared<Window> m_Window;
   Shared<EventHandler> m_EventHandler_;
   Shared<Framebuffer> m_Framebuffer_;
+  FontManager m_FontLibrary_;
   Unique<RenderTarget> m_RenderTarget_;
 };
 Expected<Unique<GameEngine>, errors::EngineError> CreateGameEngine();

@@ -5,27 +5,15 @@
 
 namespace ge
 {
-namespace
-{
-GameEngineConfig CreateEditorConfig()
-{
-  GameEngineSpecification spec;
-  spec.EnableEditorUI    = true;
-  spec.EditorUI.FontPath = "engine://Editor/Assets/Fonts/JetBrainsMonoNerdFont-Regular.ttf";
-  spec.EditorUI.FontSize = 18.0f;
-  return GameEngineConfig(spec);
-}
-} // namespace
 
 class EditorApp : public GameEngine
 {
 public:
-  EditorApp() : GameEngine(CreateEditorConfig()) {}
+  EditorApp() : GameEngine() {}
 };
 } // namespace ge
 
-ge::Expected<ge::Unique<ge::GameEngine>, ge::errors::EngineError>
-ge::CreateGameEngine()
+ge::Expected<ge::Unique<ge::GameEngine>, ge::errors::EngineError> ge::CreateGameEngine()
 {
   auto app    = CreateUnique<EditorApp>();
   auto result = app->Init();
@@ -33,6 +21,7 @@ ge::CreateGameEngine()
     return Unexpected(result.error());
   }
 
+  // If building as an editor why would you not push the overlay?
   if (app->GetConfig().GetGameEngineSpec().EnableEditorUI) {
     app->PushOverlay(CreateUnique<EditorLayer>());
   }

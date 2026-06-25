@@ -38,7 +38,8 @@ enum class FilesystemError : std::uint8_t {
   DeleteFailed,
   DirectoryIterationFailed,
   ReadFailed,
-  OSPathFail
+  OSPathFail,
+  LoadFailed
 };
 
 enum class ShaderLibraryError : std::uint8_t { None = 0, NotFound };
@@ -57,13 +58,6 @@ enum class ShaderError : std::uint8_t { None = 0, UnsupportedAPI, SourceFileNotF
 
 enum class SerializationError : std::uint8_t { None = 0, SerializationFailed, DeserializationFailed };
 
-enum class ProjectError : std::uint8_t {
-  None = 0,
-  InvalidPath,
-  ConfigLoadFailed,
-  ConfigSaveFailed,
-  DirectoryCreationFailed,
-  NoActiveProject
-};
+enum class ProjectError : std::uint8_t { None = 0, InvalidPath, ConfigLoadFailed, ConfigSaveFailed, DirectoryCreationFailed, NoActiveProject };
 
 } // namespace ge::errors

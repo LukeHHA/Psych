@@ -10,7 +10,7 @@ void FileViewer(const std::filesystem::path& path)
 
   auto fileContent = util::Filesystem::TryReadFile(path);
   if (!fileContent) {
-    return;
+    fileContent = "";
   }
 
   if (!ImGui::Begin("File Viewer")) {

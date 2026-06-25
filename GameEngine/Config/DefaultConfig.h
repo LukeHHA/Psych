@@ -11,7 +11,7 @@ struct EditorUISpec {
   bool EnableMultiViewports     = true;
   bool EnableKeyboardNavigation = true;
   bool EnableGamepadNavigation  = false;
-  std::string FontPath;
+  std::string FontPath          = "assets://data/fonts/JetBrainsMonoNerdFont-Regular.ttf";
   std::string ImGuiINIPath      = "config://imgui.ini";
   float FontSize                = 18.0f;
 

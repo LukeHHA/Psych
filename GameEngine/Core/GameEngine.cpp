@@ -2,7 +2,9 @@
 #include "Core/Core.h"
 #include "Debug/Assert.h"
 #include "Debug/Instrumentor.h"
+#include "EmbeddedResources.h"
 #include "FileSystem/EngineFilesystem.h"
+#include "Fonts/FontManager.h"
 #include "Imgui/ImguiLayer.h"
 #include "Renderer/Renderer.h"
 #include "Util/Time.h"
@@ -15,7 +17,7 @@ namespace ge
 
 GameEngine* GameEngine::s_Application = nullptr;
 
-GameEngine::GameEngine(GameEngineConfig config) : m_Config(std::move(config))
+GameEngine::GameEngine()
 {
   CORE_LOG_INFO("Game engine startup");
   CORE_ASSERT(!s_Application, "Application already exists")
@@ -30,6 +32,8 @@ Expected<void, errors::EngineError> GameEngine::Init()
   if (m_Initialized || m_LayerStack || m_EventHandler_ || m_Window) {
     return Unexpected(errors::EngineError::InvalidGameEngineState);
   }
+
+  m_FontLibrary_.RegisterFont("jetbrainsmononerdfont", embedded::JetBrainsMonoNerdFontRegular());
 
   auto configResult = m_Config.Init();
   if (!configResult) {
@@ -108,8 +112,8 @@ Expected<void, errors::EngineError> GameEngine::Shutdown()
   m_Window.reset();
   m_EventHandler_.reset();
 
-  m_Initialized = false;
-  s_Application = nullptr;
+  m_Initialized            = false;
+  s_Application            = nullptr;
   const auto projectResult = m_ProjectManager_.Shutdown(m_PathResolver_);
   util::EngineFilesystem::Shutdown();
   m_PathResolver_.ClearEngineRoot();
@@ -220,5 +224,7 @@ const GameEngineSpecification& GameEngine::GetEngineSpecification() const { retu
 ProjectManager& GameEngine::GetProjectManager() { return m_ProjectManager_; }
 
 const ProjectManager& GameEngine::GetProjectManager() const { return m_ProjectManager_; }
+
+const FontManager& GameEngine::GetFontLibrary() const { return m_FontLibrary_; }
 
 } // namespace ge

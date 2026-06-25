@@ -2,8 +2,8 @@
 #include "Core/Core.h"
 #include "Debug/Assert.h"
 #include "FileSystem/CoreFilesystemAPI.h"
-#include "Platform/MacOSFilesystemAPI.h"
 #include "Platform/LinuxFilesystemAPI.h"
+#include "Platform/MacOSFilesystemAPI.h"
 #include <filesystem>
 
 namespace ge::util
@@ -49,7 +49,7 @@ Expected<DirPath, errors::FilesystemError> Filesystem::TryGetBaseConfigPath()
     return Unexpected(errors::FilesystemError::NotInitialized);
   }
 
-  DirPath basePath   = s_OSFilesystemAPI_->GetOSAppDataPath();
+  DirPath basePath = s_OSFilesystemAPI_->GetOSAppDataPath();
   if (basePath.empty()) {
     return Unexpected(errors::FilesystemError::OSPathFail);
   }
@@ -80,7 +80,7 @@ Expected<DirPath, errors::FilesystemError> Filesystem::TryGetBaseCachePath()
     return Unexpected(errors::FilesystemError::NotInitialized);
   }
 
-  DirPath basePath  = s_OSFilesystemAPI_->GetOSCacheDataPath();
+  DirPath basePath = s_OSFilesystemAPI_->GetOSCacheDataPath();
   if (basePath.empty()) {
     return Unexpected(errors::FilesystemError::OSPathFail);
   }
@@ -161,4 +161,28 @@ Expected<Unique<FileNode>, errors::FilesystemError> Filesystem::TryCreateDirecto
   return node;
 }
 
+std::vector<std::byte> Filesystem::ReadBinaryFile(const std::filesystem::path& path)
+{
+  std::ifstream file(path, std::ios::binary | std::ios::ate);
+
+  if (!file) {
+    CORE_ASSERT(false, "Failed to open file {}", path.string())
+  }
+
+  const auto size = file.tellg();
+  if (size < 0) {
+    CORE_ASSERT(false, "Failed to read file")
+  }
+
+  std::vector<std::byte> buffer(static_cast<std::size_t>(size));
+
+  file.seekg(0, std::ios::beg);
+  file.read(reinterpret_cast<char*>(buffer.data()), size);
+
+  if (!file) {
+    CORE_ASSERT(false, "Failed to read file")
+  }
+
+  return buffer;
+}
 } // namespace ge::util
