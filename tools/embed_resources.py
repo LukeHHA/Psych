@@ -49,14 +49,14 @@ def write_header(path: Path, namespace: str, resources: list[tuple[Path, str]]) 
     lines = [
         "#pragma once",
         "",
-        '#include "Resources/BinaryBlob.h"',
+        '#include "Resources/BinaryBuffer.h"',
         "",
         namespace_open(namespace),
         "",
     ]
 
     for _, symbol in resources:
-        lines.append(f"[[nodiscard]] BinaryBlob {symbol}();")
+        lines.append(f"[[nodiscard]] BinaryBuffer {symbol}();")
 
     lines.extend(["", namespace_close(namespace), ""])
     path.write_text("\n".join(lines), encoding="utf-8")
@@ -96,9 +96,9 @@ def write_source(
     lines.extend(["} // namespace", ""])
 
     for _, symbol in resources:
-        lines.append(f"BinaryBlob {symbol}()")
+        lines.append(f"BinaryBuffer {symbol}()")
         lines.append("{")
-        lines.append(f"  return BinaryBlob{{{symbol}Data, sizeof({symbol}Data)}};")
+        lines.append(f"  return BinaryBuffer{{{symbol}Data, sizeof({symbol}Data)}};")
         lines.append("}")
         lines.append("")
 

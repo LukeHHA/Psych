@@ -60,8 +60,8 @@ void ImGuiLayer::LoadEditorFont()
   ImGuiStyle& style    = ImGui::GetStyle();
   style.ScaleAllSizes(dpiScale);
 
-  const auto& fontLibrary = GameEngine::Get().GetFontLibrary();
-  const auto& font        = fontLibrary.GetFontFromLibrary("jetbrainsmononerdfont");
+  auto fontLibrary = GameEngine::Get().GetFontLibrary();
+  auto font        = fontLibrary.GetDefaultFont();
 
   if (font.IsValid()) {
     CORE_ASSERT(font.size() <= static_cast<std::size_t>(std::numeric_limits<int>::max()), "Embedded font is too large")

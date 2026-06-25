@@ -33,8 +33,6 @@ Expected<void, errors::EngineError> GameEngine::Init()
     return Unexpected(errors::EngineError::InvalidGameEngineState);
   }
 
-  m_FontLibrary_.RegisterFont("jetbrainsmononerdfont", embedded::JetBrainsMonoNerdFontRegular());
-
   auto configResult = m_Config.Init();
   if (!configResult) {
     return Unexpected(errors::EngineError::GameEngineInitializationFailed);
@@ -138,6 +136,8 @@ void GameEngine::HandleEvents()
     switch (event->GetEventType()) {
     case EventType::WindowClose:
       m_Running = false;
+    case EventType::WindowShouldClose:
+      m_Running = false;
     }
     m_Window->HandleEvents(std::move(event));
   }
@@ -227,4 +227,5 @@ const ProjectManager& GameEngine::GetProjectManager() const { return m_ProjectMa
 
 const FontManager& GameEngine::GetFontLibrary() const { return m_FontLibrary_; }
 
+const Shared<EventHandler>& GameEngine::GetEventHandler() const { return m_EventHandler_; }
 } // namespace ge

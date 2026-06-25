@@ -35,6 +35,7 @@ public:
   [[nodiscard]] ProjectManager& GetProjectManager();
   [[nodiscard]] const ProjectManager& GetProjectManager() const;
   [[nodiscard]] const FontManager& GetFontLibrary() const;
+  [[nodiscard]] const Shared<EventHandler>& GetEventHandler() const;
   Window& GetWindow()
   {
     CORE_ASSERT(m_Window != nullptr, "Call to: GetWindow() failed. m_Window is nullptr!");

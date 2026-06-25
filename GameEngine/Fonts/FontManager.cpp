@@ -1,12 +1,14 @@
 #include "FontManager.h"
 #include "Debug/Assert.h"
+#include "EmbeddedResources.h"
 #include "Errors/Errors.h"
+#include "Resources/BinaryBuffer.h"
 
 #include <utility>
 
 namespace ge
 {
-void FontManager::RegisterFont(std::string name, BinaryBlob font)
+void FontManager::RegisterFont(std::string name, BinaryBuffer font)
 {
   const auto result = TryRegisterFont(std::move(name), font);
   if (!result) {
@@ -14,7 +16,7 @@ void FontManager::RegisterFont(std::string name, BinaryBlob font)
   }
 }
 
-Expected<void, errors::FilesystemError> FontManager::TryRegisterFont(std::string name, BinaryBlob font)
+Expected<void, errors::FilesystemError> FontManager::TryRegisterFont(std::string name, BinaryBuffer font)
 {
   if (name.empty() || !font.IsValid()) {
     return Unexpected(errors::FilesystemError::LoadFailed);
@@ -28,10 +30,18 @@ Expected<void, errors::FilesystemError> FontManager::TryRegisterFont(std::string
   return {};
 }
 
-const BinaryBlob& FontManager::GetFontFromLibrary(const std::string& key) const
+const BinaryBuffer& FontManager::GetFontFromLibrary(const std::string& key) const
 {
   CORE_ASSERT(m_FontLibrary_.contains(key), "Font does not exist in library: {}", key)
   return m_FontLibrary_.at(key);
+}
+
+const BinaryBuffer& FontManager::GetDefaultFont()
+{
+  if (m_DefaultFont_.size() == 0) {
+    m_DefaultFont_ = embedded::JetBrainsMonoNerdFontRegular();
+  }
+  return m_DefaultFont_;
 }
 
 } // namespace ge

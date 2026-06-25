@@ -1,7 +1,8 @@
 #pragma once
 
+#include "Assets/AssetHandle.h"
 #include "Errors/Errors.h"
-#include "Resources/BinaryBlob.h"
+#include "Resources/BinaryBuffer.h"
 #include "ge_expected"
 
 #include <string>
@@ -19,13 +20,16 @@ public:
   FontManager& operator=(const FontManager&) = default;
   ~FontManager()                             = default;
 
-  void RegisterFont(std::string name, BinaryBlob font);
-  Expected<void, errors::FilesystemError> TryRegisterFont(std::string name, BinaryBlob font);
+  void RegisterFont(std::string name, BinaryBuffer font);
+  Expected<void, errors::FilesystemError> TryRegisterFont(std::string name, BinaryBuffer font);
 
-  [[nodiscard]] const BinaryBlob& GetFontFromLibrary(const std::string& key) const;
+  [[nodiscard]] const BinaryBuffer& GetFontFromLibrary(const std::string& key) const;
+  [[nodiscard]] const BinaryBuffer& GetDefaultFont();
 
 private:
-  std::unordered_map<std::string, BinaryBlob> m_FontLibrary_;
+  BinaryBuffer m_DefaultFont_;
+  std::unordered_map<AssetHandle, BinaryBuffer> m_AssetFontLibrary_;
+  std::unordered_map<std::string, BinaryBuffer> m_FontLibrary_;
 };
 
 } // namespace ge
