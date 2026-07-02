@@ -8,3 +8,5 @@ CoreProfile*.json
 .icloud*
 duplicate-report.json 
 logs/
+compile_commands.json 
+.DS_Store
