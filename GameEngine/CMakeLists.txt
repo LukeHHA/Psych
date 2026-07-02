@@ -175,9 +175,7 @@ target_include_directories(GameEngineImgui SYSTEM PUBLIC
 
 target_compile_definitions(GameEngineImgui PRIVATE GL_SILENCE_DEPRECATION)
 
-find_package(Boost REQUIRED)
-
-target_include_directories(GameEngine PRIVATE ${Boost_INCLUDE_DIRS})
+find_package(Boost CONFIG REQUIRED)
 
 target_link_libraries(GameEngine PUBLIC
   spdlog::spdlog

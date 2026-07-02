@@ -13,4 +13,5 @@ Checks: >
   -readability-magic-numbers,
   -cppcoreguidelines-avoid-magic-numbers,
   -cppcoreguidelines-pro-bounds-array-to-pointer-decay,
-  -readability-redundant-access-specifiers
+  -readability-redundant-access-specifiers,
+  -bugprone-easily-swappable-parameters

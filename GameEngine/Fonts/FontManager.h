@@ -5,8 +5,7 @@
 #include "Resources/BinaryBuffer.h"
 #include "ge_expected"
 
-#include <string>
-#include <unordered_map>
+#include <filesystem>
 
 namespace ge
 {
@@ -20,8 +19,11 @@ public:
   FontManager& operator=(const FontManager&) = default;
   ~FontManager()                             = default;
 
-  void RegisterFont(std::string name, BinaryBuffer font);
-  Expected<void, errors::FilesystemError> TryRegisterFont(std::string name, BinaryBuffer font);
+  void RegisterMemoryFont(const std::string& name, BinaryBuffer& font);
+  Expected<void, errors::FilesystemError> TryRegisterMemoryFont(const std::string& name, BinaryBuffer& font);
+
+  void RegistryFileFont(const std::string& name, const std::filesystem::path& path);
+  void TryRegistryFileFont(const std::string& name, const std::filesystem::path& path);
 
   [[nodiscard]] const BinaryBuffer& GetFontFromLibrary(const std::string& key) const;
   [[nodiscard]] const BinaryBuffer& GetDefaultFont();

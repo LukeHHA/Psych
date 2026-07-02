@@ -24,6 +24,10 @@ option(GE_ENABLE_SANITIZERS "Enable ASan/UBSan for GameEngine targets" OFF)
 option(GAME_ENGINE_ENABLE_CLANG_TIDY "Run clang-tidy on GameEngine and Editor sources" OFF)
 option(BUILD_SHARED_LIBS "Build shared libraries" OFF)
 
+if(CMAKE_CXX_COMPILER_ID MATCHES "Clang|GNU")
+  add_compile_options(-fdiagnostics-color=always)
+endif()
+
 # Backwards compatibility for existing local commands that used -DBUILD_EDITOR=ON.
 if(DEFINED BUILD_EDITOR)
   set(GAME_ENGINE_BUILD_EDITOR "${BUILD_EDITOR}" CACHE BOOL "Build the editor target" FORCE)

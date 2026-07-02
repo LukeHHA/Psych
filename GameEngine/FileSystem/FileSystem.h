@@ -38,6 +38,7 @@ public:
   static std::vector<std::byte> ReadBinaryFile(const std::filesystem::path& path);
   static void Init();
   static void Shutdown();
+  static FilePath Current_Path();
   static void DeleteFile(const std::filesystem::path& path);
   static Expected<void, errors::FilesystemError> TryDeleteFile(const std::filesystem::path& path);
   static bool FileExists(const std::filesystem::path& path);
@@ -58,5 +59,6 @@ public:
 
 private:
   inline static Shared<OSFilesystemAPI> s_OSFilesystemAPI_ = nullptr;
+  inline static std::filesystem::path s_CurrentPath_;
 };
 } // namespace ge::util

@@ -4,31 +4,32 @@
 #include "Errors/Errors.h"
 #include "Resources/BinaryBuffer.h"
 
-#include <utility>
-
 namespace ge
 {
-void FontManager::RegisterFont(std::string name, BinaryBuffer font)
+void FontManager::RegisterMemoryFont(const std::string& name, BinaryBuffer& font)
 {
-  const auto result = TryRegisterFont(std::move(name), font);
+  const auto result = TryRegisterMemoryFont(name, font);
   if (!result) {
     CORE_ASSERT(false, "Failed to add font to library")
   }
 }
 
-Expected<void, errors::FilesystemError> FontManager::TryRegisterFont(std::string name, BinaryBuffer font)
+Expected<void, errors::FilesystemError> FontManager::TryRegisterMemoryFont(const std::string& name, BinaryBuffer& font)
 {
   if (name.empty() || !font.IsValid()) {
     return Unexpected(errors::FilesystemError::LoadFailed);
   }
 
-  auto [it, res] = m_FontLibrary_.emplace(std::move(name), font);
+  auto [it, res] = m_FontLibrary_.emplace(name, font);
   if (!res) {
     return Unexpected(errors::FilesystemError::LoadFailed);
   }
 
   return {};
 }
+
+void FontManager::RegistryFileFont(const std::string& name, const std::filesystem::path& path) {}
+void FontManager::TryRegistryFileFont(const std::string& name, const std::filesystem::path& path) {}
 
 const BinaryBuffer& FontManager::GetFontFromLibrary(const std::string& key) const
 {

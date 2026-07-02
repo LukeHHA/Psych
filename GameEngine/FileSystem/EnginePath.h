@@ -12,7 +12,7 @@
 namespace ge::EnginePath
 {
 
-enum class Schema : std::uint8_t { None = 0, Config, Cache, Assets, Engine, Editor };
+enum class Schema : std::uint8_t { None = 0, Config, Cache, Engine };
 
 [[nodiscard]] inline std::string_view SchemaToString(const Schema schema)
 {
@@ -23,14 +23,8 @@ enum class Schema : std::uint8_t { None = 0, Config, Cache, Assets, Engine, Edit
   case Schema::Cache:
     return "cache://";
 
-  case Schema::Assets:
-    return "assets://";
-
   case Schema::Engine:
     return "engine://";
-
-  case Schema::Editor:
-    return "editor://";
 
   case Schema::None:
     break;
@@ -66,16 +60,8 @@ enum class Schema : std::uint8_t { None = 0, Config, Cache, Assets, Engine, Edit
     return Schema::Cache;
   }
 
-  if (SchemaEquals(schema, "assets://")) {
-    return Schema::Assets;
-  }
-
   if (SchemaEquals(schema, "engine://")) {
     return Schema::Engine;
-  }
-
-  if (SchemaEquals(schema, "editor://")) {
-    return Schema::Editor;
   }
 
   return Schema::None;

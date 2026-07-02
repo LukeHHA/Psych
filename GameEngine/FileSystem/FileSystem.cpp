@@ -10,6 +10,8 @@ namespace ge::util
 {
 void Filesystem::Init()
 {
+  s_CurrentPath_ = std::filesystem::current_path();
+
   if (s_OSFilesystemAPI_ == nullptr) {
 #if defined(GE_PLATFORM_MACOS)
     s_OSFilesystemAPI_ = CreateShared<MacOSFilesystemAPI>();
@@ -22,6 +24,8 @@ void Filesystem::Init()
 }
 
 void Filesystem::Shutdown() { s_OSFilesystemAPI_ = nullptr; }
+
+FilePath Filesystem::Current_Path() { return s_CurrentPath_; }
 
 void Filesystem::DeleteFile(const std::filesystem::path& path) { CoreFilesystemAPI::DeleteFile(path); }
 

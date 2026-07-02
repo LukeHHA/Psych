@@ -19,7 +19,7 @@ PathResolver* EngineFilesystem::Resolver()
 Expected<FilePath, errors::FilesystemError> EngineFilesystem::TryResolve(const EnginePath::Path& path)
 {
   const auto* resolver = Resolver();
-  if (!resolver) {
+  if (resolver == nullptr) {
     return Unexpected(errors::FilesystemError::NotInitialized);
   }
 

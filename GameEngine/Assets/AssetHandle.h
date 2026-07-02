@@ -6,7 +6,6 @@
 #include <boost/uuid/uuid.hpp>
 #include <boost/uuid/uuid_io.hpp>
 
-#include <algorithm>
 #include <compare>
 #include <cstddef>
 #include <cstdint>
@@ -35,7 +34,7 @@ public:
 
   [[nodiscard]] bool IsNil() const noexcept
   {
-    return std::all_of(m_Id_.begin(), m_Id_.end(), [](std::uint8_t byte) { return byte == 0; });
+    return std::ranges::all_of(m_Id_.begin(), m_Id_.end(), [](std::uint8_t byte) { return byte == 0; });
   }
   [[nodiscard]] bool IsValid() const noexcept { return !IsNil(); }
   [[nodiscard]] const uuid_type& Value() const noexcept { return m_Id_; }
@@ -56,7 +55,7 @@ public:
 
   friend std::size_t hash_value(const AssetHandle& handle) noexcept
   {
-    std::size_t hash = static_cast<std::size_t>(1469598103934665603ull);
+    auto hash = static_cast<std::size_t>(1469598103934665603ull);
     for (const auto byte : handle.m_Id_) {
       hash ^= static_cast<std::size_t>(byte);
       hash *= static_cast<std::size_t>(1099511628211ull);

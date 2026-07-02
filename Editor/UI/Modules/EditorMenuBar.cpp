@@ -37,8 +37,9 @@ void ShowExampleMenuFile()
     static bool enabled = true;
     ImGui::MenuItem("Enabled", "", &enabled);
     ImGui::BeginChild("child", ImVec2(0, 60), ImGuiChildFlags_Borders);
-    for (int i = 0; i < 10; i++)
+    for (int i = 0; i < 10; i++) {
       ImGui::Text("Scrolling Text %d", i);
+    }
     ImGui::EndChild();
     static float f = 0.5f;
     static int n   = 0;
@@ -83,7 +84,7 @@ void ShowExampleMenuFile()
   if (ImGui::MenuItem("Quit", "Alt+F4", &selected)) {
     if (selected) {
       auto event = CreateUnique<WindowCloseEvent>();
-      GameEngine::Get().GetEventHandler()->QueueEvent(std::move(event));
+      GameEngine::Get().GetEventHandler().QueueEvent(std::move(event));
     }
   }
 }

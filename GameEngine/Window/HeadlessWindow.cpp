@@ -1,5 +1,4 @@
 #include "HeadlessWindow.h"
-#include "Debug/Assert.h"
 #include "Debug/Instrumentor.h"
 #include "GLFW/glfw3.h"
 
@@ -17,7 +16,7 @@ HeadlessWindow::~HeadlessWindow()
   }
 }
 
-Expected<void, errors::WindowError> HeadlessWindow::Init(const std::string& title, unsigned int width, unsigned int height, Shared<EventHandler> eventHandler)
+Expected<void, errors::WindowError> HeadlessWindow::Init(const std::string& title, unsigned int width, unsigned int height, EventHandler& eventHandler)
 {
   CORE_PROFILE_FUNCTION();
 
@@ -34,7 +33,7 @@ Expected<void, errors::WindowError> HeadlessWindow::Init(const std::string& titl
     CORE_PROFILE_SCOPE("glfwInit");
     glfwInitHint(GLFW_PLATFORM, GLFW_PLATFORM_NULL);
     int success = glfwInit();
-    if (!success) {
+    if (success == 0) {
       return Unexpected(errors::WindowError::InitializationFailed);
     }
 
@@ -68,7 +67,7 @@ Expected<void, errors::WindowError> HeadlessWindow::Init(const std::string& titl
       return Unexpected(errors::WindowError::ContextCreationFailed);
     }
 
-    m_RendererContext = contextResult.value();
+    m_RendererContext = std::move(contextResult.value());
     auto contextInit  = m_RendererContext->Init();
     if (!contextInit) {
       return Unexpected(errors::WindowError::ContextInitializationFailed);

@@ -18,38 +18,24 @@ public:
 
   virtual void Bind()                                  = 0;
   virtual void Unbind()                                = 0;
-  virtual uint32_t GetWidth() const                    = 0;
-  virtual uint32_t GetHeight() const                   = 0;
+  [[nodiscard]] virtual uint32_t GetWidth() const      = 0;
+  [[nodiscard]] virtual uint32_t GetHeight() const     = 0;
   virtual void Resize(uint32_t width, uint32_t height) = 0;
 };
 
 class FramebufferRenderTarget : public RenderTarget
 {
 public:
-  explicit FramebufferRenderTarget(Shared<Framebuffer> framebuffer)
-      : m_Framebuffer_(std::move(framebuffer))
-  {
-    CORE_ASSERT(m_Framebuffer_,
-                "FramebufferRenderTarget requires a valid framebuffer")
-  }
+  explicit FramebufferRenderTarget(Framebuffer& framebuffer) : m_Framebuffer_(framebuffer) {}
 
-  virtual void Bind() override { m_Framebuffer_->Bind(); }
-  virtual void Unbind() override { m_Framebuffer_->Unbind(); }
-  virtual uint32_t GetWidth() const override
-  {
-    return m_Framebuffer_->GetWidth();
-  }
-  virtual uint32_t GetHeight() const override
-  {
-    return m_Framebuffer_->GetHeight();
-  }
-  virtual void Resize(uint32_t width, uint32_t height) override
-  {
-    m_Framebuffer_->Resize(width, height);
-  }
+  void Bind() override { m_Framebuffer_.Bind(); }
+  void Unbind() override { m_Framebuffer_.Unbind(); }
+  [[nodiscard]] uint32_t GetWidth() const override { return m_Framebuffer_.GetWidth(); }
+  [[nodiscard]] uint32_t GetHeight() const override { return m_Framebuffer_.GetHeight(); }
+  void Resize(uint32_t width, uint32_t height) override { m_Framebuffer_.Resize(width, height); }
 
 private:
-  Shared<Framebuffer> m_Framebuffer_;
+  Framebuffer& m_Framebuffer_;
 };
 
 class WindowRenderTarget : public RenderTarget
@@ -57,15 +43,15 @@ class WindowRenderTarget : public RenderTarget
 public:
   explicit WindowRenderTarget(Window& window) : m_Window_(window) {}
 
-  virtual void Bind() override
+  void Bind() override
   {
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glViewport(0, 0, GetWidth(), GetHeight());
   }
-  virtual void Unbind() override {}
-  virtual uint32_t GetWidth() const override { return m_Window_.GetWidth(); }
-  virtual uint32_t GetHeight() const override { return m_Window_.GetHeight(); }
-  virtual void Resize(uint32_t, uint32_t) override {}
+  void Unbind() override {}
+  [[nodiscard]] uint32_t GetWidth() const override { return m_Window_.GetWidth(); }
+  [[nodiscard]] uint32_t GetHeight() const override { return m_Window_.GetHeight(); }
+  void Resize(uint32_t width, uint32_t height) override {}
 
 private:
   Window& m_Window_;

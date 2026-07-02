@@ -2,7 +2,6 @@
 #include "Core/Core.h"
 #include "Debug/Assert.h"
 #include "Debug/Instrumentor.h"
-#include "EmbeddedResources.h"
 #include "FileSystem/EngineFilesystem.h"
 #include "Fonts/FontManager.h"
 #include "Imgui/ImguiLayer.h"
@@ -29,7 +28,7 @@ Expected<void, errors::EngineError> GameEngine::Init()
   CORE_PROFILE_FUNCTION();
   CORE_PROFILE_SCOPE("GameEngine::Init");
 
-  if (m_Initialized || m_LayerStack || m_EventHandler_ || m_Window) {
+  if (m_Initialized || m_LayerStack || m_Window) {
     return Unexpected(errors::EngineError::InvalidGameEngineState);
   }
 
@@ -52,15 +51,14 @@ Expected<void, errors::EngineError> GameEngine::Init()
   }
   util::EngineFilesystem::Init(m_PathResolver_);
 
-  m_LayerStack    = CreateUnique<LayerStack>();
-  m_EventHandler_ = CreateShared<EventHandler>();
+  m_LayerStack = CreateUnique<LayerStack>();
 
   Renderer::SetRendererAPI(spec.RenderingAPI);
   auto window = Window::Create(spec.Name, 1280, 720, m_EventHandler_);
   if (!window) {
     return Unexpected(errors::EngineError::WindowCreationFailed);
   }
-  m_Window      = window.value();
+  m_Window      = std::move(window.value());
 
   auto renderer = Renderer::Init(spec);
   if (!renderer) {
@@ -72,13 +70,12 @@ Expected<void, errors::EngineError> GameEngine::Init()
     if (!m_Framebuffer_) {
       return Unexpected(errors::EngineError::FramebufferCreationFailed);
     }
-    m_RenderTarget_ = CreateUnique<FramebufferRenderTarget>(m_Framebuffer_);
+    m_RenderTarget_ = CreateUnique<FramebufferRenderTarget>(*m_Framebuffer_);
     PushLayer(CreateUnique<ImGuiLayer>());
   } else {
     m_RenderTarget_ = CreateUnique<WindowRenderTarget>(*m_Window);
   }
 
-  CORE_ASSERT(m_EventHandler_, "EventHandler creation failed")
   CORE_ASSERT(m_Window, "Window Creation failed returning nullptr")
   m_Initialized = true;
   CORE_LOG_INFO("GameEngine Init");
@@ -98,7 +95,7 @@ Expected<void, errors::EngineError> GameEngine::Shutdown()
   CORE_PROFILE_FUNCTION();
   CORE_PROFILE_SCOPE("GameEngine::Shutdown");
 
-  if (!m_Initialized && !m_LayerStack && !m_Window && !m_EventHandler_) {
+  if (!m_Initialized && !m_LayerStack && !m_Window) {
     return {};
   }
 
@@ -108,7 +105,6 @@ Expected<void, errors::EngineError> GameEngine::Shutdown()
   m_Framebuffer_.reset();
   Renderer::Shutdown();
   m_Window.reset();
-  m_EventHandler_.reset();
 
   m_Initialized            = false;
   s_Application            = nullptr;
@@ -132,11 +128,9 @@ void GameEngine::HandleEvents()
 {
   CORE_PROFILE_FUNCTION();
   Unique<Event> event = nullptr;
-  while (m_EventHandler_->TryDequeueEvent(event)) {
+  while (m_EventHandler_.TryDequeueEvent(event)) {
     switch (event->GetEventType()) {
     case EventType::WindowClose:
-      m_Running = false;
-    case EventType::WindowShouldClose:
       m_Running = false;
     }
     m_Window->HandleEvents(std::move(event));
@@ -227,5 +221,30 @@ const ProjectManager& GameEngine::GetProjectManager() const { return m_ProjectMa
 
 const FontManager& GameEngine::GetFontLibrary() const { return m_FontLibrary_; }
 
-const Shared<EventHandler>& GameEngine::GetEventHandler() const { return m_EventHandler_; }
+const EventHandler& GameEngine::GetEventHandler() const { return m_EventHandler_; }
+EventHandler& GameEngine::GetEventHandler() { return m_EventHandler_; }
+
+Window& GameEngine::GetWindow()
+{
+  CORE_ASSERT(m_Window != nullptr, "Call to: GetWindow() failed. m_Window is nullptr!");
+  return *m_Window;
+}
+
+const Window& GameEngine::GetWindow() const
+{
+  CORE_ASSERT(m_Window != nullptr, "Call to: GetWindow() failed. m_Window is nullptr!");
+  return *m_Window;
+}
+
+Framebuffer& GameEngine::GetFramebuffer()
+{
+  CORE_ASSERT(m_Framebuffer_ != nullptr, "Call to: GetFramebuffer() failed. m_Framebuffer_ is nullptr!");
+  return *m_Framebuffer_;
+}
+
+const Framebuffer& GameEngine::GetFramebuffer() const
+{
+  CORE_ASSERT(m_Framebuffer_ != nullptr, "Call to: GetFramebuffer() failed. m_Framebuffer_ is nullptr!");
+  return *m_Framebuffer_;
+}
 } // namespace ge

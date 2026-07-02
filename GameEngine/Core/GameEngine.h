@@ -30,23 +30,22 @@ public:
   void HandleEvents();
   void PushLayer(std::unique_ptr<Layer> layer);
   void PushOverlay(std::unique_ptr<Layer> layer);
+
+  /// getters for member objects
   [[nodiscard]] const GameEngineConfig& GetConfig() const;
   [[nodiscard]] const GameEngineSpecification& GetEngineSpecification() const;
   [[nodiscard]] ProjectManager& GetProjectManager();
   [[nodiscard]] const ProjectManager& GetProjectManager() const;
   [[nodiscard]] const FontManager& GetFontLibrary() const;
-  [[nodiscard]] const Shared<EventHandler>& GetEventHandler() const;
-  Window& GetWindow()
-  {
-    CORE_ASSERT(m_Window != nullptr, "Call to: GetWindow() failed. m_Window is nullptr!");
-    return *m_Window;
-  }
-  Framebuffer& GetFramebuffer()
-  {
-    CORE_ASSERT(m_Framebuffer_ != nullptr, "Call to: GetFramebuffer() failed. m_Framebuffer_ is nullptr!");
-    return *m_Framebuffer_;
-  }
-  static GameEngine& Get();
+
+  /// getters for ptrs
+  [[nodiscard]] const EventHandler& GetEventHandler() const;
+  [[nodiscard]] EventHandler& GetEventHandler();
+  [[nodiscard]] Window& GetWindow();
+  [[nodiscard]] const Window& GetWindow() const;
+  [[nodiscard]] const Framebuffer& GetFramebuffer() const;
+  [[nodiscard]] Framebuffer& GetFramebuffer();
+  [[nodiscard]] static GameEngine& Get();
 
 private:
   [[nodiscard]] LayerStack& Layers()
@@ -61,18 +60,27 @@ private:
   }
 
 private:
+  /// default constructed objects - reverse destruction order
   GameEngineConfig m_Config;
   util::PathResolver m_PathResolver_;
+  FontManager m_FontLibrary_;
   ProjectManager m_ProjectManager_;
+  EventHandler m_EventHandler_;
+
+  /// engine instance
+  static GameEngine* s_Application;
+
+  /// polymorphic classes
+  Unique<LayerStack> m_LayerStack;
+  Unique<Window> m_Window;
+  Unique<Framebuffer> m_Framebuffer_;
+  Unique<RenderTarget> m_RenderTarget_;
+
+  // member vars
   bool m_Initialized = false;
   bool m_Running     = false;
-  static GameEngine* s_Application;
-  Unique<LayerStack> m_LayerStack;
-  Shared<Window> m_Window;
-  Shared<EventHandler> m_EventHandler_;
-  Shared<Framebuffer> m_Framebuffer_;
-  FontManager m_FontLibrary_;
-  Unique<RenderTarget> m_RenderTarget_;
 };
+
+/// User defined - extern declartion in entrypoint.h
 Expected<Unique<GameEngine>, errors::EngineError> CreateGameEngine();
 } // namespace ge
