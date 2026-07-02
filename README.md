@@ -1,4 +1,24 @@
-# Game Engine
+# Psych Engine
+
+## 3D cross-platform game engine
+
+Psych is currently under active development. It aims to be a cross-platform 3D engine with a simple GUI and be highly configurable.
+
+## Open Source
+
+Psych is licensed under MIT and will always be free.
+
+## Background and Disclaimer
+
+This engine is a personal project that may very well one day be worth it to somebody. However, it takes a lot of insperation from other engines
+such as [Hazel](https://github.com/TheCherno/Hazel) and diverges at points were my studies have lead me. I am also a student and have spent maybe
+two years of actual programming, less in c++. As a result, you should not expect the code quality or architectural design to be of any quality.
+I am open to learn and this project is my way of forcing myself into a proper codebase that is mine.
+
+## Contributing
+
+I don't have any formal process for contributing as of yet. Feel free to suggest what ever.
+Try to follow the architecture of the engine. It is what it is.
 
 ## Building With CMake
 
