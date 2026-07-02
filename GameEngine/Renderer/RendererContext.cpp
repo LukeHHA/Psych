@@ -6,7 +6,7 @@
 
 namespace ge
 {
-Expected<Shared<RendererContext>, errors::RendererError> RendererContext::Create(GLFWwindow* window)
+Expected<Unique<RendererContext>, errors::RendererError> RendererContext::Create(GLFWwindow* window)
 {
   CORE_PROFILE_FUNCTION();
 
@@ -18,13 +18,13 @@ Expected<Shared<RendererContext>, errors::RendererError> RendererContext::Create
   case RendererAPIType::NONE:
     return Unexpected(errors::RendererError::UnsupportedAPI);
   case RendererAPIType::TEST_HEADLESS:
-    return CreateShared<RendererContextHeadless>(window);
+    return CreateUnique<RendererContextHeadless>(window);
   case RendererAPIType::OPENGL:
-    return CreateShared<OpenglContext>(window);
+    return CreateUnique<OpenglContext>(window);
   case RendererAPIType::VULKAN:
-    return CreateShared<VulkanContext>();
+    return CreateUnique<VulkanContext>();
   case RendererAPIType::METAL:
-    return CreateShared<OpenglContext>(window);
+    return CreateUnique<OpenglContext>(window);
   default:
     return Unexpected(errors::RendererError::UnsupportedAPI);
   }

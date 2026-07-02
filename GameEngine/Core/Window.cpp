@@ -8,22 +8,20 @@
 namespace ge
 {
 class EventHandler;
-Expected<Shared<Window>, errors::WindowError>
-Window::Create(const std::string& title, unsigned int width,
-               unsigned int height, Shared<EventHandler> eventHandler)
+Expected<Unique<Window>, errors::WindowError> Window::Create(const std::string& title, unsigned int width, unsigned int height, EventHandler& eventHandler)
 {
   CORE_PROFILE_FUNCTION();
-  Shared<Window> window;
+  Unique<Window> window;
 
   switch (RendererAPI::Current()) {
   case RendererAPIType::TEST_HEADLESS:
-    window = CreateShared<HeadlessWindow>();
+    window = CreateUnique<HeadlessWindow>();
     break;
 
   case RendererAPIType::OPENGL:
   case RendererAPIType::VULKAN:
   case RendererAPIType::METAL:
-    window = CreateShared<EngineWindow>();
+    window = CreateUnique<EngineWindow>();
     break;
   case RendererAPIType::NONE:
     return Unexpected(errors::WindowError::InitializationFailed);

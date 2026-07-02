@@ -27,3 +27,5 @@ AllowAllArgumentsOnNextLine: false
 BinPackParameters: false
 
 AllowAllParametersOfDeclarationOnNextLine: false
+
+AlwaysBreakTemplateDeclarations: Yes

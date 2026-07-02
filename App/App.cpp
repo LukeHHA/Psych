@@ -5,16 +5,13 @@
 #include "EntryPoint.h"
 #include "ge/Core/Core.h"
 
-#include <memory>
-
 class App : public ge::GameEngine
 {
 public:
-  App(ge::GameEngineSpecification& spec) : ge::GameEngine(spec)
+  App() : ge::GameEngine()
   {
     CORE_PROFILE_FUNCTION();
     CORE_LOG_INFO("Initializing App");
-    PushLayer(std::make_unique<AppLayer>());
   }
 
   ~App()
@@ -24,9 +21,16 @@ public:
   }
 };
 
-std::unique_ptr<ge::GameEngine>
-ge::CreateGameEngine(ge::GameEngineSpecification& spec)
+ge::Expected<ge::Unique<ge::GameEngine>, ge::errors::EngineError>
+ge::CreateGameEngine()
 {
   CORE_PROFILE_FUNCTION();
-  return std::make_unique<App>(spec);
+  auto app    = ge::CreateUnique<App>();
+  auto result = app->Init();
+  if (!result) {
+    return ge::Unexpected(result.error());
+  }
+
+  app->PushLayer(ge::CreateUnique<AppLayer>());
+  return std::move(app);
 }

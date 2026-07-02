@@ -1,6 +1,5 @@
 #include "EngineWindow.h"
 #include "Core/Core.h"
-#include "Debug/Assert.h"
 #include "Debug/Instrumentor.h"
 #include "Events/Event.h"
 #include "Events/EventHandler.h"
@@ -22,16 +21,12 @@ EngineWindow::~EngineWindow()
   CORE_LOG_INFO("Window Shutdown");
 }
 
-Expected<void, errors::WindowError> EngineWindow::Init(const std::string& title, unsigned int width, unsigned int height, Shared<EventHandler> eventHandler)
+Expected<void, errors::WindowError> EngineWindow::Init(const std::string& title, unsigned int width, unsigned int height, EventHandler& eventHandler)
 {
   CORE_PROFILE_FUNCTION();
 
   if (width == 0 || height == 0) {
     return Unexpected(errors::WindowError::InvalidDimensions);
-  }
-
-  if (!eventHandler) {
-    return Unexpected(errors::WindowError::InvalidEventHandler);
   }
 
   // This is just to ensure one window for now but will be reference counted in
@@ -40,11 +35,11 @@ Expected<void, errors::WindowError> EngineWindow::Init(const std::string& title,
     m_Data.Title         = title;
     m_Data.Width         = width;
     m_Data.Height        = height;
-    m_Data.EventsHandler = eventHandler;
+    m_Data.EventsHandler = &eventHandler;
 
     CORE_PROFILE_SCOPE("glfwInit");
     int success = glfwInit();
-    if (!success) {
+    if (success == 0) {
       return Unexpected(errors::WindowError::InitializationFailed);
     }
 
@@ -66,6 +61,10 @@ Expected<void, errors::WindowError> EngineWindow::Init(const std::string& title,
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 
+#if defined(__linux__)
+    glfwWindowHint(GLFW_DECORATED, GLFW_TRUE);
+#endif
+
     m_Window = UniqueGLFWwindow(glfwCreateWindow(static_cast<int>(width), static_cast<int>(height), title.c_str(), nullptr, nullptr), GLFWwindowDeleter{});
     if (!m_Window) {
       return Unexpected(errors::WindowError::NativeWindowCreationFailed);
@@ -78,7 +77,7 @@ Expected<void, errors::WindowError> EngineWindow::Init(const std::string& title,
       return Unexpected(errors::WindowError::ContextCreationFailed);
     }
 
-    m_RendererContext = contextResult.value();
+    m_RendererContext = std::move(contextResult.value());
     auto contextInit  = m_RendererContext->Init();
     if (!contextInit) {
       return Unexpected(errors::WindowError::ContextInitializationFailed);
@@ -92,26 +91,26 @@ Expected<void, errors::WindowError> EngineWindow::Init(const std::string& title,
 
     // Set GLFW callbacks
     glfwSetWindowSizeCallback(m_Window.get(), [](GLFWwindow* window, int width, int height) {
-      WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
+      WindowData& data = *static_cast<WindowData*>(glfwGetWindowUserPointer(window));
 
       auto event       = CreateUnique<WindowResizeEvent>(width, height);
       data.EventsHandler->QueueEvent(std::move(event));
     });
 
     glfwSetFramebufferSizeCallback(m_Window.get(), [](GLFWwindow* window, int width, int height) {
-      WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
+      WindowData& data = *static_cast<WindowData*>(glfwGetWindowUserPointer(window));
       auto event       = CreateUnique<FramebufferResizeEvent>(width, height);
       data.EventsHandler->QueueEvent(std::move(event));
     });
 
     glfwSetWindowCloseCallback(m_Window.get(), [](GLFWwindow* window) {
-      WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
+      WindowData& data = *static_cast<WindowData*>(glfwGetWindowUserPointer(window));
       auto event       = CreateUnique<WindowCloseEvent>();
       data.EventsHandler->QueueEvent(std::move(event));
     });
 
     glfwSetKeyCallback(m_Window.get(), [](GLFWwindow* window, int key, int scancode, int action, int mods) {
-      WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
+      WindowData& data = *static_cast<WindowData*>(glfwGetWindowUserPointer(window));
 
       switch (action) {
       case GLFW_PRESS: {
@@ -129,17 +128,19 @@ Expected<void, errors::WindowError> EngineWindow::Init(const std::string& title,
         data.EventsHandler->QueueEvent(std::move(event));
         break;
       }
+      default:
+        break;
       }
     });
 
     glfwSetCharCallback(m_Window.get(), [](GLFWwindow* window, unsigned int keycode) {
-      WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
+      WindowData& data = *static_cast<WindowData*>(glfwGetWindowUserPointer(window));
       auto event       = CreateUnique<KeyTypedEvent>(keycode);
       data.EventsHandler->QueueEvent(std::move(event));
     });
 
     glfwSetMouseButtonCallback(m_Window.get(), [](GLFWwindow* window, int button, int action, int mods) {
-      WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
+      WindowData& data = *static_cast<WindowData*>(glfwGetWindowUserPointer(window));
 
       switch (action) {
       case GLFW_PRESS: {
@@ -152,18 +153,20 @@ Expected<void, errors::WindowError> EngineWindow::Init(const std::string& title,
         data.EventsHandler->QueueEvent(std::move(event));
         break;
       }
+      default:
+        break;
       }
     });
 
     glfwSetScrollCallback(m_Window.get(), [](GLFWwindow* window, double xOffset, double yOffset) {
-      WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
+      WindowData& data = *static_cast<WindowData*>(glfwGetWindowUserPointer(window));
 
       auto event       = CreateUnique<MouseScrolledEvent>((float)xOffset, (float)yOffset);
       data.EventsHandler->QueueEvent(std::move(event));
     });
 
     glfwSetCursorPosCallback(m_Window.get(), [](GLFWwindow* window, double xPos, double yPos) {
-      WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
+      WindowData& data = *static_cast<WindowData*>(glfwGetWindowUserPointer(window));
 
       auto event       = CreateUnique<MouseMovedEvent>((float)xPos, (float)yPos);
       data.EventsHandler->QueueEvent(std::move(event));
@@ -193,20 +196,35 @@ void EngineWindow::HandleEvents(Unique<Event> event)
 {
   switch (event->GetEventType()) {
   case EventType::WindowResize:
-    auto& e       = static_cast<WindowResizeEvent&>(*event);
-    m_Data.Height = e.GetHeight();
-    m_Data.Width  = e.GetWidth();
-    std::cout << "window resize\n";
+  case EventType::None:
+  case EventType::WindowClose:
+  case EventType::WindowShouldClose:
+  case EventType::WindowFocus:
+  case EventType::WindowLostFocus:
+  case EventType::WindowMoved:
+  case EventType::FramebufferResize:
+  case EventType::AppTick:
+  case EventType::AppUpdate:
+  case EventType::AppRender:
+  case EventType::KeyPressed:
+  case EventType::KeyReleased:
+  case EventType::KeyTyped:
+  case EventType::MouseButtonPressed:
+  case EventType::MouseButtonReleased:
+  case EventType::MouseMoved:
+  case EventType::MouseScrolled:
+    break;
   }
 }
 void EngineWindow::SetVSync(bool enabled)
 {
   CORE_PROFILE_FUNCTION();
 
-  if (enabled)
+  if (enabled) {
     glfwSwapInterval(1);
-  else
+  } else {
     glfwSwapInterval(0);
+  }
 
   m_Data.VSync = enabled;
 }

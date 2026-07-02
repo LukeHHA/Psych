@@ -1,5 +1,6 @@
 #include "Shader.h"
 #include "Core/Core.h"
+#include "FileSystem/EngineFilesystem.h"
 #include "FileSystem/FileSystem.h"
 #include "Renderer/Platform/Opengl/OpenglShader.h"
 #include "Renderer/RendererAPI.h"
@@ -9,12 +10,24 @@
 
 namespace ge
 {
+namespace
+{
+Expected<std::string, errors::FilesystemError> TryReadShaderSource(const std::string& path)
+{
+  if (path.find("://") != std::string::npos) {
+    return util::EngineFilesystem::TryReadFile(path);
+  }
+
+  return util::Filesystem::TryReadFile(path);
+}
+} // namespace
+
 // SHADER
 Expected<Shared<Shader>, errors::ShaderError>
 Shader::Create(const std::string& vertexSrc, const std::string& fragSrc,
                const std::string& name)
 {
-  auto vertexSource = util::Filesystem::TryReadFile(vertexSrc);
+  auto vertexSource = TryReadShaderSource(vertexSrc);
   if (!vertexSource) {
     if (vertexSource.error() == errors::FilesystemError::FileNotFound) {
       return Unexpected(errors::ShaderError::SourceFileNotFound);
@@ -22,7 +35,7 @@ Shader::Create(const std::string& vertexSrc, const std::string& fragSrc,
     return Unexpected(errors::ShaderError::SourceReadFailed);
   }
 
-  auto fragmentSource = util::Filesystem::TryReadFile(fragSrc);
+  auto fragmentSource = TryReadShaderSource(fragSrc);
   if (!fragmentSource) {
     if (fragmentSource.error() == errors::FilesystemError::FileNotFound) {
       return Unexpected(errors::ShaderError::SourceFileNotFound);

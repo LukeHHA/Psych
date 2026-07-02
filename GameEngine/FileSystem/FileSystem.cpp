@@ -2,6 +2,7 @@
 #include "Core/Core.h"
 #include "Debug/Assert.h"
 #include "FileSystem/CoreFilesystemAPI.h"
+#include "Platform/LinuxFilesystemAPI.h"
 #include "Platform/MacOSFilesystemAPI.h"
 #include <filesystem>
 
@@ -9,9 +10,13 @@ namespace ge::util
 {
 void Filesystem::Init()
 {
+  s_CurrentPath_ = std::filesystem::current_path();
+
   if (s_OSFilesystemAPI_ == nullptr) {
 #if defined(GE_PLATFORM_MACOS)
     s_OSFilesystemAPI_ = CreateShared<MacOSFilesystemAPI>();
+#elif defined(GE_PLATFORM_LINUX)
+    s_OSFilesystemAPI_ = CreateShared<LinuxFilesystemAPI>();
 #else
     CORE_ASSERT(false, "Unknow Operating system. Unable to init filesystem")
 #endif
@@ -19,6 +24,8 @@ void Filesystem::Init()
 }
 
 void Filesystem::Shutdown() { s_OSFilesystemAPI_ = nullptr; }
+
+FilePath Filesystem::Current_Path() { return s_CurrentPath_; }
 
 void Filesystem::DeleteFile(const std::filesystem::path& path) { CoreFilesystemAPI::DeleteFile(path); }
 
@@ -46,7 +53,11 @@ Expected<DirPath, errors::FilesystemError> Filesystem::TryGetBaseConfigPath()
     return Unexpected(errors::FilesystemError::NotInitialized);
   }
 
-  DirPath basePath   = s_OSFilesystemAPI_->GetOSAppDataPath();
+  DirPath basePath = s_OSFilesystemAPI_->GetOSAppDataPath();
+  if (basePath.empty()) {
+    return Unexpected(errors::FilesystemError::OSPathFail);
+  }
+
   DirPath configPath = basePath / GameEngineName / "config";
   const auto result  = CoreFilesystemAPI::TryCreateDirs(configPath);
   if (!result) {
@@ -73,7 +84,11 @@ Expected<DirPath, errors::FilesystemError> Filesystem::TryGetBaseCachePath()
     return Unexpected(errors::FilesystemError::NotInitialized);
   }
 
-  DirPath basePath  = s_OSFilesystemAPI_->GetOSCacheDataPath();
+  DirPath basePath = s_OSFilesystemAPI_->GetOSCacheDataPath();
+  if (basePath.empty()) {
+    return Unexpected(errors::FilesystemError::OSPathFail);
+  }
+
   DirPath cachePath = basePath / GameEngineName;
 
   const auto result = CoreFilesystemAPI::TryCreateDirs(cachePath);
@@ -150,4 +165,28 @@ Expected<Unique<FileNode>, errors::FilesystemError> Filesystem::TryCreateDirecto
   return node;
 }
 
+std::vector<std::byte> Filesystem::ReadBinaryFile(const std::filesystem::path& path)
+{
+  std::ifstream file(path, std::ios::binary | std::ios::ate);
+
+  if (!file) {
+    CORE_ASSERT(false, "Failed to open file {}", path.string())
+  }
+
+  const auto size = file.tellg();
+  if (size < 0) {
+    CORE_ASSERT(false, "Failed to read file")
+  }
+
+  std::vector<std::byte> buffer(static_cast<std::size_t>(size));
+
+  file.seekg(0, std::ios::beg);
+  file.read(reinterpret_cast<char*>(buffer.data()), size);
+
+  if (!file) {
+    CORE_ASSERT(false, "Failed to read file")
+  }
+
+  return buffer;
+}
 } // namespace ge::util

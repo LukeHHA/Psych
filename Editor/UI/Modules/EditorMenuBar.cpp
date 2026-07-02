@@ -1,4 +1,7 @@
 #include "EditorMenuBar.h"
+#include "Core/GameEngine.h"
+#include "Events/Event.h"
+#include "Events/EventHandler.h"
 #include "imgui.h"
 
 namespace ge::ui
@@ -34,8 +37,9 @@ void ShowExampleMenuFile()
     static bool enabled = true;
     ImGui::MenuItem("Enabled", "", &enabled);
     ImGui::BeginChild("child", ImVec2(0, 60), ImGuiChildFlags_Borders);
-    for (int i = 0; i < 10; i++)
+    for (int i = 0; i < 10; i++) {
       ImGui::Text("Scrolling Text %d", i);
+    }
     ImGui::EndChild();
     static float f = 0.5f;
     static int n   = 0;
@@ -50,10 +54,7 @@ void ShowExampleMenuFile()
     for (int i = 0; i < ImGuiCol_COUNT; i++) {
       const char* name = ImGui::GetStyleColorName((ImGuiCol)i);
       ImVec2 p         = ImGui::GetCursorScreenPos();
-      ImGui::GetWindowDrawList()->AddRectFilled(
-          p,
-          ImVec2(p.x + sz, p.y + sz),
-          ImGui::GetColorU32((ImGuiCol)i));
+      ImGui::GetWindowDrawList()->AddRectFilled(p, ImVec2(p.x + sz, p.y + sz), ImGui::GetColorU32((ImGuiCol)i));
       ImGui::Dummy(ImVec2(sz, sz));
       ImGui::SameLine();
       ImGui::MenuItem(name);
@@ -76,10 +77,15 @@ void ShowExampleMenuFile()
   {
     IM_ASSERT(0);
   }
-  if (ImGui::MenuItem("Checked", NULL, true)) {
+  if (ImGui::MenuItem("Checked", nullptr, true)) {
   }
   ImGui::Separator();
-  if (ImGui::MenuItem("Quit", "Alt+F4")) {
+  bool selected = false;
+  if (ImGui::MenuItem("Quit", "Alt+F4", &selected)) {
+    if (selected) {
+      auto event = CreateUnique<WindowCloseEvent>();
+      GameEngine::Get().GetEventHandler().QueueEvent(std::move(event));
+    }
   }
 }
 

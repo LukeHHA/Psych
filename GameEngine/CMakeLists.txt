@@ -1,10 +1,13 @@
 set(SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/Logging/Logging.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Core/GameEngine.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Fonts/FontManager.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Layers/Layer.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Layers/LayerStack.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Core/Window.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/Config/Config.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Config/GameEngineConfig.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Project/Project.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Project/ProjectManager.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Renderer/Renderer.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Renderer/RendererAPI.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Renderer/RendererContext.cpp
@@ -27,10 +30,42 @@ set(SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/Window/HeadlessWindow.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Events/EventHandler.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Events/EventQueue.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/FileSystem/EngineFilesystem.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/FileSystem/FileSystem.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/FileSystem/PathResolver.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/FileSystem/CoreFilesystemAPI.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/FileSystem/Platform/MacOSFilesystemAPI.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Imgui/ImguiLayer.cpp
+)
+
+find_package(Python3 REQUIRED COMPONENTS Interpreter)
+
+set(GAME_ENGINE_GENERATED_DIR "${CMAKE_CURRENT_BINARY_DIR}/generated")
+set(GAME_ENGINE_EMBEDDED_HEADER "${GAME_ENGINE_GENERATED_DIR}/EmbeddedResources.h")
+set(GAME_ENGINE_EMBEDDED_SOURCE "${GAME_ENGINE_GENERATED_DIR}/EmbeddedResources.cpp")
+set(GAME_ENGINE_EMBEDDED_RESOURCE_FILES
+    "${PROJECT_SOURCE_DIR}/Resources/Fonts/JetBrainsMonoNerdFont-Regular.ttf"
+)
+set(GAME_ENGINE_EMBEDDED_RESOURCES
+    "${PROJECT_SOURCE_DIR}/Resources/Fonts/JetBrainsMonoNerdFont-Regular.ttf=JetBrainsMonoNerdFontRegular"
+)
+
+add_custom_command(
+  OUTPUT
+    "${GAME_ENGINE_EMBEDDED_HEADER}"
+    "${GAME_ENGINE_EMBEDDED_SOURCE}"
+  COMMAND "${Python3_EXECUTABLE}"
+    "${PROJECT_SOURCE_DIR}/tools/embed_resources.py"
+    --namespace ge::embedded
+    --output-header "${GAME_ENGINE_EMBEDDED_HEADER}"
+    --output-source "${GAME_ENGINE_EMBEDDED_SOURCE}"
+    ${GAME_ENGINE_EMBEDDED_RESOURCES}
+  DEPENDS
+    "${PROJECT_SOURCE_DIR}/tools/embed_resources.py"
+    ${GAME_ENGINE_EMBEDDED_RESOURCE_FILES}
+  VERBATIM
+)
+
+set(IMGUI_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/Vendor/imgui/imgui.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Vendor/imgui/imgui_draw.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Vendor/imgui/imgui_demo.cpp
@@ -42,7 +77,7 @@ set(SOURCES
 )
 
 add_library(GameEngine STATIC)
-target_sources(GameEngine PRIVATE ${SOURCES})
+target_sources(GameEngine PRIVATE ${SOURCES} "${GAME_ENGINE_EMBEDDED_SOURCE}")
 target_compile_features(GameEngine PUBLIC cxx_std_20)
 set_target_properties(GameEngine PROPERTIES CXX_EXTENSIONS OFF)
 
@@ -51,6 +86,7 @@ if(APPLE)
   enable_language(OBJC)
 
   target_sources(GameEngine PRIVATE
+        FileSystem/Platform/MacOSFilesystemAPI.cpp
         FileSystem/Platform/MacOSFilesystem.mm
     )
 
@@ -62,10 +98,15 @@ if(APPLE)
         "-framework Foundation"
     )
 elseif(UNIX AND NOT APPLE)
-  find_package(OpenGL REQUIRED)
+  # find_package(OpenGL REQUIRED)
   find_package(Threads REQUIRED)
 
-  target_link_libraries(GameEngine PUBLIC OpenGL::GL Threads::Threads)
+  target_sources(GameEngine PRIVATE
+        FileSystem/Platform/LinuxFilesystemAPI.cpp
+    )
+
+  # target_link_libraries(GameEngine PUBLIC OpenGL::GL Threads::Threads)
+  target_link_libraries(GameEngine PUBLIC Threads::Threads)
 endif()
 
 if(
@@ -94,8 +135,8 @@ set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
 set(GLFW_INSTALL OFF CACHE BOOL "" FORCE)
 if(UNIX AND NOT APPLE)
-  set(GLFW_BUILD_X11 ON CACHE BOOL "Build GLFW X11 support")
-  set(GLFW_BUILD_WAYLAND OFF CACHE BOOL "Build GLFW Wayland support")
+  set(GLFW_BUILD_X11 OFF CACHE BOOL "Build GLFW X11 support")
+  set(GLFW_BUILD_WAYLAND ON CACHE BOOL "Build GLFW Wayland support")
 endif()
 
 set(ASSIMP_BUILD_ASSIMP_TOOLS OFF CACHE BOOL "" FORCE)
@@ -105,6 +146,8 @@ set(ASSIMP_INSTALL OFF CACHE BOOL "" FORCE)
 set(ASSIMP_WARNINGS_AS_ERRORS OFF CACHE BOOL "" FORCE)
 set(PUGIXML_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 set(PUGIXML_INSTALL OFF CACHE BOOL "" FORCE)
+set(CEREAL_INSTALL OFF CACHE BOOL "" FORCE)
+set(CEREAL_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 
 add_subdirectory(Vendor/spdlog EXCLUDE_FROM_ALL)
 add_subdirectory(Vendor/kz EXCLUDE_FROM_ALL)
@@ -113,6 +156,26 @@ add_subdirectory(Vendor/glfw-3.4 EXCLUDE_FROM_ALL)
 add_subdirectory(Vendor/pugixml EXCLUDE_FROM_ALL)
 add_subdirectory(Vendor/assimp EXCLUDE_FROM_ALL)
 add_subdirectory(Vendor/glm EXCLUDE_FROM_ALL)
+# add_subdirectory(Vendor/cereal EXCLUDE_FROM_ALL)
+
+add_library(GameEngineImgui OBJECT)
+target_sources(GameEngineImgui PRIVATE ${IMGUI_SOURCES})
+target_compile_features(GameEngineImgui PRIVATE cxx_std_20)
+set_target_properties(GameEngineImgui PROPERTIES CXX_EXTENSIONS OFF)
+
+target_link_libraries(GameEngineImgui PRIVATE
+  glad
+  glfw
+)
+
+target_include_directories(GameEngineImgui SYSTEM PUBLIC
+    ${CMAKE_CURRENT_SOURCE_DIR}/Vendor
+    ${CMAKE_CURRENT_SOURCE_DIR}/Vendor/imgui
+)
+
+target_compile_definitions(GameEngineImgui PRIVATE GL_SILENCE_DEPRECATION)
+
+find_package(Boost CONFIG REQUIRED)
 
 target_link_libraries(GameEngine PUBLIC
   spdlog::spdlog
@@ -121,16 +184,22 @@ target_link_libraries(GameEngine PUBLIC
   pugixml::pugixml
   assimp
   glfw
+  Boost::headers
+  # cereal
 )
+
+target_link_libraries(GameEngine PRIVATE GameEngineImgui)
 
 target_include_directories(GameEngine PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/
     ${CMAKE_CURRENT_SOURCE_DIR}/include
+    ${GAME_ENGINE_GENERATED_DIR}
 )
 
 target_include_directories(GameEngine SYSTEM PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/Vendor
     ${CMAKE_CURRENT_SOURCE_DIR}/Vendor/imgui
+    ${CMAKE_CURRENT_SOURCE_DIR}/Vendor/cereal/include
 )
 
 if(GAME_ENGINE_BUILD_TESTS)
@@ -146,3 +215,5 @@ target_compile_definitions(GameEngine
 )
 
 target_link_libraries(GameEngine PUBLIC glm::glm)
+
+game_engine_enable_clang_tidy(GameEngine)

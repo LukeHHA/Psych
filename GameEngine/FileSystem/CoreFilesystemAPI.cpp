@@ -125,7 +125,7 @@ Expected<void, errors::FilesystemError> CoreFilesystemAPI::TryCreateFile(const F
   return {};
 }
 
-const std::string CoreFilesystemAPI::StreamFile(const std::string& path)
+std::string CoreFilesystemAPI::StreamFile(const std::string& path)
 {
   const auto result = TryReadFile(path);
   if (!result) {
@@ -172,10 +172,7 @@ Expected<std::string, errors::FilesystemError> CoreFilesystemAPI::TryReadFile(co
 
 bool CoreFilesystemAPI::CreateDir(const DirPath& path) { return std::filesystem::create_directory(path); }
 
-bool CoreFilesystemAPI::CreateDirWithParentPerms(const DirPath& path, const DirPath& parent_path)
-{
-  return std::filesystem::create_directory(path, parent_path);
-}
+bool CoreFilesystemAPI::CreateDirWithParentPerms(const DirPath& path, const DirPath& parent_path) { return std::filesystem::create_directory(path, parent_path); }
 
 bool CoreFilesystemAPI::CreateDirs(const DirPath& path) { return static_cast<bool>(TryCreateDirs(path)); }
 

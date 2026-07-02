@@ -16,25 +16,29 @@ namespace ge
 class HeadlessWindow : public Window
 {
 public:
-  using EventCallbackFn = std::function<void(Event&)>;
+  using EventCallbackFn                            = std::function<void(Event&)>;
 
-  HeadlessWindow()      = default;
-  virtual ~HeadlessWindow();
+  HeadlessWindow()                                 = default;
+  HeadlessWindow(const HeadlessWindow&)            = delete;
+  HeadlessWindow(HeadlessWindow&&)                 = delete;
+  HeadlessWindow& operator=(const HeadlessWindow&) = delete;
+  HeadlessWindow& operator=(HeadlessWindow&&)      = delete;
+  ~HeadlessWindow() override;
 
-  Expected<void, errors::WindowError> Init(const std::string& title, unsigned int width, unsigned int height, Shared<EventHandler> eventHandler) override;
+  Expected<void, errors::WindowError> Init(const std::string& title, unsigned int width, unsigned int height, EventHandler& eventHandler) override;
   Expected<void, errors::WindowError> Shutdown() override;
-  virtual void PollEvents() override {}
-  virtual unsigned int GetWidth() const override { return m_Data.Width; }
-  virtual unsigned int GetHeight() const override { return m_Data.Height; }
-  virtual GLFWwindow* GetNativeWindow() const override { return m_Window.get(); }
-  virtual void SetEventCallback(const EventCallbackFn& callback) override { m_Data.EventCallback = callback; }
+  void PollEvents() override {}
+  [[nodiscard]] unsigned int GetWidth() const override { return m_Data.Width; }
+  [[nodiscard]] unsigned int GetHeight() const override { return m_Data.Height; }
+  [[nodiscard]] GLFWwindow* GetNativeWindow() const override { return m_Window.get(); }
+  void SetEventCallback(const EventCallbackFn& callback) override { m_Data.EventCallback = callback; }
   void OnUpdate() override;
   void SetVSync(bool enabled) override;
-  virtual void HandleEvents(Unique<Event> event) override;
-  bool IsVSync() const override;
+  void HandleEvents(Unique<Event> event) override;
+  [[nodiscard]] bool IsVSync() const override;
 
 private:
-  Shared<RendererContext> m_RendererContext;
+  Unique<RendererContext> m_RendererContext;
   UniqueGLFWwindow m_Window;
 
   struct WindowData {

@@ -19,7 +19,7 @@ public:
 
   static Expected<void, errors::FilesystemError> TryDeleteFile(const std::filesystem::path& path);
 
-  static const std::string StreamFile(const std::string& path);
+  static std::string StreamFile(const std::string& path);
 
   static Expected<std::string, errors::FilesystemError> TryReadFile(const std::filesystem::path& path);
 

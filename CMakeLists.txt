@@ -21,7 +21,12 @@ option(GAME_ENGINE_BUILD_EDITOR "Build the editor target" OFF)
 option(GE_ENABLE_ASSERTS "Enable GameEngine runtime assertions" ON)
 option(GE_ENABLE_PROFILING "Enable GameEngine profiling instrumentation" ON)
 option(GE_ENABLE_SANITIZERS "Enable ASan/UBSan for GameEngine targets" OFF)
+option(GAME_ENGINE_ENABLE_CLANG_TIDY "Run clang-tidy on GameEngine and Editor sources" OFF)
 option(BUILD_SHARED_LIBS "Build shared libraries" OFF)
+
+if(CMAKE_CXX_COMPILER_ID MATCHES "Clang|GNU")
+  add_compile_options(-fdiagnostics-color=always)
+endif()
 
 # Backwards compatibility for existing local commands that used -DBUILD_EDITOR=ON.
 if(DEFINED BUILD_EDITOR)
@@ -34,6 +39,20 @@ message(STATUS "GameEngine tests: ${GAME_ENGINE_BUILD_TESTS}")
 message(STATUS "GameEngine asserts: ${GE_ENABLE_ASSERTS}")
 message(STATUS "GameEngine profiling: ${GE_ENABLE_PROFILING}")
 message(STATUS "GameEngine sanitizers: ${GE_ENABLE_SANITIZERS}")
+message(STATUS "GameEngine clang-tidy: ${GAME_ENGINE_ENABLE_CLANG_TIDY}")
+
+if(GAME_ENGINE_ENABLE_CLANG_TIDY)
+  find_program(GAME_ENGINE_CLANG_TIDY_EXE NAMES clang-tidy REQUIRED)
+  set(GAME_ENGINE_CLANG_TIDY_COMMAND "${GAME_ENGINE_CLANG_TIDY_EXE}")
+endif()
+
+function(game_engine_enable_clang_tidy target_name)
+  if(GAME_ENGINE_ENABLE_CLANG_TIDY)
+    set_target_properties("${target_name}" PROPERTIES
+      CXX_CLANG_TIDY "${GAME_ENGINE_CLANG_TIDY_COMMAND}"
+    )
+  endif()
+endfunction()
 
 add_subdirectory(GameEngine)
 if(GAME_ENGINE_BUILD_EDITOR)

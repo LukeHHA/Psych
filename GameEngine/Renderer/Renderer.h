@@ -32,7 +32,7 @@ public:
   Renderer()  = delete;
   ~Renderer() = delete;
 
-  static Expected<void, errors::RendererError> Init(GameEngineSpecification& specs);
+  static Expected<void, errors::RendererError> Init(const GameEngineSpecification& specs);
   static void Shutdown();
   static void SetClearColour(const glm::vec3& color);
   static void Clear();

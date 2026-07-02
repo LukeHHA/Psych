@@ -11,6 +11,7 @@ namespace ge
 enum class EventType {
   None = 0,
   WindowClose,
+  WindowShouldClose,
   WindowResize,
   WindowFocus,
   WindowLostFocus,
@@ -37,30 +38,27 @@ enum EventCategory {
   EventCategoryMouseButton = BIT(4)
 };
 
-#define EVENT_CLASS_TYPE(type)                                                 \
-  static EventType GetStaticType() { return EventType::type; }                 \
-  virtual EventType GetEventType() const override { return GetStaticType(); }  \
+#define EVENT_CLASS_TYPE(type)                                                                                                                                           \
+  static EventType GetStaticType() { return EventType::type; }                                                                                                           \
+  virtual EventType GetEventType() const override { return GetStaticType(); }                                                                                            \
   virtual const char* GetName() const override { return #type; }
 
-#define EVENT_CLASS_CATEGORY(category)                                         \
+#define EVENT_CLASS_CATEGORY(category)                                                                                                                                   \
   virtual int GetCategoryFlags() const override { return category; }
 
 class Event
 {
 public:
-  virtual ~Event() = default;
+  virtual ~Event()                       = default;
 
-  bool Handled = false;
+  bool Handled                           = false;
 
   virtual EventType GetEventType() const = 0;
   virtual const char* GetName() const    = 0;
   virtual int GetCategoryFlags() const   = 0;
   virtual std::string ToString() const { return GetName(); }
 
-  bool IsInCategory(EventCategory category)
-  {
-    return GetCategoryFlags() & category;
-  }
+  bool IsInCategory(EventCategory category) { return GetCategoryFlags() & category; }
 };
 
 class EventDispatcher
@@ -69,7 +67,8 @@ public:
   EventDispatcher(Event& event) : m_Event(event) {}
 
   // F will be deduced by the compiler
-  template <typename T, typename F> bool Dispatch(const F& func)
+  template <typename T, typename F>
+  bool Dispatch(const F& func)
   {
     if (m_Event.GetEventType() == T::GetStaticType()) {
       m_Event.Handled |= func(static_cast<T&>(m_Event));
@@ -82,18 +81,12 @@ private:
   Event& m_Event;
 };
 
-inline std::ostream& operator<<(std::ostream& os, const Event& e)
-{
-  return os << e.ToString();
-}
+inline std::ostream& operator<<(std::ostream& os, const Event& e) { return os << e.ToString(); }
 
 class WindowResizeEvent : public Event
 {
 public:
-  WindowResizeEvent(unsigned int width, unsigned int height)
-      : m_Width(width), m_Height(height)
-  {
-  }
+  WindowResizeEvent(unsigned int width, unsigned int height) : m_Width(width), m_Height(height) {}
 
   unsigned int GetWidth() const { return m_Width; }
   unsigned int GetHeight() const { return m_Height; }
@@ -114,10 +107,7 @@ private:
 class FramebufferResizeEvent : public Event
 {
 public:
-  FramebufferResizeEvent(unsigned int width, unsigned int height)
-      : m_Width(width), m_Height(height)
-  {
-  }
+  FramebufferResizeEvent(unsigned int width, unsigned int height) : m_Width(width), m_Height(height) {}
 
   unsigned int GetWidth() const { return m_Width; }
   unsigned int GetHeight() const { return m_Height; }
@@ -149,6 +139,23 @@ public:
   }
 
   EVENT_CLASS_TYPE(WindowClose)
+  EVENT_CLASS_CATEGORY(EventCategoryApplication)
+};
+
+class WindowShouldCloseEvent : public Event
+{
+public:
+  WindowShouldCloseEvent()  = default;
+  ~WindowShouldCloseEvent() = default;
+
+  [[nodiscard]] std::string ToString() const override
+  {
+    std::stringstream ss;
+    ss << "WindowShouldCloseEvent: ";
+    return ss.str();
+  }
+
+  EVENT_CLASS_TYPE(WindowShouldClose)
   EVENT_CLASS_CATEGORY(EventCategoryApplication)
 };
 } // namespace ge
