@@ -43,7 +43,6 @@ Expected<void, errors::EngineError> GameEngine::Init()
   if (resourcePathError) {
     return Unexpected(errors::EngineError::GameEngineInitializationFailed);
   }
-  m_PathResolver_.SetEngineRoot(resourcePath);
 
   const auto projectResult = m_ProjectManager_.Init(m_PathResolver_);
   if (!projectResult) {
@@ -110,7 +109,6 @@ Expected<void, errors::EngineError> GameEngine::Shutdown()
   s_Application            = nullptr;
   const auto projectResult = m_ProjectManager_.Shutdown(m_PathResolver_);
   util::EngineFilesystem::Shutdown();
-  m_PathResolver_.ClearEngineRoot();
   if (!projectResult) {
     return Unexpected(errors::EngineError::GameEngineInitializationFailed);
   }

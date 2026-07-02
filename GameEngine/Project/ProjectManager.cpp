@@ -25,8 +25,6 @@ Expected<void, errors::ProjectError> ProjectManager::Shutdown(util::PathResolver
 {
   CORE_PROFILE_FUNCTION();
 
-  resolver.ClearAssetRoot();
-
   if (!m_ActiveProject_) {
     return {};
   }
@@ -57,7 +55,6 @@ Expected<void, errors::ProjectError> ProjectManager::OpenProject(util::FilePath 
     }
   }
 
-  resolver.SetAssetRoot(project->GetAssetRootPath());
   m_ActiveProject_ = std::move(project);
   return {};
 }
