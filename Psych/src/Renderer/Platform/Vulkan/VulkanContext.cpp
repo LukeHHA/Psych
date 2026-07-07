@@ -1,0 +1,23 @@
+#include "VulkanContext.h"
+#include "Debug/Assert.h"
+
+namespace psych
+{
+// VulkanContext::VulkanContext(GLFWwindow* window) : m_WindowHandle(window) {
+//     CORE_ASSERT(window, "Window is null!");
+// }
+
+VulkanContext::VulkanContext() = default;
+
+Expected<void, errors::RendererError> VulkanContext::Init()
+{
+  // Vulkan-specific initialization code would go here
+  return {};
+}
+void VulkanContext::SwapBuffers()
+{
+  // Vulkan does not use traditional buffer swapping like OpenGL.
+  // Presentation is handled differently, so this function may be empty
+  // or contain Vulkan-specific presentation logic.
+}
+} // namespace psych

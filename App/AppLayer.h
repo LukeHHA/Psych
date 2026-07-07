@@ -1,9 +1,9 @@
 #pragma once
 
-#include "ge/Core/Layer.h"
-#include "ge/Core/Renderer.h"
+#include "Psych/Core/Layer.h"
+#include "Psych/Core/Renderer.h"
 
-class AppLayer : public ge::Layer
+class AppLayer : public psychLayer
 {
 public:
   AppLayer();
@@ -11,12 +11,12 @@ public:
 
   virtual void OnAttach() override;
   virtual void OnDetach() override;
-  virtual void OnEvent(ge::Event& event) override;
+  virtual void OnEvent(psychEvent& event) override;
   virtual void OnUpdate(float ts = 1) override;
   virtual void OnRender() override;
   virtual void OnImGuiRender() override;
 
 private:
-  ge::Shared<ge::VertexArray> m_VertexArray;
-  ge::Shared<ge::Shader> m_Shader;
+  psychShared<psychVertexArray> m_VertexArray;
+  psychShared<psychShader> m_Shader;
 };

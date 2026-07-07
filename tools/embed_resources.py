@@ -3,7 +3,7 @@
 
 Example:
   python tools/embed_resources.py \
-    --namespace ge::embedded \
+    --namespace psych::embedded \
     --output-header build/generated/EmbeddedResources.h \
     --output-source build/generated/EmbeddedResources.cpp \
     Resources/Fonts/JetBrainsMonoNerdFont-Regular.ttf=JetBrainsMonoNerdFontRegular

@@ -31,13 +31,13 @@ jobs:
             ninja-build
 
       - name: Configure
-        run: cmake -S . -B build -G Ninja -DGAME_ENGINE_BUILD_TESTS=ON -DGE_ENABLE_SANITIZERS=ON -DGLFW_BUILD_X11=ON -DGLFW_BUILD_WAYLAND=OFF -DCMAKE_BUILD_TYPE=Debug
+        run: cmake -S . -B build -G Ninja -DPSYCH_ENGINE_BUILD_TESTS=ON -DGE_ENABLE_SANITIZERS=ON -DGLFW_BUILD_X11=ON -DGLFW_BUILD_WAYLAND=OFF -DCMAKE_BUILD_TYPE=Debug
 
       - name: Build engine
-        run: cmake --build build --target GameEngine --parallel
+        run: cmake --build build --target PsychEngine --parallel
 
       - name: Build tests
-        run: cmake --build build --target GameEngineTests --parallel
+        run: cmake --build build --target PsychEngineTests --parallel
 
       - name: Run tests
         run: ctest --test-dir build --output-on-failure

@@ -5,11 +5,11 @@
 int main(int argc, char** argv)
 {
   std::filesystem::create_directories("logs");
-  ge::Log::Init();
+  psych::Log::Init();
 
   ::testing::InitGoogleTest(&argc, argv);
   const int result = RUN_ALL_TESTS();
 
-  ge::Log::Shutdown();
+  psych::Log::Shutdown();
   return result;
 }

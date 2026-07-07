@@ -12,19 +12,16 @@ struct LayerEvents {
   std::vector<std::string> detached;
 };
 
-class TestLayer : public ge::Layer
+class TestLayer : public psych::Layer
 {
 public:
-  TestLayer(std::string name, LayerEvents& events)
-      : ge::Layer(name), m_Name_(std::move(name)), m_Events_(events)
-  {
-  }
+  TestLayer(std::string name, LayerEvents& events) : psych::Layer(name), m_Name_(std::move(name)), m_Events_(events) {}
 
   const std::string& Name() const { return m_Name_; }
 
   void OnAttach() override { m_Events_.attached.push_back(m_Name_); }
   void OnDetach() override { m_Events_.detached.push_back(m_Name_); }
-  void OnEvent(ge::Event&) override {}
+  void OnEvent(psych::Event&) override {}
   void OnUpdate(float) override {}
   void OnRender() override {}
   void OnImGuiRender() override {}
@@ -37,7 +34,7 @@ private:
 TEST(LayerStackTests, PushLayerInsertsBeforeOverlays)
 {
   LayerEvents events;
-  ge::LayerStack stack;
+  psych::LayerStack stack;
 
   stack.PushOverlay(std::make_unique<TestLayer>("overlay-a", events));
   stack.PushLayer(std::make_unique<TestLayer>("layer-a", events));
@@ -49,12 +46,8 @@ TEST(LayerStackTests, PushLayerInsertsBeforeOverlays)
     order.push_back(static_cast<TestLayer*>(layer.get())->Name());
   }
 
-  EXPECT_EQ(order,
-            (std::vector<std::string>{
-                "layer-a", "layer-b", "overlay-a", "overlay-b"}));
-  EXPECT_EQ(events.attached,
-            (std::vector<std::string>{
-                "overlay-a", "layer-a", "layer-b", "overlay-b"}));
+  EXPECT_EQ(order, (std::vector<std::string>{"layer-a", "layer-b", "overlay-a", "overlay-b"}));
+  EXPECT_EQ(events.attached, (std::vector<std::string>{"overlay-a", "layer-a", "layer-b", "overlay-b"}));
 }
 
 TEST(LayerStackTests, DestructorDetachesOwnedLayersInIterationOrder)
@@ -62,16 +55,14 @@ TEST(LayerStackTests, DestructorDetachesOwnedLayersInIterationOrder)
   LayerEvents events;
 
   {
-    ge::LayerStack stack;
+    psych::LayerStack stack;
     stack.PushLayer(std::make_unique<TestLayer>("layer-a", events));
     stack.PushOverlay(std::make_unique<TestLayer>("overlay-a", events));
 
-    EXPECT_EQ(events.attached,
-              (std::vector<std::string>{"layer-a", "overlay-a"}));
+    EXPECT_EQ(events.attached, (std::vector<std::string>{"layer-a", "overlay-a"}));
     EXPECT_TRUE(events.detached.empty());
   }
 
-  EXPECT_EQ(events.detached,
-            (std::vector<std::string>{"layer-a", "overlay-a"}));
+  EXPECT_EQ(events.detached, (std::vector<std::string>{"layer-a", "overlay-a"}));
 }
 } // namespace

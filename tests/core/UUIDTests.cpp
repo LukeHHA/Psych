@@ -5,17 +5,17 @@ namespace
 {
 TEST(UUIDTests, NilCreatesNilUuidWithExpectedSize)
 {
-  const ge::UUID id = ge::UUID::Nill();
+  const psych::UUID id = psych::UUID::Nill();
 
   EXPECT_TRUE(id.is_nil());
-  EXPECT_EQ(id.size(), ge::UUID::static_size());
+  EXPECT_EQ(id.size(), psych::UUID::static_size());
   EXPECT_EQ(id.size(), 16u);
 }
 
 TEST(UUIDTests, DefaultUuidIsNonNilAndCopiesCompareEqual)
 {
-  const ge::UUID id;
-  const ge::UUID copy = id;
+  const psych::UUID id;
+  const psych::UUID copy = id;
 
   EXPECT_FALSE(id.is_nil());
   EXPECT_EQ(copy, id);
@@ -24,8 +24,8 @@ TEST(UUIDTests, DefaultUuidIsNonNilAndCopiesCompareEqual)
 
 TEST(UUIDTests, DifferentGeneratedUuidsCompareNotEqual)
 {
-  const ge::UUID first;
-  const ge::UUID second;
+  const psych::UUID first;
+  const psych::UUID second;
 
   EXPECT_NE(first, second);
 }

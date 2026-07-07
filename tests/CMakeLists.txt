@@ -3,19 +3,19 @@ include(FetchContent)
 find_package(GTest CONFIG QUIET)
 if(GTest_FOUND)
     if(TARGET GTest::gtest)
-        set(GAME_ENGINE_GTEST_TARGET GTest::gtest)
+        set(PSYCH_ENGINE_GTEST_TARGET GTest::gtest)
     else()
-        set(GAME_ENGINE_GTEST_TARGET GTest::GTest)
+        set(PSYCH_ENGINE_GTEST_TARGET GTest::GTest)
     endif()
-elseif(EXISTS "${PROJECT_SOURCE_DIR}/GameEngine/Vendor/assimp/contrib/googletest/CMakeLists.txt")
+elseif(EXISTS "${PROJECT_SOURCE_DIR}/PsychEngine/Vendor/assimp/contrib/googletest/CMakeLists.txt")
     set(BUILD_GMOCK OFF CACHE BOOL "" FORCE)
     set(INSTALL_GTEST OFF CACHE BOOL "" FORCE)
     add_subdirectory(
-        "${PROJECT_SOURCE_DIR}/GameEngine/Vendor/assimp/contrib/googletest"
-        "${CMAKE_BINARY_DIR}/_deps/game_engine_googletest-build"
+        "${PROJECT_SOURCE_DIR}/PsychEngine/Vendor/assimp/contrib/googletest"
+        "${CMAKE_BINARY_DIR}/_deps/PSYCH_ENGINE_googletest-build"
         EXCLUDE_FROM_ALL
     )
-    set(GAME_ENGINE_GTEST_TARGET gtest)
+    set(PSYCH_ENGINE_GTEST_TARGET gtest)
 else()
     set(INSTALL_GTEST OFF CACHE BOOL "" FORCE)
     FetchContent_Declare(
@@ -23,10 +23,10 @@ else()
         URL https://github.com/google/googletest/archive/refs/tags/v1.17.0.zip
     )
     FetchContent_MakeAvailable(googletest)
-    set(GAME_ENGINE_GTEST_TARGET GTest::gtest)
+    set(PSYCH_ENGINE_GTEST_TARGET GTest::gtest)
 endif()
 
-add_executable(GameEngineTests
+add_executable(PsychEngineTests
     main.cpp
     core/UUIDTests.cpp
     events/EventTests.cpp
@@ -36,16 +36,16 @@ add_executable(GameEngineTests
     util/CommandLineTests.cpp
 )
 
-target_link_libraries(GameEngineTests PRIVATE
-    GameEngine
-    ${GAME_ENGINE_GTEST_TARGET}
+target_link_libraries(PsychEngineTests PRIVATE
+    PsychEngine
+    ${PSYCH_ENGINE_GTEST_TARGET}
 )
 
-target_compile_definitions(GameEngineTests PRIVATE GE_TESTS_ENABLED)
+target_compile_definitions(PsychEngineTests PRIVATE GE_TESTS_ENABLED)
 
 file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/runtime")
 
 include(GoogleTest)
-gtest_discover_tests(GameEngineTests
+gtest_discover_tests(PsychEngineTests
     WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/runtime"
 )

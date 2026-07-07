@@ -1,8 +1,8 @@
 #include "AppLayer.h"
-#include "ge/Core/Core.h"
-#include "ge/Core/Renderer.h"
+#include "Psych/Core/Core.h"
+#include "Psych/Core/Renderer.h"
 
-AppLayer::AppLayer() : ge::Layer("AppLayer") { CORE_PROFILE_FUNCTION(); }
+AppLayer::AppLayer() : psych::Layer("AppLayer") { CORE_PROFILE_FUNCTION(); }
 
 AppLayer::~AppLayer() { CORE_PROFILE_FUNCTION(); }
 
@@ -10,18 +10,17 @@ void AppLayer::OnUpdate(float ts)
 {
   CORE_PROFILE_FUNCTION();
 
-  auto renderer = ge::RendererAPI::Create();
+  auto renderer = psych::RendererAPI::Create();
   renderer->DrawIndexed(m_VertexArray, 6);
 }
-void AppLayer::OnEvent(ge::Event& event) { CORE_PROFILE_FUNCTION(); }
+void AppLayer::OnEvent(psych::Event& event) { CORE_PROFILE_FUNCTION(); }
 
 void AppLayer::OnRender() { CORE_PROFILE_FUNCTION(); }
 
 void AppLayer::OnAttach()
 {
   CORE_PROFILE_FUNCTION();
-  const auto shader = ge::Shader::Create(
-      "data/Shaders/vertex.glsl", "data/Shaders/fragment.glsl", "TestShader");
+  const auto shader = psych::Shader::Create("data/Shaders/vertex.glsl", "data/Shaders/fragment.glsl", "TestShader");
 
   shader->Bind();
   static const float s_TriangleVertices[] = {
@@ -33,15 +32,18 @@ void AppLayer::OnAttach()
   };
 
   static const uint32_t s_TriangleIndices[] = {
-      0, 1, 3, // first triangle
-      1, 2, 3  // second triangle
+      0,
+      1,
+      3, // first triangle
+      1,
+      2,
+      3  // second triangle
   };
 
-  auto vertexBuffer =
-      ge::VertexBuffer::Create(s_TriangleVertices, sizeof(s_TriangleVertices));
-  vertexBuffer->SetLayout(ge::VertexFormatID::PC);
-  auto IndexBuffer = ge::IndexBuffer::Create(s_TriangleIndices, 6);
-  m_VertexArray    = ge::VertexArray::Create();
+  auto vertexBuffer = psych::VertexBuffer::Create(s_TriangleVertices, sizeof(s_TriangleVertices));
+  vertexBuffer->SetLayout(psych::VertexFormatID::PC);
+  auto IndexBuffer = psych::IndexBuffer::Create(s_TriangleIndices, 6);
+  m_VertexArray    = psych::VertexArray::Create();
   m_VertexArray->AddVertexBuffer(vertexBuffer);
   m_VertexArray->AddIndexBuffer(IndexBuffer);
 }

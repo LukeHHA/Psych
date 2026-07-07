@@ -15,7 +15,7 @@ protected:
   void SetUp() override
   {
     const auto* testInfo = ::testing::UnitTest::GetInstance()->current_test_info();
-    m_Root_ = std::filesystem::temp_directory_path() / ("game_engine_fs_tests_" + std::string(testInfo->test_suite_name()) + "_" + std::string(testInfo->name()));
+    m_Root_ = std::filesystem::temp_directory_path() / ("PSYCH_ENGINE_fs_tests_" + std::string(testInfo->test_suite_name()) + "_" + std::string(testInfo->name()));
     std::filesystem::remove_all(m_Root_);
     std::filesystem::create_directories(m_Root_);
   }
@@ -30,19 +30,19 @@ TEST_F(FilesystemTest, CoreFilesystemDetectsFilesAndDirectories)
   const std::filesystem::path directory = m_Root_ / "assets";
   const std::filesystem::path file      = directory / "scene.txt";
 
-  ASSERT_TRUE(ge::CoreFilesystemAPI::CreateDirs(directory));
+  ASSERT_TRUE(psych::CoreFilesystemAPI::CreateDirs(directory));
   {
     std::ofstream output(file);
     output << "scene-data";
   }
 
-  EXPECT_TRUE(ge::CoreFilesystemAPI::DirExists(directory));
-  EXPECT_FALSE(ge::CoreFilesystemAPI::DirExists(file));
-  EXPECT_TRUE(ge::CoreFilesystemAPI::FileExists(file));
-  EXPECT_FALSE(ge::CoreFilesystemAPI::FileExists(directory));
-  EXPECT_EQ(ge::CoreFilesystemAPI::StreamFile(file.string()), "scene-data");
+  EXPECT_TRUE(psych::CoreFilesystemAPI::DirExists(directory));
+  EXPECT_FALSE(psych::CoreFilesystemAPI::DirExists(file));
+  EXPECT_TRUE(psych::CoreFilesystemAPI::FileExists(file));
+  EXPECT_FALSE(psych::CoreFilesystemAPI::FileExists(directory));
+  EXPECT_EQ(psych::CoreFilesystemAPI::StreamFile(file.string()), "scene-data");
 
-  const auto readResult = ge::CoreFilesystemAPI::TryReadFile(file);
+  const auto readResult = psych::CoreFilesystemAPI::TryReadFile(file);
   ASSERT_TRUE(readResult);
   EXPECT_EQ(readResult.value(), "scene-data");
 }
@@ -55,11 +55,11 @@ TEST_F(FilesystemTest, DeleteFileRemovesOnlyExistingRegularFiles)
     output << "temporary";
   }
 
-  ASSERT_TRUE(ge::CoreFilesystemAPI::FileExists(file));
-  ge::CoreFilesystemAPI::DeleteFile(file);
-  EXPECT_FALSE(ge::CoreFilesystemAPI::FileExists(file));
+  ASSERT_TRUE(psych::CoreFilesystemAPI::FileExists(file));
+  psych::CoreFilesystemAPI::DeleteFile(file);
+  EXPECT_FALSE(psych::CoreFilesystemAPI::FileExists(file));
 
-  EXPECT_NO_THROW(ge::CoreFilesystemAPI::DeleteFile(file));
+  EXPECT_NO_THROW(psych::CoreFilesystemAPI::DeleteFile(file));
 }
 
 TEST_F(FilesystemTest, TryDeleteFileReportsWrongTypeWhenPathIsDirectory)
@@ -67,30 +67,30 @@ TEST_F(FilesystemTest, TryDeleteFileReportsWrongTypeWhenPathIsDirectory)
   const std::filesystem::path directory = m_Root_ / "delete-dir";
   std::filesystem::create_directories(directory);
 
-  const auto result = ge::CoreFilesystemAPI::TryDeleteFile(directory);
+  const auto result = psych::CoreFilesystemAPI::TryDeleteFile(directory);
 
   ASSERT_FALSE(result);
-  EXPECT_EQ(result.error(), ge::errors::FilesystemError::PathExistsWithWrongType);
+  EXPECT_EQ(result.error(), psych::errors::FilesystemError::PathExistsWithWrongType);
 }
 
 TEST_F(FilesystemTest, TryReadFileReportsMissingFiles)
 {
   const std::filesystem::path missingFile = m_Root_ / "missing.txt";
 
-  const auto result                       = ge::CoreFilesystemAPI::TryReadFile(missingFile);
+  const auto result                       = psych::CoreFilesystemAPI::TryReadFile(missingFile);
 
   ASSERT_FALSE(result);
-  EXPECT_EQ(result.error(), ge::errors::FilesystemError::FileNotFound);
+  EXPECT_EQ(result.error(), psych::errors::FilesystemError::FileNotFound);
 }
 
 TEST_F(FilesystemTest, TryCreateFileCreatesParentDirectories)
 {
   const std::filesystem::path file = m_Root_ / "config" / "settings.xml";
 
-  const auto result                = ge::CoreFilesystemAPI::TryCreateFile(file);
+  const auto result                = psych::CoreFilesystemAPI::TryCreateFile(file);
 
   ASSERT_TRUE(result);
-  EXPECT_TRUE(ge::CoreFilesystemAPI::FileExists(file));
+  EXPECT_TRUE(psych::CoreFilesystemAPI::FileExists(file));
 }
 
 TEST_F(FilesystemTest, TryCreateFileReportsWrongTypeWhenPathIsDirectory)
@@ -98,20 +98,20 @@ TEST_F(FilesystemTest, TryCreateFileReportsWrongTypeWhenPathIsDirectory)
   const std::filesystem::path directory = m_Root_ / "config";
   std::filesystem::create_directories(directory);
 
-  const auto result = ge::CoreFilesystemAPI::TryCreateFile(directory);
+  const auto result = psych::CoreFilesystemAPI::TryCreateFile(directory);
 
   ASSERT_FALSE(result);
-  EXPECT_EQ(result.error(), ge::errors::FilesystemError::PathExistsWithWrongType);
+  EXPECT_EQ(result.error(), psych::errors::FilesystemError::PathExistsWithWrongType);
 }
 
 TEST_F(FilesystemTest, PlatformConfigPathRequiresFilesystemInitialization)
 {
-  ge::util::Filesystem::Shutdown();
+  psych::util::Filesystem::Shutdown();
 
-  const auto result = ge::util::Filesystem::TryGetBaseConfigPath();
+  const auto result = psych::util::Filesystem::TryGetBaseConfigPath();
 
   ASSERT_FALSE(result);
-  EXPECT_EQ(result.error(), ge::errors::FilesystemError::NotInitialized);
+  EXPECT_EQ(result.error(), psych::errors::FilesystemError::NotInitialized);
 }
 
 TEST_F(FilesystemTest, CreateDirectoryTreeBuildsFileAndDirectoryNodes)
@@ -130,7 +130,7 @@ TEST_F(FilesystemTest, CreateDirectoryTreeBuildsFileAndDirectoryNodes)
     output << "nested";
   }
 
-  ge::Unique<ge::util::FileNode> root = ge::util::Filesystem::CreateDirectoryTree(m_Root_);
+  psych::Unique<psych::util::FileNode> root = psych::util::Filesystem::CreateDirectoryTree(m_Root_);
 
   ASSERT_NE(root, nullptr);
   EXPECT_TRUE(root->isDir);
@@ -146,7 +146,7 @@ TEST_F(FilesystemTest, CreateDirectoryTreeBuildsFileAndDirectoryNodes)
 
   EXPECT_EQ(childNames, (std::vector<std::string>{"child", "root.txt"}));
 
-  const ge::util::FileNode* childDirectory = nullptr;
+  const psych::util::FileNode* childDirectory = nullptr;
   for (const auto& child : root->children) {
     if (child->name == "child") {
       childDirectory = child.get();
@@ -163,9 +163,9 @@ TEST_F(FilesystemTest, CreateDirectoryTreeBuildsFileAndDirectoryNodes)
 
 TEST_F(FilesystemTest, TryCreateDirectoryTreeReportsMissingRoot)
 {
-  const auto result = ge::util::Filesystem::TryCreateDirectoryTree(m_Root_ / "missing");
+  const auto result = psych::util::Filesystem::TryCreateDirectoryTree(m_Root_ / "missing");
 
   ASSERT_FALSE(result);
-  EXPECT_EQ(result.error(), ge::errors::FilesystemError::FileNotFound);
+  EXPECT_EQ(result.error(), psych::errors::FilesystemError::FileNotFound);
 }
 } // namespace

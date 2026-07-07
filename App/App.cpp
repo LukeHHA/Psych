@@ -1,14 +1,14 @@
 #include "AppLayer.h"
-#include "Core/GameEngine.h"
+#include "Core/PsychEngine.h"
 
 #define GE_ENTRYPOINT_IMPL
 #include "EntryPoint.h"
-#include "ge/Core/Core.h"
+#include "Psych/Core/Core.h"
 
-class App : public ge::GameEngine
+class App : public psych::PsychEngine
 {
 public:
-  App() : ge::GameEngine()
+  App() : psych::PsychEngine()
   {
     CORE_PROFILE_FUNCTION();
     CORE_LOG_INFO("Initializing App");
@@ -21,16 +21,15 @@ public:
   }
 };
 
-ge::Expected<ge::Unique<ge::GameEngine>, ge::errors::EngineError>
-ge::CreateGameEngine()
+psych::Expected<psych::Unique<psych::PsychEngine>, psych::errors::EngineError> psych::CreatePsychEngine()
 {
   CORE_PROFILE_FUNCTION();
-  auto app    = ge::CreateUnique<App>();
+  auto app    = psych::CreateUnique<App>();
   auto result = app->Init();
   if (!result) {
-    return ge::Unexpected(result.error());
+    return psych::Unexpected(result.error());
   }
 
-  app->PushLayer(ge::CreateUnique<AppLayer>());
+  app->PushLayer(psych::CreateUnique<AppLayer>());
   return std::move(app);
 }

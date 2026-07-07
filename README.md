@@ -34,37 +34,37 @@ Build the default target:
 cmake --build build --parallel
 ```
 
-The `GameEngine` library is always configured; there is no separate `BUILD_ENGINE` option at the moment. By default, the non-editor `App` frontend is configured. To configure the editor frontend instead:
+The `PsychEngine` library is always configured; there is no separate `BUILD_ENGINE` option at the moment. By default, the non-editor `App` frontend is configured. To configure the editor frontend instead:
 
 ```bash
-cmake -S . -B build -DGAME_ENGINE_BUILD_EDITOR=ON
+cmake -S . -B build -DPSYCH_ENGINE_BUILD_EDITOR=ON
 cmake --build build --target Editor --parallel
 ```
 
-`BUILD_EDITOR=ON` is still accepted as a backwards-compatible alias for `GAME_ENGINE_BUILD_EDITOR=ON`.
+`BUILD_EDITOR=ON` is still accepted as a backwards-compatible alias for `PSYCH_ENGINE_BUILD_EDITOR=ON`.
 
 Common targets:
 
 ```bash
-cmake --build build --target GameEngine --parallel
+cmake --build build --target PsychEngine --parallel
 cmake --build build --target Editor --parallel
 cmake --build build --target App --parallel
-cmake --build build --target GameEngineTests --parallel
+cmake --build build --target PsychEngineTests --parallel
 ```
 
-`Editor` exists only when configured with `-DGAME_ENGINE_BUILD_EDITOR=ON`. `App` exists only when the editor option is off.
+`Editor` exists only when configured with `-DPSYCH_ENGINE_BUILD_EDITOR=ON`. `App` exists only when the editor option is off.
 
 ### CMake Options
 
-| Option                          | Default | Description                                                                |
-| ------------------------------- | ------- | -------------------------------------------------------------------------- |
-| `GAME_ENGINE_BUILD_EDITOR`      | `OFF`   | Configure the `Editor` executable instead of the default `App` executable. |
-| `GAME_ENGINE_BUILD_TESTS`       | `OFF`   | Configure the `GameEngineTests` target and CTest integration.              |
-| `GE_ENABLE_ASSERTS`             | `ON`    | Enable engine runtime assertions.                                          |
-| `GE_ENABLE_PROFILING`           | `ON`    | Enable profiling instrumentation.                                          |
-| `GE_ENABLE_SANITIZERS`          | `OFF`   | Add AddressSanitizer/UndefinedBehaviorSanitizer flags to `GameEngine`.     |
-| `GAME_ENGINE_ENABLE_CLANG_TIDY` | `OFF`   | Run `clang-tidy` while compiling `GameEngine` and `Editor` sources.        |
-| `BUILD_SHARED_LIBS`             | `OFF`   | Standard CMake option used by dependencies that respect it.                |
+| Option                           | Default | Description                                                                |
+| -------------------------------- | ------- | -------------------------------------------------------------------------- |
+| `PSYCH_ENGINE_BUILD_EDITOR`      | `OFF`   | Configure the `Editor` executable instead of the default `App` executable. |
+| `PSYCH_ENGINE_BUILD_TESTS`       | `OFF`   | Configure the `PsychEngineTests` target and CTest integration.             |
+| `GE_ENABLE_ASSERTS`              | `ON`    | Enable engine runtime assertions.                                          |
+| `GE_ENABLE_PROFILING`            | `ON`    | Enable profiling instrumentation.                                          |
+| `GE_ENABLE_SANITIZERS`           | `OFF`   | Add AddressSanitizer/UndefinedBehaviorSanitizer flags to `PsychEngine`.    |
+| `PSYCH_ENGINE_ENABLE_CLANG_TIDY` | `OFF`   | Run `clang-tidy` while compiling `PsychEngine` and `Editor` sources.       |
+| `BUILD_SHARED_LIBS`              | `OFF`   | Standard CMake option used by dependencies that respect it.                |
 
 Build type can be set with standard CMake values:
 
@@ -78,8 +78,8 @@ cmake --build build-release --parallel
 Configure tests and build the test binary:
 
 ```bash
-cmake -S . -B build-tests -DGAME_ENGINE_BUILD_TESTS=ON
-cmake --build build-tests --target GameEngineTests --parallel
+cmake -S . -B build-tests -DPSYCH_ENGINE_BUILD_TESTS=ON
+cmake --build build-tests --target PsychEngineTests --parallel
 ```
 
 Run tests through CTest:
@@ -93,7 +93,7 @@ ctest --test-dir build-tests --output-on-failure
 Configure with clang-tidy enabled:
 
 ```bash
-cmake -S . -B build-tidy -DGAME_ENGINE_ENABLE_CLANG_TIDY=ON -DGAME_ENGINE_BUILD_EDITOR=ON
+cmake -S . -B build-tidy -DPSYCH_ENGINE_ENABLE_CLANG_TIDY=ON -DPSYCH_ENGINE_BUILD_EDITOR=ON
 cmake --build build-tidy --target Editor --parallel
 ```
 
@@ -104,6 +104,6 @@ This applies clang-tidy only to the engine/editor targets that call the project 
 Configure a sanitizer build:
 
 ```bash
-cmake -S . -B build-asan -DGE_ENABLE_SANITIZERS=ON -DGAME_ENGINE_BUILD_EDITOR=ON
+cmake -S . -B build-asan -DGE_ENABLE_SANITIZERS=ON -DPSYCH_ENGINE_BUILD_EDITOR=ON
 cmake --build build-asan --target Editor --parallel
 ```

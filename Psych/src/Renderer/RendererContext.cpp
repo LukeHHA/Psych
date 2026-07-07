@@ -1,0 +1,32 @@
+#include "Renderer/RendererContext.h"
+#include "Renderer/Platform/Opengl/OpenglContext.h"
+#include "Renderer/Platform/Vulkan/VulkanContext.h"
+#include "Renderer/RendererAPI.h"
+#include <Debug/Instrumentor.h>
+
+namespace psych
+{
+Expected<Unique<RendererContext>, errors::RendererError> RendererContext::Create(GLFWwindow* window)
+{
+  CORE_PROFILE_FUNCTION();
+
+  if (window == nullptr) {
+    return Unexpected(errors::RendererError::ContextCreationFailed);
+  }
+
+  switch (RendererAPI::Current()) {
+  case RendererAPIType::NONE:
+    return Unexpected(errors::RendererError::UnsupportedAPI);
+  case RendererAPIType::TEST_HEADLESS:
+    return CreateUnique<RendererContextHeadless>(window);
+  case RendererAPIType::OPENGL:
+    return CreateUnique<OpenglContext>(window);
+  case RendererAPIType::VULKAN:
+    return CreateUnique<VulkanContext>();
+  case RendererAPIType::METAL:
+    return CreateUnique<OpenglContext>(window);
+  default:
+    return Unexpected(errors::RendererError::UnsupportedAPI);
+  }
+}
+} // namespace psych
