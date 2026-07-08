@@ -1,11 +1,10 @@
 #include "EngineFilesystem.h"
 
-#include "Core/Core.h"
 #include "Debug/Assert.h"
 
 namespace psych::util
 {
-void EngineFilesystem::Init() { s_PathResolver_ = CreateUnique<PathResolver>(); }
+void EngineFilesystem::Init(PathResolver& resolver) { s_PathResolver_ = &resolver; }
 
 void EngineFilesystem::Shutdown() { s_PathResolver_ = nullptr; }
 
@@ -14,7 +13,7 @@ bool EngineFilesystem::IsInitialized() { return s_PathResolver_ != nullptr; }
 PathResolver* EngineFilesystem::Resolver()
 {
   CORE_ASSERT(s_PathResolver_, "EngineFilesystem used before initialization")
-  return s_PathResolver_.get();
+  return s_PathResolver_;
 }
 
 Expected<FilePath, errors::FilesystemError> EngineFilesystem::TryResolve(const EnginePath::Path& path)

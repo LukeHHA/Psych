@@ -8,6 +8,7 @@
 #include "Renderer/Renderer.h"
 #include "Util/Time.h"
 
+#include <filesystem>
 #include <utility>
 
 namespace psych
@@ -35,7 +36,19 @@ Expected<void, errors::EngineError> PsychEngine::Init()
   if (!configResult) {
     return Unexpected(errors::EngineError::PsychEngineInitializationFailed);
   }
-  auto spec    = m_Config.GetPsychEngineSpec();
+  auto spec = m_Config.GetPsychEngineSpec();
+
+  std::error_code resourcePathError;
+  const auto resourcePath = std::filesystem::current_path(resourcePathError);
+  if (resourcePathError) {
+    return Unexpected(errors::EngineError::PsychEngineInitializationFailed);
+  }
+
+  const auto projectResult = m_ProjectManager_.Init(m_PathResolver_);
+  if (!projectResult) {
+    return Unexpected(errors::EngineError::PsychEngineInitializationFailed);
+  }
+  util::EngineFilesystem::Init(m_PathResolver_);
 
   m_LayerStack = CreateUnique<LayerStack>();
 
@@ -92,8 +105,13 @@ Expected<void, errors::EngineError> PsychEngine::Shutdown()
   Renderer::Shutdown();
   m_Window.reset();
 
-  m_Initialized           = false;
-  s_Application           = nullptr;
+  m_Initialized            = false;
+  s_Application            = nullptr;
+  const auto projectResult = m_ProjectManager_.Shutdown(m_PathResolver_);
+  util::EngineFilesystem::Shutdown();
+  if (!projectResult) {
+    return Unexpected(errors::EngineError::PsychEngineInitializationFailed);
+  }
 
   const auto configResult = m_Config.Shutdown();
   if (!configResult) {

@@ -18,9 +18,16 @@ public:
   EngineFilesystem& operator=(EngineFilesystem&&)      = delete;
   ~EngineFilesystem()                                  = delete;
 
-  static void Init();
+  static void Init(PathResolver& resolver);
   static void Shutdown();
   [[nodiscard]] static bool IsInitialized();
+
+  static FilePath Resolve(const EnginePath::Path& path);
+  static FilePath Resolve(const std::string& path);
+  static FilePath Resolve(const char* path);
+  static Expected<FilePath, errors::FilesystemError> TryResolve(const EnginePath::Path& path);
+  static Expected<FilePath, errors::FilesystemError> TryResolve(const std::string& path);
+  static Expected<FilePath, errors::FilesystemError> TryResolve(const char* path);
 
   static bool FileExists(const EnginePath::Path& path);
   static bool FileExists(const std::string& path);
@@ -50,15 +57,10 @@ public:
   static Expected<Unique<FileNode>, errors::FilesystemError> TryCreateDirectoryTree(const std::string& rootPath);
   static Expected<Unique<FileNode>, errors::FilesystemError> TryCreateDirectoryTree(const char* rootPath);
 
-  static FilePath Resolve(const EnginePath::Path& path);
-  static FilePath Resolve(const std::string& path);
-  static FilePath Resolve(const char* path);
-  static Expected<FilePath, errors::FilesystemError> TryResolve(const EnginePath::Path& path);
-  static Expected<FilePath, errors::FilesystemError> TryResolve(const std::string& path);
-  static Expected<FilePath, errors::FilesystemError> TryResolve(const char* path);
+private:
   [[nodiscard]] static PathResolver* Resolver();
 
 private:
-  inline static Unique<PathResolver> s_PathResolver_ = nullptr;
+  inline static PathResolver* s_PathResolver_ = nullptr;
 };
 } // namespace psych::util
