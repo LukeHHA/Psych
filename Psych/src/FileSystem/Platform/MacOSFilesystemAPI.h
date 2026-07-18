@@ -41,8 +41,8 @@ public:
   ~MacOSFilesystemAPI() override = default;
   CORE_NO_COPY_NO_MOVE(MacOSFilesystemAPI);
 
-  DirPath GetOSAppDataPath() const override;
-  DirPath GetOSCacheDataPath() const override;
+  std::filesystem::path GetOSAppDataPath() const override;
+  std::filesystem::path GetOSCacheDataPath() const override;
 
 private:
   std::filesystem::path GetApplicationSupportPath() const;

@@ -1,11 +1,11 @@
- 
+
 /**************************************************************************/
-/*  PsychEngine.h                                                         */                                                            
+/*  PsychEngine.h                                                         */
 /**************************************************************************/
 /*                         This file is part of:                          */
 /*                             PSYCH ENGINE                               */
 /**************************************************************************/
-/* Copyright (c)  Luke Howe                                               */                                                  
+/* Copyright (c)  Luke Howe                                               */
 /*                                                                        */
 /* Permission is hereby granted, free of charge, to any person obtaining  */
 /* a copy of this software and associated documentation files (the        */
@@ -35,10 +35,8 @@
 #include "Debug/Assert.h"
 #include "Errors/Errors.h"
 #include "Events/EventHandler.h"
-#include "FileSystem/PathResolver.h"
 #include "Fonts/FontManager.h"
 #include "Layers/LayerStack.h"
-#include "Project/ProjectManager.h"
 #include "Renderer/Framebuffer.h"
 #include "Renderer/RenderTarget.h"
 #include "expected.h"
@@ -63,8 +61,6 @@ public:
   /// getters for member objects
   [[nodiscard]] const PsychEngineConfig& GetConfig() const;
   [[nodiscard]] const PsychEngineSpecification& GetEngineSpecification() const;
-  [[nodiscard]] ProjectManager& GetProjectManager();
-  [[nodiscard]] const ProjectManager& GetProjectManager() const;
   [[nodiscard]] const FontManager& GetFontLibrary() const;
 
   /// getters for ptrs
@@ -91,9 +87,7 @@ private:
 private:
   /// default constructed objects - reverse destruction order
   PsychEngineConfig m_Config;
-  util::PathResolver m_PathResolver_;
   FontManager m_FontLibrary_;
-  ProjectManager m_ProjectManager_;
   EventHandler m_EventHandler_;
 
   /// engine instance

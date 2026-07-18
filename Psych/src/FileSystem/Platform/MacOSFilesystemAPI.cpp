@@ -32,8 +32,8 @@
 
 namespace psych
 {
-DirPath MacOSFilesystemAPI::GetOSAppDataPath() const { return GetApplicationSupportPath(); }
+std::filesystem::path MacOSFilesystemAPI::GetOSAppDataPath() const { return GetApplicationSupportPath(); }
 
-DirPath MacOSFilesystemAPI::GetOSCacheDataPath() const { return GetCachePath(); }
+std::filesystem::path MacOSFilesystemAPI::GetOSCacheDataPath() const { return GetCachePath(); }
 
 } // namespace psych

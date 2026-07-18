@@ -245,7 +245,7 @@ constexpr auto CleanupOutputString(const char (&expr)[N], const char (&remove)[K
 } // namespace InstrumentorUtils
 } // namespace psych
 
-#if defined(GE_PROFILE)
+#if defined(PSYCH_PROFILE)
 #define CORE_PROFILE 1
 #else
 #define CORE_PROFILE 0

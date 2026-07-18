@@ -40,10 +40,10 @@ public:
   ~LinuxFilesystemAPI() override = default;
   CORE_NO_COPY_NO_MOVE(LinuxFilesystemAPI);
 
-  DirPath GetOSAppDataPath() const override;
-  DirPath GetOSCacheDataPath() const override;
+  std::filesystem::path GetOSAppDataPath() const override;
+  std::filesystem::path GetOSCacheDataPath() const override;
 
 private:
-  [[nodiscard]] DirPath GetHomePath() const;
+  [[nodiscard]] std::filesystem::path GetHomePath() const;
 };
 } // namespace psych

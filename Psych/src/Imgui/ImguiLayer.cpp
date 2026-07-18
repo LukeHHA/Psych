@@ -30,7 +30,8 @@
 #include "ImguiLayer.h"
 #include "Core/PsychEngine.h"
 #include "Debug/Instrumentor.h"
-#include "FileSystem/EngineFilesystem.h"
+#include "FileSystem/EnginePath.h"
+#include "FileSystem/FileSystem.h"
 #include "imgui/imgui.h"
 #include <limits>
 #include <string>
@@ -128,7 +129,7 @@ void ImGuiLayer::ConfigureEditorUIRuntime()
   }
 
   if (m_EditorSpec_.ImGuiINIPath.find("://") != std::string::npos) {
-    const auto iniPath = util::EngineFilesystem::TryResolve(m_EditorSpec_.ImGuiINIPath);
+    const auto iniPath = Filesystem::TryResolve(EnginePath::Path{m_EditorSpec_.ImGuiINIPath});
     if (iniPath) {
       m_EditorSpec_.ImGuiINIPath = iniPath.value().string();
     }

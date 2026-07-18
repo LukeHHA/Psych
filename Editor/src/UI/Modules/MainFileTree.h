@@ -4,6 +4,6 @@
 #include <imgui.h>
 namespace psych::ui
 {
-void TraverseFileTreeNode(const util::FileNode* node, ImGuiTreeNodeFlags flags);
-void MainFileTree(const util::FileNode* node);
+void TraverseFileTreeNode(const FileNode* node, ImGuiTreeNodeFlags flags);
+void MainFileTree(const FileNode* node);
 } // namespace psych::ui

@@ -48,7 +48,7 @@
 #define BIT(x) (1 << x)
 
 // --- Core and App specific ASSERT ---
-#ifdef GE_ENABLE_ASSERTS
+#ifdef PSYCH_ENABLE_ASSERTS
 #define DEBUG_TRACE()                                                          \
   do {                                                                         \
     std::fprintf(stderr,                                                       \

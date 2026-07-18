@@ -56,12 +56,12 @@ int main(int argc, char** argv)
     }
 
     psych::Log::Init();
-    psych::util::Filesystem::Init();
+    psych::Filesystem::Init();
 
     CORE_PROFILE_BEGIN_SESSION("Startup", "CoreProfile-Startup.json");
     auto appResult = psych::CreatePsychEngine();
     if (!appResult) {
-      std::cerr << "Failed to create game engine\n";
+      std::cerr << "Failed to create Psych engine\n";
       return 1;
     }
 
@@ -78,12 +78,12 @@ int main(int argc, char** argv)
     auto shutdownResult = app->Shutdown();
     CORE_PROFILE_END_SESSION();
     if (!shutdownResult) {
-      std::cerr << "Failed to shutdown game engine\n";
-      psych::util::Filesystem::Shutdown();
+      std::cerr << "Failed to shutdown Psych engine\n";
+      psych::Filesystem::Shutdown();
       return 1;
     }
 
-    psych::util::Filesystem::Shutdown();
+    psych::Filesystem::Shutdown();
     CORE_LOG_INFO("Filesystem Shutdown");
   }
 

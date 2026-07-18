@@ -41,7 +41,7 @@ target_link_libraries(PsychEngineTests PRIVATE
     ${PSYCH_ENGINE_GTEST_TARGET}
 )
 
-target_compile_definitions(PsychEngineTests PRIVATE GE_TESTS_ENABLED)
+target_compile_definitions(PsychEngineTests PRIVATE PSYCH_TESTS_ENABLED)
 
 file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/runtime")
 

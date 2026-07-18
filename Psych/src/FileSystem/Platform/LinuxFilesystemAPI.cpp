@@ -33,11 +33,11 @@
 
 namespace psych
 {
-DirPath LinuxFilesystemAPI::GetOSAppDataPath() const
+std::filesystem::path LinuxFilesystemAPI::GetOSAppDataPath() const
 {
   if (const char* configHome = std::getenv("XDG_CONFIG_HOME")) {
     if (*configHome != '\0') {
-      return DirPath{configHome};
+      return std::filesystem::path{configHome};
     }
   }
 
@@ -49,11 +49,11 @@ DirPath LinuxFilesystemAPI::GetOSAppDataPath() const
   return homePath / ".config";
 }
 
-DirPath LinuxFilesystemAPI::GetOSCacheDataPath() const
+std::filesystem::path LinuxFilesystemAPI::GetOSCacheDataPath() const
 {
   if (const char* cacheHome = std::getenv("XDG_CACHE_HOME")) {
     if (*cacheHome != '\0') {
-      return DirPath{cacheHome};
+      return std::filesystem::path{cacheHome};
     }
   }
 
@@ -65,11 +65,11 @@ DirPath LinuxFilesystemAPI::GetOSCacheDataPath() const
   return homePath / ".cache";
 }
 
-DirPath LinuxFilesystemAPI::GetHomePath() const
+std::filesystem::path LinuxFilesystemAPI::GetHomePath() const
 {
   if (const char* home = std::getenv("HOME")) {
     if (*home != '\0') {
-      return DirPath{home};
+      return std::filesystem::path{home};
     }
   }
 

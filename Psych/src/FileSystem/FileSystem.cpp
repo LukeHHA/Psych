@@ -1,11 +1,11 @@
- 
+
 /**************************************************************************/
-/*  FileSystem.cpp                                                        */                                                            
+/*  FileSystem.cpp                                                        */
 /**************************************************************************/
 /*                         This file is part of:                          */
 /*                             PSYCH ENGINE                               */
 /**************************************************************************/
-/* Copyright (c)  Luke Howe                                               */                                                  
+/* Copyright (c)  Luke Howe                                               */
 /*                                                                        */
 /* Permission is hereby granted, free of charge, to any person obtaining  */
 /* a copy of this software and associated documentation files (the        */
@@ -34,27 +34,34 @@
 #include "Platform/LinuxFilesystemAPI.h"
 #include "Platform/MacOSFilesystemAPI.h"
 #include <filesystem>
+#include <fstream>
 
-namespace psych::util
+namespace psych
 {
 void Filesystem::Init()
 {
   s_CurrentPath_ = std::filesystem::current_path();
 
   if (s_OSFilesystemAPI_ == nullptr) {
-#if defined(GE_PLATFORM_MACOS)
+#if defined(PSYCH_PLATFORM_MACOS)
     s_OSFilesystemAPI_ = CreateShared<MacOSFilesystemAPI>();
-#elif defined(GE_PLATFORM_LINUX)
+#elif defined(PSYCH_PLATFORM_LINUX)
     s_OSFilesystemAPI_ = CreateShared<LinuxFilesystemAPI>();
 #else
     CORE_ASSERT(false, "Unknow Operating system. Unable to init filesystem")
 #endif
   }
+
+  s_PathResolver_ = CreateUnique<PathResolver>(s_CurrentPath_);
 }
 
-void Filesystem::Shutdown() { s_OSFilesystemAPI_ = nullptr; }
+void Filesystem::Shutdown()
+{
+  s_PathResolver_.reset();
+  s_OSFilesystemAPI_ = nullptr;
+}
 
-FilePath Filesystem::Current_Path() { return s_CurrentPath_; }
+std::filesystem::path Filesystem::Current_Path() { return s_CurrentPath_; }
 
 void Filesystem::DeleteFile(const std::filesystem::path& path) { CoreFilesystemAPI::DeleteFile(path); }
 
@@ -74,20 +81,39 @@ std::string Filesystem::StreamFile(const std::string& path) { return CoreFilesys
 
 Expected<std::string, errors::FilesystemError> Filesystem::TryReadFile(const std::filesystem::path& path) { return CoreFilesystemAPI::TryReadFile(path); }
 
-bool Filesystem::IsInitialized() { return s_OSFilesystemAPI_ != nullptr; }
+Expected<std::string, errors::FilesystemError> Filesystem::TryReadFile(const EnginePath::Path& path)
+{
+  const auto resolvedPath = TryResolve(path);
+  if (!resolvedPath) {
+    return Unexpected(resolvedPath.error());
+  }
 
-Expected<DirPath, errors::FilesystemError> Filesystem::TryGetBaseConfigPath()
+  return CoreFilesystemAPI::TryReadFile(resolvedPath.value());
+}
+
+Expected<std::filesystem::path, errors::FilesystemError> Filesystem::TryResolve(const EnginePath::Path& path)
+{
+  if (!s_PathResolver_) {
+    return Unexpected(errors::FilesystemError::NotInitialized);
+  }
+
+  return s_PathResolver_->TryResolve(path);
+}
+
+bool Filesystem::IsInitialized() { return s_OSFilesystemAPI_ != nullptr && s_PathResolver_ != nullptr; }
+
+Expected<std::filesystem::path, errors::FilesystemError> Filesystem::TryGetBaseConfigPath()
 {
   if (!IsInitialized()) {
     return Unexpected(errors::FilesystemError::NotInitialized);
   }
 
-  DirPath basePath = s_OSFilesystemAPI_->GetOSAppDataPath();
+  std::filesystem::path basePath = s_OSFilesystemAPI_->GetOSAppDataPath();
   if (basePath.empty()) {
     return Unexpected(errors::FilesystemError::OSPathFail);
   }
 
-  DirPath configPath = basePath / PsychEngineName / "config";
+  std::filesystem::path configPath = basePath / PsychEngineName / "config";
   const auto result  = CoreFilesystemAPI::TryCreateDirs(configPath);
   if (!result) {
     return Unexpected(result.error());
@@ -96,7 +122,7 @@ Expected<DirPath, errors::FilesystemError> Filesystem::TryGetBaseConfigPath()
   return configPath;
 }
 
-DirPath Filesystem::GetBaseConfigPath()
+std::filesystem::path Filesystem::GetBaseConfigPath()
 {
   const auto result = TryGetBaseConfigPath();
   if (!result) {
@@ -107,18 +133,18 @@ DirPath Filesystem::GetBaseConfigPath()
   return result.value();
 }
 
-Expected<DirPath, errors::FilesystemError> Filesystem::TryGetBaseCachePath()
+Expected<std::filesystem::path, errors::FilesystemError> Filesystem::TryGetBaseCachePath()
 {
   if (!IsInitialized()) {
     return Unexpected(errors::FilesystemError::NotInitialized);
   }
 
-  DirPath basePath = s_OSFilesystemAPI_->GetOSCacheDataPath();
+  std::filesystem::path basePath = s_OSFilesystemAPI_->GetOSCacheDataPath();
   if (basePath.empty()) {
     return Unexpected(errors::FilesystemError::OSPathFail);
   }
 
-  DirPath cachePath = basePath / PsychEngineName;
+  std::filesystem::path cachePath = basePath / PsychEngineName;
 
   const auto result = CoreFilesystemAPI::TryCreateDirs(cachePath);
   if (!result) {
@@ -128,7 +154,7 @@ Expected<DirPath, errors::FilesystemError> Filesystem::TryGetBaseCachePath()
   return cachePath;
 }
 
-DirPath Filesystem::GetBaseCachePath()
+std::filesystem::path Filesystem::GetBaseCachePath()
 {
   const auto result = TryGetBaseCachePath();
   if (!result) {
@@ -218,4 +244,4 @@ std::vector<std::byte> Filesystem::ReadBinaryFile(const std::filesystem::path& p
 
   return buffer;
 }
-} // namespace psych::util
+} // namespace psych

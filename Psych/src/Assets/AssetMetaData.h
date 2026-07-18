@@ -29,13 +29,15 @@
 
 #pragma once
 
-#include "Asset/Asset.h"
-#include "FileSystem/FileSystem.h"
+#include "Assets/Asset.h"
+
+#include <filesystem>
+
 namespace psych
 {
 struct AssetMetaData {
   AssetHandle handle = AssetHandle::Nill();
-  util::FilePath path;
+  std::filesystem::path path;
   AssetType type;
   std::atomic<bool> is_loaded = false;
 };

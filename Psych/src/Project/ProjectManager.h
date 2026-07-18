@@ -35,6 +35,8 @@
 #include "Project/Project.h"
 #include "expected.h"
 
+#include <filesystem>
+
 namespace psych
 {
 class ProjectManager
@@ -47,9 +49,9 @@ public:
   ProjectManager& operator=(ProjectManager&&)      = delete;
   ~ProjectManager()                                = default;
 
-  [[nodiscard]] Expected<void, errors::ProjectError> Init(util::PathResolver& resolver);
-  [[nodiscard]] Expected<void, errors::ProjectError> Shutdown(util::PathResolver& resolver);
-  [[nodiscard]] Expected<void, errors::ProjectError> OpenProject(util::FilePath projectRoot, util::PathResolver& resolver);
+  [[nodiscard]] Expected<void, errors::ProjectError> Init(PathResolver& resolver);
+  [[nodiscard]] Expected<void, errors::ProjectError> Shutdown(PathResolver& resolver);
+  [[nodiscard]] Expected<void, errors::ProjectError> OpenProject(std::filesystem::path projectRoot, PathResolver& resolver);
 
   [[nodiscard]] bool HasActiveProject() const;
   [[nodiscard]] Project& GetActiveProject();

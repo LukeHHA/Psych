@@ -8,7 +8,7 @@ namespace psych::ui
 void FileViewer(const std::filesystem::path& path)
 {
 
-  auto fileContent = util::Filesystem::TryReadFile(path);
+  auto fileContent = Filesystem::TryReadFile(path);
   if (!fileContent) {
     fileContent = "";
   }

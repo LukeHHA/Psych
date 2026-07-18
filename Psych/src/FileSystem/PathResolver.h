@@ -1,11 +1,11 @@
- 
+
 /**************************************************************************/
-/*  PathResolver.h                                                        */                                                            
+/*  PathResolver.h                                                        */
 /**************************************************************************/
 /*                         This file is part of:                          */
 /*                             PSYCH ENGINE                               */
 /**************************************************************************/
-/* Copyright (c)  Luke Howe                                               */                                                  
+/* Copyright (c)  Luke Howe                                               */
 /*                                                                        */
 /* Permission is hereby granted, free of charge, to any person obtaining  */
 /* a copy of this software and associated documentation files (the        */
@@ -29,24 +29,28 @@
 
 #pragma once
 
+#include "Errors/Errors.h"
 #include "FileSystem/EnginePath.h"
-#include "FileSystem/FileSystem.h"
+#include "expected.h"
 
-namespace psych::util
+#include <filesystem>
+#include <utility>
+
+namespace psych
 {
 class PathResolver
 {
 public:
-  PathResolver();
+  PathResolver(std::filesystem::path path) : m_EngineRoot_(std::move(path)) {}
   PathResolver(const PathResolver&)            = delete;
   PathResolver& operator=(const PathResolver&) = delete;
   PathResolver(PathResolver&&)                 = delete;
   PathResolver& operator=(PathResolver&&)      = delete;
   ~PathResolver()                              = default;
 
-  [[nodiscard]] Expected<FilePath, errors::FilesystemError> TryResolve(const EnginePath::Path& path) const;
+  [[nodiscard]] Expected<std::filesystem::path, errors::FilesystemError> TryResolve(const EnginePath::Path& path) const;
 
 private:
-  FilePath m_EngineRoot_;
+  std::filesystem::path m_EngineRoot_;
 };
-} // namespace psych::util
+} // namespace psych

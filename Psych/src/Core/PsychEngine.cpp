@@ -1,11 +1,11 @@
- 
+
 /**************************************************************************/
-/*  PsychEngine.cpp                                                       */                                                            
+/*  PsychEngine.cpp                                                       */
 /**************************************************************************/
 /*                         This file is part of:                          */
 /*                             PSYCH ENGINE                               */
 /**************************************************************************/
-/* Copyright (c)  Luke Howe                                               */                                                  
+/* Copyright (c)  Luke Howe                                               */
 /*                                                                        */
 /* Permission is hereby granted, free of charge, to any person obtaining  */
 /* a copy of this software and associated documentation files (the        */
@@ -31,7 +31,6 @@
 #include "Core/Core.h"
 #include "Debug/Assert.h"
 #include "Debug/Instrumentor.h"
-#include "FileSystem/EngineFilesystem.h"
 #include "Fonts/FontManager.h"
 #include "Imgui/ImguiLayer.h"
 #include "Renderer/Renderer.h"
@@ -47,7 +46,7 @@ PsychEngine* PsychEngine::s_Application = nullptr;
 
 PsychEngine::PsychEngine()
 {
-  CORE_LOG_INFO("Game engine startup");
+  CORE_LOG_INFO("Psych engine startup");
   CORE_ASSERT(!s_Application, "Application already exists")
   s_Application = this;
 }
@@ -65,19 +64,7 @@ Expected<void, errors::EngineError> PsychEngine::Init()
   if (!configResult) {
     return Unexpected(errors::EngineError::PsychEngineInitializationFailed);
   }
-  auto spec = m_Config.GetPsychEngineSpec();
-
-  std::error_code resourcePathError;
-  const auto resourcePath = std::filesystem::current_path(resourcePathError);
-  if (resourcePathError) {
-    return Unexpected(errors::EngineError::PsychEngineInitializationFailed);
-  }
-
-  const auto projectResult = m_ProjectManager_.Init(m_PathResolver_);
-  if (!projectResult) {
-    return Unexpected(errors::EngineError::PsychEngineInitializationFailed);
-  }
-  util::EngineFilesystem::Init(m_PathResolver_);
+  auto spec    = m_Config.GetPsychEngineSpec();
 
   m_LayerStack = CreateUnique<LayerStack>();
 
@@ -134,13 +121,8 @@ Expected<void, errors::EngineError> PsychEngine::Shutdown()
   Renderer::Shutdown();
   m_Window.reset();
 
-  m_Initialized            = false;
-  s_Application            = nullptr;
-  const auto projectResult = m_ProjectManager_.Shutdown(m_PathResolver_);
-  util::EngineFilesystem::Shutdown();
-  if (!projectResult) {
-    return Unexpected(errors::EngineError::PsychEngineInitializationFailed);
-  }
+  m_Initialized           = false;
+  s_Application           = nullptr;
 
   const auto configResult = m_Config.Shutdown();
   if (!configResult) {
@@ -241,10 +223,6 @@ const PsychEngineConfig& PsychEngine::GetConfig() const
 }
 
 const PsychEngineSpecification& PsychEngine::GetEngineSpecification() const { return GetConfig().GetPsychEngineSpec(); }
-
-ProjectManager& PsychEngine::GetProjectManager() { return m_ProjectManager_; }
-
-const ProjectManager& PsychEngine::GetProjectManager() const { return m_ProjectManager_; }
 
 const FontManager& PsychEngine::GetFontLibrary() const { return m_FontLibrary_; }
 

@@ -46,7 +46,7 @@ public:
 
   UUID() : m_id_(Generate())
   {
-#ifdef GE_DEBUG
+#ifdef PSYCH_DEBUG
     m_debug_value_ = m_debug_counter_++;
 #endif
   }
@@ -154,7 +154,7 @@ private:
 
   storage_type m_id_;
 
-#ifdef GE_DEBUG
+#ifdef PSYCH_DEBUG
   std::uint64_t m_debug_value_                 = 0;
   inline static std::uint64_t m_debug_counter_ = 0;
 #endif

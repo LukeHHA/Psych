@@ -37,7 +37,7 @@
 
 namespace psych
 {
-Expected<void, errors::ProjectError> ProjectManager::Init(util::PathResolver& resolver)
+Expected<void, errors::ProjectError> ProjectManager::Init(PathResolver& resolver)
 {
   CORE_PROFILE_FUNCTION();
 
@@ -50,7 +50,7 @@ Expected<void, errors::ProjectError> ProjectManager::Init(util::PathResolver& re
   return OpenProject(std::move(projectRoot), resolver);
 }
 
-Expected<void, errors::ProjectError> ProjectManager::Shutdown(util::PathResolver& resolver)
+Expected<void, errors::ProjectError> ProjectManager::Shutdown(PathResolver& resolver)
 {
   CORE_PROFILE_FUNCTION();
 
@@ -67,7 +67,7 @@ Expected<void, errors::ProjectError> ProjectManager::Shutdown(util::PathResolver
   return {};
 }
 
-Expected<void, errors::ProjectError> ProjectManager::OpenProject(util::FilePath projectRoot, util::PathResolver& resolver)
+Expected<void, errors::ProjectError> ProjectManager::OpenProject(std::filesystem::path projectRoot, PathResolver& resolver)
 {
   CORE_PROFILE_FUNCTION();
 

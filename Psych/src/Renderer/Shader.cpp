@@ -29,7 +29,7 @@
 
 #include "Shader.h"
 #include "Core/Core.h"
-#include "FileSystem/EngineFilesystem.h"
+#include "FileSystem/EnginePath.h"
 #include "FileSystem/FileSystem.h"
 #include "Renderer/Platform/Opengl/OpenglShader.h"
 #include "Renderer/RendererAPI.h"
@@ -44,10 +44,10 @@ namespace
 Expected<std::string, errors::FilesystemError> TryReadShaderSource(const std::string& path)
 {
   if (path.find("://") != std::string::npos) {
-    return util::EngineFilesystem::TryReadFile(path);
+    return Filesystem::TryReadFile(EnginePath::Path{path});
   }
 
-  return util::Filesystem::TryReadFile(path);
+  return Filesystem::TryReadFile(path);
 }
 } // namespace
 

@@ -5,7 +5,7 @@
 
 namespace psych::ui
 {
-void TraverseFileTreeNode(const util::FileNode* node, ImGuiTreeNodeFlags flags)
+void TraverseFileTreeNode(const FileNode* node, ImGuiTreeNodeFlags flags)
 {
   if (node == nullptr) {
     return;
@@ -28,7 +28,7 @@ void TraverseFileTreeNode(const util::FileNode* node, ImGuiTreeNodeFlags flags)
   }
 }
 
-void MainFileTree(const util::FileNode* node)
+void MainFileTree(const FileNode* node)
 {
   if (node == nullptr) {
     return;

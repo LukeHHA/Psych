@@ -1,6 +1,7 @@
 set(SOURCES
     src/EditorApp.cpp
     src/EditorLayer.cpp
+    src/ProjectEditor.cpp
     src/UI/Modules/EditorMenuBar.cpp
     src/UI/Modules/MainFileTree.cpp
     src/UI/Modules/FileViewer.cpp

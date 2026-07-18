@@ -29,11 +29,14 @@
 
 #pragma once
 
-#include "Asset/AssetLibrary.h"
+#include "Assets/AssetLibrary.h"
+
+#include <filesystem>
+
 namespace psych
 {
 struct AssetManagerSpec {
-  util::FilePath asset_path;
+  std::filesystem::path asset_path;
 };
 
 class AssetLibrary;
@@ -49,6 +52,6 @@ private:
 
 private:
   AssetLibrary m_AssetLibrary_;
-  util::FilePath m_AssetPath_ = "/assets/";
+  std::filesystem::path m_AssetPath_ = "/assets/";
 };
 } // namespace psych

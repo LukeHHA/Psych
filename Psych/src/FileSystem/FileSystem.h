@@ -1,11 +1,11 @@
- 
+
 /**************************************************************************/
-/*  FileSystem.h                                                          */                                                            
+/*  FileSystem.h                                                          */
 /**************************************************************************/
 /*                         This file is part of:                          */
 /*                             PSYCH ENGINE                               */
 /**************************************************************************/
-/* Copyright (c)  Luke Howe                                               */                                                  
+/* Copyright (c)  Luke Howe                                               */
 /*                                                                        */
 /* Permission is hereby granted, free of charge, to any person obtaining  */
 /* a copy of this software and associated documentation files (the        */
@@ -31,19 +31,14 @@
 
 #include "Core/Core.h"
 #include "Errors/Errors.h"
+#include "FileSystem/PathResolver.h"
 #include "OSFilesystemAPI.h"
 #include "expected.h"
 
 #include <filesystem>
-#include <fstream>
 
-namespace psych::util
+namespace psych
 {
-using FilePath                     = std::filesystem::path;
-using DirPath                      = std::filesystem::path;
-
-using recursive_directory_iterator = std::filesystem::recursive_directory_iterator;
-
 struct FileNode {
   FileNode() = default;
   FileNode(std::filesystem::path path, bool isDir) : isDir(isDir), path(std::move(path)), name(this->path.filename().string()) {}
@@ -67,7 +62,7 @@ public:
   static std::vector<std::byte> ReadBinaryFile(const std::filesystem::path& path);
   static void Init();
   static void Shutdown();
-  static FilePath Current_Path();
+  static std::filesystem::path Current_Path();
   static void DeleteFile(const std::filesystem::path& path);
   static Expected<void, errors::FilesystemError> TryDeleteFile(const std::filesystem::path& path);
   static bool FileExists(const std::filesystem::path& path);
@@ -77,17 +72,20 @@ public:
   static Expected<void, errors::FilesystemError> TryCreateDirs(const std::filesystem::path& path);
   static std::string StreamFile(const std::string& path);
   static Expected<std::string, errors::FilesystemError> TryReadFile(const std::filesystem::path& path);
-  static Unique<FileNode> CreateDirectoryTree(const DirPath& rootPath);
-  static Expected<Unique<FileNode>, errors::FilesystemError> TryCreateDirectoryTree(const DirPath& rootPath);
+  static Expected<std::string, errors::FilesystemError> TryReadFile(const EnginePath::Path& path);
+  static Expected<std::filesystem::path, errors::FilesystemError> TryResolve(const EnginePath::Path& path);
+  static Unique<FileNode> CreateDirectoryTree(const std::filesystem::path& rootPath);
+  static Expected<Unique<FileNode>, errors::FilesystemError> TryCreateDirectoryTree(const std::filesystem::path& rootPath);
 
   static bool IsInitialized();
-  static Expected<DirPath, errors::FilesystemError> TryGetBaseConfigPath();
-  static Expected<DirPath, errors::FilesystemError> TryGetBaseCachePath();
-  static DirPath GetBaseConfigPath();
-  static DirPath GetBaseCachePath();
+  static Expected<std::filesystem::path, errors::FilesystemError> TryGetBaseConfigPath();
+  static Expected<std::filesystem::path, errors::FilesystemError> TryGetBaseCachePath();
+  static std::filesystem::path GetBaseConfigPath();
+  static std::filesystem::path GetBaseCachePath();
 
 private:
   inline static Shared<OSFilesystemAPI> s_OSFilesystemAPI_ = nullptr;
   inline static std::filesystem::path s_CurrentPath_;
+  inline static Unique<PathResolver> s_PathResolver_ = nullptr;
 };
-} // namespace psych::util
+} // namespace psych

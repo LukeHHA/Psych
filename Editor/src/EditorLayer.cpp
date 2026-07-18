@@ -1,7 +1,6 @@
 #include "EditorLayer.h"
 #include "Core/PsychEngine.h"
 #include "Debug/Instrumentor.h"
-#include "FileSystem/EngineFilesystem.h"
 #include "Renderer/Buffer.h"
 #include "Renderer/RendererAPI.h"
 #include "Renderer/VertexArray.h"
@@ -87,10 +86,10 @@ void EditorLayer::OnImGuiRender()
 {
   ui::MainMenuBar();
 
-  static std::unique_ptr<util::FileNode> FileTree;
+  static std::unique_ptr<FileNode> FileTree;
 
   if (!FileTree) {
-    auto fileTreeResult = util::EngineFilesystem::TryCreateDirectoryTree("assets://");
+    auto fileTreeResult = Filesystem::TryCreateDirectoryTree(Filesystem::Current_Path());
     if (!fileTreeResult) {
       CORE_LOG_ERROR("Failed to create editor file tree");
     } else {

@@ -38,9 +38,9 @@
 
 namespace psych
 {
-Project::Project(util::FilePath rootPath) : m_RootPath_(std::move(rootPath)) {}
+Project::Project(std::filesystem::path rootPath) : m_RootPath_(std::move(rootPath)) {}
 
-Project::Project(util::FilePath rootPath, ProjectConfig config) : m_RootPath_(std::move(rootPath)), m_Config_(std::move(config)) {}
+Project::Project(std::filesystem::path rootPath, ProjectConfig config) : m_RootPath_(std::move(rootPath)), m_Config_(std::move(config)) {}
 
 Expected<void, errors::ProjectError> Project::Init() { return TryDeserialize(); }
 
@@ -99,7 +99,7 @@ Expected<void, errors::ProjectError> Project::TryDeserialize()
   }
 
   const auto configPath = GetConfigPath();
-  if (!util::Filesystem::FileExists(configPath)) {
+  if (!Filesystem::FileExists(configPath)) {
     const auto serializeResult = TrySerialize();
     if (!serializeResult) {
       CORE_ASSERT(false, "Failed to create default project config file")
@@ -124,7 +124,7 @@ Expected<void, errors::ProjectError> Project::TryDeserialize()
     return Unexpected(errors::ProjectError::ConfigLoadFailed);
   }
 
-  const auto assetDirectory = util::Filesystem::TryCreateDirs(GetAssetRootPath());
+  const auto assetDirectory = Filesystem::TryCreateDirs(GetAssetRootPath());
   if (!assetDirectory) {
     return Unexpected(errors::ProjectError::DirectoryCreationFailed);
   }
@@ -135,11 +135,11 @@ Expected<void, errors::ProjectError> Project::TryDeserialize()
 
 const ProjectConfig& Project::GetConfig() const { return m_Config_; }
 
-const util::FilePath& Project::GetRootPath() const { return m_RootPath_; }
+const std::filesystem::path& Project::GetRootPath() const { return m_RootPath_; }
 
-util::FilePath Project::GetAssetRootPath() const
+std::filesystem::path Project::GetAssetRootPath() const
 {
-  const util::FilePath assetDirectory = m_Config_.AssetDirectory;
+  const std::filesystem::path assetDirectory = m_Config_.AssetDirectory;
   if (assetDirectory.is_absolute()) {
     return assetDirectory;
   }
@@ -147,7 +147,7 @@ util::FilePath Project::GetAssetRootPath() const
   return m_RootPath_ / assetDirectory;
 }
 
-util::FilePath Project::GetConfigPath() const { return m_RootPath_ / s_ConfigFileName_; }
+std::filesystem::path Project::GetConfigPath() const { return m_RootPath_ / s_ConfigFileName_; }
 
 Expected<void, errors::ProjectError> Project::TryCreateProjectDirectories() const
 {
@@ -155,12 +155,12 @@ Expected<void, errors::ProjectError> Project::TryCreateProjectDirectories() cons
     return Unexpected(errors::ProjectError::InvalidPath);
   }
 
-  const auto rootResult = util::Filesystem::TryCreateDirs(m_RootPath_);
+  const auto rootResult = Filesystem::TryCreateDirs(m_RootPath_);
   if (!rootResult) {
     return Unexpected(errors::ProjectError::DirectoryCreationFailed);
   }
 
-  const auto assetResult = util::Filesystem::TryCreateDirs(GetAssetRootPath());
+  const auto assetResult = Filesystem::TryCreateDirs(GetAssetRootPath());
   if (!assetResult) {
     return Unexpected(errors::ProjectError::DirectoryCreationFailed);
   }

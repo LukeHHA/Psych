@@ -52,21 +52,21 @@ public:
 
   static Expected<std::string, errors::FilesystemError> TryReadFile(const std::filesystem::path& path);
 
-  static bool CreateDir(const DirPath& path);
+  static bool CreateDir(const std::filesystem::path& path);
 
-  static bool CreateDirWithParentPerms(const DirPath& path, const DirPath& parent_path);
+  static bool CreateDirWithParentPerms(const std::filesystem::path& path, const std::filesystem::path& parent_path);
 
-  static bool CreateDirs(const DirPath& path);
+  static bool CreateDirs(const std::filesystem::path& path);
 
-  static bool CreateFile(const FilePath& path);
+  static bool CreateFile(const std::filesystem::path& path);
 
-  static Expected<void, errors::FilesystemError> TryCreateDirs(const DirPath& path);
+  static Expected<void, errors::FilesystemError> TryCreateDirs(const std::filesystem::path& path);
 
-  static Expected<void, errors::FilesystemError> TryCreateFile(const FilePath& path);
+  static Expected<void, errors::FilesystemError> TryCreateFile(const std::filesystem::path& path);
 
   /// NOTE:Function needs to be updated to handle perms internall for
   /// create_directories
   [[deprecated]]
-  static bool CreateDirsWithParentPerms(const DirPath& path);
+  static bool CreateDirsWithParentPerms(const std::filesystem::path& path);
 };
 } // namespace psych

@@ -28,9 +28,11 @@
 /**************************************************************************/
 
 #pragma once
-#include "Asset/AssetExtensions.h"
-#include "Asset/AssetMetaData.h"
+#include "Assets/AssetExtensions.h"
+#include "Assets/AssetMetaData.h"
 #include "expected.h"
+
+#include <filesystem>
 
 namespace psych
 {
@@ -41,8 +43,8 @@ public:
   IAssetLibrary()                                                                  = default;
   virtual ~IAssetLibrary()                                                         = default;
 
-  virtual Expected<void, std::string> ProcessDirectory(const util::FilePath& path) = 0;
-  virtual Expected<void, std::string> AddAsset(const util::FilePath& path)         = 0;
+  virtual Expected<void, std::string> ProcessDirectory(const std::filesystem::path& path) = 0;
+  virtual Expected<void, std::string> AddAsset(const std::filesystem::path& path)         = 0;
 };
 
 class AssetLibrary : public IAssetLibrary
@@ -51,9 +53,9 @@ public:
   AssetLibrary()          = default;
   virtual ~AssetLibrary() = default;
 
-  virtual Expected<void, std::string> ProcessDirectory(const util::FilePath& path) override
+  virtual Expected<void, std::string> ProcessDirectory(const std::filesystem::path& path) override
   {
-    for (const auto& dirEntry : util::recursive_directory_iterator(path)) {
+    for (const auto& dirEntry : std::filesystem::recursive_directory_iterator(path)) {
       if (!dirEntry.is_regular_file())
         continue;
       if (!dirEntry.path().has_extension())
@@ -64,7 +66,7 @@ public:
     return {};
   }
 
-  virtual Expected<void, std::string> AddAsset(const util::FilePath& asset_path) override
+  virtual Expected<void, std::string> AddAsset(const std::filesystem::path& asset_path) override
   {
     auto ext = asset_path.extension().string();
 

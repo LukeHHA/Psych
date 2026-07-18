@@ -30,7 +30,6 @@ set(SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/Window/HeadlessWindow.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/Events/EventHandler.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/Events/EventQueue.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/FileSystem/EngineFilesystem.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/FileSystem/FileSystem.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/FileSystem/PathResolver.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/FileSystem/CoreFilesystemAPI.cpp
@@ -203,13 +202,13 @@ target_include_directories(PsychEngine SYSTEM PUBLIC
 )
 
 if(PSYCH_ENGINE_BUILD_TESTS)
-  target_compile_definitions(PsychEngine PRIVATE GE_TESTS_ENABLED)
+  target_compile_definitions(PsychEngine PRIVATE PSYCH_TESTS_ENABLED)
 endif()
 
 target_compile_definitions(PsychEngine
   PUBLIC
-    $<$<BOOL:${PSYCH_ENABLE_ASSERTS}>:GE_ENABLE_ASSERTS>
-    $<$<BOOL:${PSYCH_ENABLE_PROFILING}>:GE_PROFILE>
+    $<$<BOOL:${PSYCH_ENABLE_ASSERTS}>:PSYCH_ENABLE_ASSERTS>
+    $<$<BOOL:${PSYCH_ENABLE_PROFILING}>:PSYCH_PROFILE>
   PRIVATE
     GL_SILENCE_DEPRECATION
 )

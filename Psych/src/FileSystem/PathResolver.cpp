@@ -1,11 +1,11 @@
- 
+
 /**************************************************************************/
-/*  PathResolver.cpp                                                      */                                                            
+/*  PathResolver.cpp                                                      */
 /**************************************************************************/
 /*                         This file is part of:                          */
 /*                             PSYCH ENGINE                               */
 /**************************************************************************/
-/* Copyright (c)  Luke Howe                                               */                                                  
+/* Copyright (c)  Luke Howe                                               */
 /*                                                                        */
 /* Permission is hereby granted, free of charge, to any person obtaining  */
 /* a copy of this software and associated documentation files (the        */
@@ -31,11 +31,9 @@
 #include "FileSystem/FileSystem.h"
 #include <filesystem>
 
-namespace psych::util
+namespace psych
 {
-PathResolver::PathResolver() { m_EngineRoot_ = util::Filesystem::Current_Path(); }
-
-Expected<FilePath, errors::FilesystemError> PathResolver::TryResolve(const EnginePath::Path& path) const
+Expected<std::filesystem::path, errors::FilesystemError> PathResolver::TryResolve(const EnginePath::Path& path) const
 {
   if (!path.IsValid()) {
     return Unexpected(errors::FilesystemError::InvalidPath);
@@ -72,4 +70,4 @@ Expected<FilePath, errors::FilesystemError> PathResolver::TryResolve(const Engin
 
   return Unexpected(errors::FilesystemError::InvalidPath);
 }
-} // namespace psych::util
+} // namespace psych

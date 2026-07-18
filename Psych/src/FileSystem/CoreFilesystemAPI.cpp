@@ -114,7 +114,7 @@ Expected<void, errors::FilesystemError> CoreFilesystemAPI::TryDeleteFile(const s
 
 bool CoreFilesystemAPI::CreateFile(const std::filesystem::path& path) { return static_cast<bool>(TryCreateFile(path)); }
 
-Expected<void, errors::FilesystemError> CoreFilesystemAPI::TryCreateFile(const FilePath& path)
+Expected<void, errors::FilesystemError> CoreFilesystemAPI::TryCreateFile(const std::filesystem::path& path)
 {
   if (path.empty()) {
     return Unexpected(errors::FilesystemError::InvalidPath);
@@ -199,13 +199,16 @@ Expected<std::string, errors::FilesystemError> CoreFilesystemAPI::TryReadFile(co
   return contents.str();
 }
 
-bool CoreFilesystemAPI::CreateDir(const DirPath& path) { return std::filesystem::create_directory(path); }
+bool CoreFilesystemAPI::CreateDir(const std::filesystem::path& path) { return std::filesystem::create_directory(path); }
 
-bool CoreFilesystemAPI::CreateDirWithParentPerms(const DirPath& path, const DirPath& parent_path) { return std::filesystem::create_directory(path, parent_path); }
+bool CoreFilesystemAPI::CreateDirWithParentPerms(const std::filesystem::path& path, const std::filesystem::path& parent_path)
+{
+  return std::filesystem::create_directory(path, parent_path);
+}
 
-bool CoreFilesystemAPI::CreateDirs(const DirPath& path) { return static_cast<bool>(TryCreateDirs(path)); }
+bool CoreFilesystemAPI::CreateDirs(const std::filesystem::path& path) { return static_cast<bool>(TryCreateDirs(path)); }
 
-Expected<void, errors::FilesystemError> CoreFilesystemAPI::TryCreateDirs(const DirPath& path)
+Expected<void, errors::FilesystemError> CoreFilesystemAPI::TryCreateDirs(const std::filesystem::path& path)
 {
   if (path.empty()) {
     return Unexpected(errors::FilesystemError::InvalidPath);
@@ -236,6 +239,6 @@ Expected<void, errors::FilesystemError> CoreFilesystemAPI::TryCreateDirs(const D
   return {};
 }
 
-bool CoreFilesystemAPI::CreateDirsWithParentPerms(const DirPath& path) { return std::filesystem::create_directories(path); }
+bool CoreFilesystemAPI::CreateDirsWithParentPerms(const std::filesystem::path& path) { return std::filesystem::create_directories(path); }
 
 } // namespace psych

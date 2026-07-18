@@ -64,7 +64,7 @@ Expected<void, errors::SerializationError> PsychEngineConfig::TrySerialize() con
 {
   CORE_PROFILE_FUNCTION();
 
-  const auto baseConfigPath = util::Filesystem::TryGetBaseConfigPath();
+  const auto baseConfigPath = Filesystem::TryGetBaseConfigPath();
   if (!baseConfigPath) {
     CORE_ASSERT(false, "Failed to get config path")
     return Unexpected(errors::SerializationError::SerializationFailed);
@@ -96,7 +96,7 @@ Expected<void, errors::SerializationError> PsychEngineConfig::TryDeserialize()
     return {};
   }
 
-  const auto baseConfigPath = util::Filesystem::TryGetBaseConfigPath();
+  const auto baseConfigPath = Filesystem::TryGetBaseConfigPath();
   if (!baseConfigPath) {
     /// Could assert on baseConfigPath itself but the future intent is to not assert
     CORE_ASSERT(false, "Failed to get config path")
@@ -104,7 +104,7 @@ Expected<void, errors::SerializationError> PsychEngineConfig::TryDeserialize()
   }
   const auto configPath = baseConfigPath.value() / s_ConfigFileName_;
 
-  if (!util::Filesystem::FileExists(configPath)) {
+  if (!Filesystem::FileExists(configPath)) {
     const auto res = TrySerialize();
     if (!res) {
       CORE_ASSERT(false, "Failed to create config file on disk")

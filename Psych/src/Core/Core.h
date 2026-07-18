@@ -42,12 +42,12 @@ inline constexpr const char* PsychEngineName = "PsychEngine";
 #include <TargetConditionals.h>
 
 #if TARGET_OS_MAC && !TARGET_OS_IPHONE
-#define GE_PLATFORM_MACOS
+#define PSYCH_PLATFORM_MACOS
 #elif TARGET_OS_IPHONE
-#define GE_PLATFORM_IOS
+#define PSYCH_PLATFORM_IOS
 #endif
 #elif defined(__linux__)
-#define GE_PLATFORM_LINUX
+#define PSYCH_PLATFORM_LINUX
 #endif
 
 // Pointer Utils

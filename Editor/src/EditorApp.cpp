@@ -2,6 +2,7 @@
 #include "Core/PsychEngine.h"
 #include "EditorLayer.h"
 #include "EntryPoint.h"
+#include "ProjectEditor.h"
 
 namespace psych
 {
@@ -22,8 +23,9 @@ psych::Expected<psych::Unique<psych::PsychEngine>, psych::errors::EngineError> p
   }
 
   // If building as an editor why would you not push the overlay?
-  if (app->GetConfig().GetPsychEngineSpec().EnableEditorUI) {
-    app->PushOverlay(psych::CreateUnique<psych::EditorLayer>());
-  }
+  // if (app->GetConfig().GetPsychEngineSpec().EnableEditorUI) {
+  //   app->PushOverlay(psych::CreateUnique<psych::EditorLayer>());
+  // }
+  app->PushOverlay(CreateUnique<ProjectEditor>());
   return std::move(app);
 }

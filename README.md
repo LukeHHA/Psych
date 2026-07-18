@@ -60,9 +60,9 @@ cmake --build build --target PsychEngineTests --parallel
 | -------------------------------- | ------- | -------------------------------------------------------------------------- |
 | `PSYCH_ENGINE_BUILD_EDITOR`      | `OFF`   | Configure the `Editor` executable instead of the default `App` executable. |
 | `PSYCH_ENGINE_BUILD_TESTS`       | `OFF`   | Configure the `PsychEngineTests` target and CTest integration.             |
-| `GE_ENABLE_ASSERTS`              | `ON`    | Enable engine runtime assertions.                                          |
-| `GE_ENABLE_PROFILING`            | `ON`    | Enable profiling instrumentation.                                          |
-| `GE_ENABLE_SANITIZERS`           | `OFF`   | Add AddressSanitizer/UndefinedBehaviorSanitizer flags to `PsychEngine`.    |
+| `PSYCH_ENABLE_ASSERTS`           | `ON`    | Enable engine runtime assertions.                                          |
+| `PSYCH_ENABLE_PROFILING`         | `ON`    | Enable profiling instrumentation.                                          |
+| `PSYCH_ENABLE_SANITIZERS`        | `OFF`   | Add AddressSanitizer/UndefinedBehaviorSanitizer flags to `PsychEngine`.    |
 | `PSYCH_ENGINE_ENABLE_CLANG_TIDY` | `OFF`   | Run `clang-tidy` while compiling `PsychEngine` and `Editor` sources.       |
 | `BUILD_SHARED_LIBS`              | `OFF`   | Standard CMake option used by dependencies that respect it.                |
 
