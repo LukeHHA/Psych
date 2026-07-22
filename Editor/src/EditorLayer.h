@@ -25,6 +25,7 @@ public:
   void OnImGuiRender() override;
 
 private:
+  bool m_ShowProjectWindow_ = false;
   Shared<VertexArray> m_CubeVertexArray_;
   Shared<Shader> m_CubeShader_;
   Unique<RendererAPI> m_RendererAPI_;

@@ -1,11 +1,11 @@
- 
+
 /**************************************************************************/
-/*  MacOSFilesystemAPI.cpp                                                */                                                            
+/*  MacOSFilesystemAPI.cpp                                                */
 /**************************************************************************/
 /*                         This file is part of:                          */
 /*                             PSYCH ENGINE                               */
 /**************************************************************************/
-/* Copyright (c)  Luke Howe                                               */                                                  
+/* Copyright (c)  Luke Howe                                               */
 /*                                                                        */
 /* Permission is hereby granted, free of charge, to any person obtaining  */
 /* a copy of this software and associated documentation files (the        */
@@ -28,7 +28,6 @@
 /**************************************************************************/
 
 #include "MacOSFilesystemAPI.h"
-#include "FileSystem/OSFilesystemAPI.h"
 
 namespace psych
 {

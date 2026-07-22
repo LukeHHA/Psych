@@ -1,6 +1,7 @@
 #include "EditorLayer.h"
 #include "Core/PsychEngine.h"
 #include "Debug/Instrumentor.h"
+#include "ProjectWindow.h"
 #include "Renderer/Buffer.h"
 #include "Renderer/RendererAPI.h"
 #include "Renderer/VertexArray.h"
@@ -84,52 +85,59 @@ void EditorLayer::End() { CORE_PROFILE_FUNCTION(); }
 
 void EditorLayer::OnImGuiRender()
 {
-  ui::MainMenuBar();
+  m_ShowProjectWindow_ = true;
+  if (m_ShowProjectWindow_) {
+    ProjectWindow w{};
+    w.OnImGuiRender();
+    m_ShowProjectWindow_ = false;
+  } else {
+    ui::MainMenuBar();
 
-  static std::unique_ptr<FileNode> FileTree;
+    static std::unique_ptr<FileNode> FileTree;
 
-  if (!FileTree) {
-    auto fileTreeResult = Filesystem::TryCreateDirectoryTree(Filesystem::Current_Path());
-    if (!fileTreeResult) {
-      CORE_LOG_ERROR("Failed to create editor file tree");
-    } else {
-      FileTree = std::move(fileTreeResult.value());
-    }
-  }
-
-  if (ImGui::Begin("File Tree")) {
-    ui::MainFileTree(FileTree.get());
-  }
-  ImGui::End();
-
-  ImGuiWindowFlags viewportWindowFlags = 0;
-  viewportWindowFlags |= ImGuiWindowFlags_NoScrollbar;
-  viewportWindowFlags |= ImGuiWindowFlags_NoScrollWithMouse;
-  viewportWindowFlags |= ImGuiWindowFlags_HorizontalScrollbar;
-
-  if (ImGui::Begin("Viewport", nullptr, viewportWindowFlags)) {
-    ImVec2 viewportSize = ImGui::GetContentRegionAvail();
-
-    if (viewportSize.x > 0.0f && viewportSize.y > 0.0f) {
-      auto& framebuffer         = PsychEngine::Get().GetFramebuffer();
-
-      const auto viewportWidth  = static_cast<uint32_t>(viewportSize.x);
-      const auto viewportHeight = static_cast<uint32_t>(viewportSize.y);
-
-      if (viewportWidth != m_ViewportWidth_ || viewportHeight != m_ViewportHeight_) {
-        framebuffer.Resize(viewportWidth, viewportHeight);
-        m_ViewportWidth_  = viewportWidth;
-        m_ViewportHeight_ = viewportHeight;
+    if (!FileTree) {
+      auto fileTreeResult = Filesystem::TryCreateDirectoryTree(Filesystem::Current_Path());
+      if (!fileTreeResult) {
+        CORE_LOG_ERROR("Failed to create editor file tree");
+      } else {
+        FileTree = std::move(fileTreeResult.value());
       }
-
-      const auto framebufferTexture = static_cast<ImTextureID>(framebuffer.GetColorAttachmentID());
-
-      ImGui::Image(framebufferTexture, viewportSize, ImVec2(0.0f, 1.0f), ImVec2(1.0f, 0.0f));
     }
-  }
-  ImGui::End();
 
-  ui::FileViewer("./data/config.xml");
+    if (ImGui::Begin("File Tree")) {
+      ui::MainFileTree(FileTree.get());
+    }
+    ImGui::End();
+
+    ImGuiWindowFlags viewportWindowFlags = 0;
+    viewportWindowFlags |= ImGuiWindowFlags_NoScrollbar;
+    viewportWindowFlags |= ImGuiWindowFlags_NoScrollWithMouse;
+    viewportWindowFlags |= ImGuiWindowFlags_HorizontalScrollbar;
+
+    if (ImGui::Begin("Viewport", nullptr, viewportWindowFlags)) {
+      ImVec2 viewportSize = ImGui::GetContentRegionAvail();
+
+      if (viewportSize.x > 0.0f && viewportSize.y > 0.0f) {
+        auto& framebuffer         = PsychEngine::Get().GetFramebuffer();
+
+        const auto viewportWidth  = static_cast<uint32_t>(viewportSize.x);
+        const auto viewportHeight = static_cast<uint32_t>(viewportSize.y);
+
+        if (viewportWidth != m_ViewportWidth_ || viewportHeight != m_ViewportHeight_) {
+          framebuffer.Resize(viewportWidth, viewportHeight);
+          m_ViewportWidth_  = viewportWidth;
+          m_ViewportHeight_ = viewportHeight;
+        }
+
+        const auto framebufferTexture = static_cast<ImTextureID>(framebuffer.GetColorAttachmentID());
+
+        ImGui::Image(framebufferTexture, viewportSize, ImVec2(0.0f, 1.0f), ImVec2(1.0f, 0.0f));
+      }
+    }
+    ImGui::End();
+
+    ui::FileViewer("./data/config.xml");
+  }
 }
 
 void EditorLayer::OnRender()

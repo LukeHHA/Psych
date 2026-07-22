@@ -114,7 +114,7 @@ Expected<std::filesystem::path, errors::FilesystemError> Filesystem::TryGetBaseC
   }
 
   std::filesystem::path configPath = basePath / PsychEngineName / "config";
-  const auto result  = CoreFilesystemAPI::TryCreateDirs(configPath);
+  const auto result                = CoreFilesystemAPI::TryCreateDirs(configPath);
   if (!result) {
     return Unexpected(result.error());
   }
@@ -146,7 +146,7 @@ Expected<std::filesystem::path, errors::FilesystemError> Filesystem::TryGetBaseC
 
   std::filesystem::path cachePath = basePath / PsychEngineName;
 
-  const auto result = CoreFilesystemAPI::TryCreateDirs(cachePath);
+  const auto result               = CoreFilesystemAPI::TryCreateDirs(cachePath);
   if (!result) {
     return Unexpected(result.error());
   }
@@ -244,4 +244,6 @@ std::vector<std::byte> Filesystem::ReadBinaryFile(const std::filesystem::path& p
 
   return buffer;
 }
+
+std::filesystem::path Filesystem::GetFileExplorer() { return s_OSFilesystemAPI_->GetOSFileExplorer(); }
 } // namespace psych

@@ -1,11 +1,11 @@
- 
+
 /**************************************************************************/
-/*  OSFilesystemAPI.h                                                     */                                                            
+/*  OSFilesystemAPI.h                                                     */
 /**************************************************************************/
 /*                         This file is part of:                          */
 /*                             PSYCH ENGINE                               */
 /**************************************************************************/
-/* Copyright (c)  Luke Howe                                               */                                                  
+/* Copyright (c)  Luke Howe                                               */
 /*                                                                        */
 /* Permission is hereby granted, free of charge, to any person obtaining  */
 /* a copy of this software and associated documentation files (the        */
@@ -41,7 +41,8 @@ public:
   virtual ~OSFilesystemAPI() = default;
   CORE_NO_COPY_NO_MOVE(OSFilesystemAPI);
 
-  virtual std::filesystem::path GetOSAppDataPath() const   = 0;
-  virtual std::filesystem::path GetOSCacheDataPath() const = 0;
+  [[nodiscard]] virtual std::filesystem::path GetOSAppDataPath() const   = 0;
+  [[nodiscard]] virtual std::filesystem::path GetOSCacheDataPath() const = 0;
+  [[nodiscard]] virtual std::filesystem::path GetOSFileExplorer() const  = 0;
 };
 } // namespace psych

@@ -1,11 +1,11 @@
- 
+
 /**************************************************************************/
-/*  MacOSFilesystemAPI.h                                                  */                                                            
+/*  MacOSFilesystemAPI.h                                                  */
 /**************************************************************************/
 /*                         This file is part of:                          */
 /*                             PSYCH ENGINE                               */
 /**************************************************************************/
-/* Copyright (c)  Luke Howe                                               */                                                  
+/* Copyright (c)  Luke Howe                                               */
 /*                                                                        */
 /* Permission is hereby granted, free of charge, to any person obtaining  */
 /* a copy of this software and associated documentation files (the        */
@@ -41,11 +41,12 @@ public:
   ~MacOSFilesystemAPI() override = default;
   CORE_NO_COPY_NO_MOVE(MacOSFilesystemAPI);
 
-  std::filesystem::path GetOSAppDataPath() const override;
-  std::filesystem::path GetOSCacheDataPath() const override;
+  [[nodiscard]] std::filesystem::path GetOSAppDataPath() const override;
+  [[nodiscard]] std::filesystem::path GetOSCacheDataPath() const override;
+  [[nodiscard]] std::filesystem::path GetOSFileExplorer() const override;
 
 private:
-  std::filesystem::path GetApplicationSupportPath() const;
-  std::filesystem::path GetCachePath() const;
+  [[nodiscard]] std::filesystem::path GetApplicationSupportPath() const;
+  [[nodiscard]] std::filesystem::path GetCachePath() const;
 };
 } // namespace psych

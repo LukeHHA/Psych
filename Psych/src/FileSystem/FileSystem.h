@@ -82,6 +82,7 @@ public:
   static Expected<std::filesystem::path, errors::FilesystemError> TryGetBaseCachePath();
   static std::filesystem::path GetBaseConfigPath();
   static std::filesystem::path GetBaseCachePath();
+  static std::filesystem::path GetFileExplorer();
 
 private:
   inline static Shared<OSFilesystemAPI> s_OSFilesystemAPI_ = nullptr;
