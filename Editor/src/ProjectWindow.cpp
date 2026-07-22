@@ -1,6 +1,6 @@
 #include "ProjectWindow.h"
 #include "FileSystem/FileSystem.h"
-#include "ImGui/misc/cpp/imgui_stdlib.cpp"
+#include "imgui/misc/cpp/imgui_stdlib.cpp"
 #include <iostream>
 
 namespace psych

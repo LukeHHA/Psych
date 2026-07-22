@@ -1,11 +1,11 @@
- 
+
 /**************************************************************************/
-/*  LinuxFilesystemAPI.h                                                  */                                                            
+/*  LinuxFilesystemAPI.h                                                  */
 /**************************************************************************/
 /*                         This file is part of:                          */
 /*                             PSYCH ENGINE                               */
 /**************************************************************************/
-/* Copyright (c)  Luke Howe                                               */                                                  
+/* Copyright (c)  Luke Howe                                               */
 /*                                                                        */
 /* Permission is hereby granted, free of charge, to any person obtaining  */
 /* a copy of this software and associated documentation files (the        */
@@ -40,8 +40,9 @@ public:
   ~LinuxFilesystemAPI() override = default;
   CORE_NO_COPY_NO_MOVE(LinuxFilesystemAPI);
 
-  std::filesystem::path GetOSAppDataPath() const override;
-  std::filesystem::path GetOSCacheDataPath() const override;
+  [[nodiscard]] std::filesystem::path GetOSAppDataPath() const override;
+  [[nodiscard]] std::filesystem::path GetOSCacheDataPath() const override;
+  [[nodiscard]] std::filesystem::path GetOSFileExplorer() const override;
 
 private:
   [[nodiscard]] std::filesystem::path GetHomePath() const;

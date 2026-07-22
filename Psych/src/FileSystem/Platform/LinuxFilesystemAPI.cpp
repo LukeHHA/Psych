@@ -1,11 +1,11 @@
- 
+
 /**************************************************************************/
-/*  LinuxFilesystemAPI.cpp                                                */                                                            
+/*  LinuxFilesystemAPI.cpp                                                */
 /**************************************************************************/
 /*                         This file is part of:                          */
 /*                             PSYCH ENGINE                               */
 /**************************************************************************/
-/* Copyright (c)  Luke Howe                                               */                                                  
+/* Copyright (c)  Luke Howe                                               */
 /*                                                                        */
 /* Permission is hereby granted, free of charge, to any person obtaining  */
 /* a copy of this software and associated documentation files (the        */
@@ -75,4 +75,6 @@ std::filesystem::path LinuxFilesystemAPI::GetHomePath() const
 
   return {};
 }
+
+std::filesystem::path LinuxFilesystemAPI::GetOSFileExplorer() const { return ""; }
 } // namespace psych
