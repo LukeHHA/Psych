@@ -1,15 +1,16 @@
 #include "EditorLayer.h"
+#include "Core/Core.h"
 #include "Core/PsychEngine.h"
 #include "Debug/Instrumentor.h"
-#include "ProjectWindow.h"
+#include "FileSystem/FileSystem.h"
 #include "Renderer/Buffer.h"
 #include "Renderer/RendererAPI.h"
 #include "Renderer/VertexArray.h"
 #include "UI/Modules/EditorMenuBar.h"
 #include "UI/Modules/FileViewer.h"
 #include "UI/Modules/MainFileTree.h"
+#include "UI/Modules/Viewport.h"
 #include "Util/Time.h"
-#include "imgui/imgui.h"
 #include <cstdint>
 #include <glm/ext/matrix_clip_space.hpp>
 #include <glm/ext/matrix_transform.hpp>
@@ -60,6 +61,22 @@ void EditorLayer::OnAttach()
   } else {
     m_RendererAPI_ = std::move(rendererAPI.value());
   }
+
+  m_PanelManager_.AddPanel<ui::EditorMenuBarPanel>();
+
+  auto* fileTree = m_PanelManager_.AddPanel<ui::MainFileTreePanel>();
+  fileTree->SetSelectedCallbackFn([this](const std::filesystem::path& path) { OpenFile(path); });
+
+  auto fileTreeResult = Filesystem::TryCreateDirectoryTree(Filesystem::Current_Path());
+  if (!fileTreeResult) {
+    CORE_LOG_ERROR("Failed to create editor file tree");
+  } else {
+    m_FileTreeRoot_ = std::move(fileTreeResult.value());
+    fileTree->SetRootNode(m_FileTreeRoot_.get());
+  }
+
+  m_PanelManager_.AddPanel<ui::FileViewerPanel>();
+  m_PanelManager_.AddPanel<ui::ViewportPanel>();
 }
 
 void EditorLayer::OnDetach()
@@ -71,6 +88,8 @@ void EditorLayer::OnDetach()
 
 void EditorLayer::OnEvent(Event& e)
 {
+  m_PanelManager_.OnEvent(e);
+
   // if (m_BlockEvents) {
   //   ImGuiIO& io = ImGui::GetIO();
   //   e.Handled |= e.IsInCategory(EventCategoryMouse) & io.WantCaptureMouse;
@@ -83,62 +102,7 @@ void EditorLayer::Begin() { CORE_PROFILE_FUNCTION(); }
 
 void EditorLayer::End() { CORE_PROFILE_FUNCTION(); }
 
-void EditorLayer::OnImGuiRender()
-{
-  m_ShowProjectWindow_ = true;
-  if (m_ShowProjectWindow_) {
-    ProjectWindow w{};
-    w.OnImGuiRender();
-    m_ShowProjectWindow_ = false;
-  } else {
-    ui::MainMenuBar();
-
-    static std::unique_ptr<FileNode> FileTree;
-
-    if (!FileTree) {
-      auto fileTreeResult = Filesystem::TryCreateDirectoryTree(Filesystem::Current_Path());
-      if (!fileTreeResult) {
-        CORE_LOG_ERROR("Failed to create editor file tree");
-      } else {
-        FileTree = std::move(fileTreeResult.value());
-      }
-    }
-
-    if (ImGui::Begin("File Tree")) {
-      ui::MainFileTree(FileTree.get());
-    }
-    ImGui::End();
-
-    ImGuiWindowFlags viewportWindowFlags = 0;
-    viewportWindowFlags |= ImGuiWindowFlags_NoScrollbar;
-    viewportWindowFlags |= ImGuiWindowFlags_NoScrollWithMouse;
-    viewportWindowFlags |= ImGuiWindowFlags_HorizontalScrollbar;
-
-    if (ImGui::Begin("Viewport", nullptr, viewportWindowFlags)) {
-      ImVec2 viewportSize = ImGui::GetContentRegionAvail();
-
-      if (viewportSize.x > 0.0f && viewportSize.y > 0.0f) {
-        auto& framebuffer         = PsychEngine::Get().GetFramebuffer();
-
-        const auto viewportWidth  = static_cast<uint32_t>(viewportSize.x);
-        const auto viewportHeight = static_cast<uint32_t>(viewportSize.y);
-
-        if (viewportWidth != m_ViewportWidth_ || viewportHeight != m_ViewportHeight_) {
-          framebuffer.Resize(viewportWidth, viewportHeight);
-          m_ViewportWidth_  = viewportWidth;
-          m_ViewportHeight_ = viewportHeight;
-        }
-
-        const auto framebufferTexture = static_cast<ImTextureID>(framebuffer.GetColorAttachmentID());
-
-        ImGui::Image(framebufferTexture, viewportSize, ImVec2(0.0f, 1.0f), ImVec2(1.0f, 0.0f));
-      }
-    }
-    ImGui::End();
-
-    ui::FileViewer("./data/config.xml");
-  }
-}
+void EditorLayer::OnImGuiRender() { m_PanelManager_.OnImGuiRender(); }
 
 void EditorLayer::OnRender()
 {
@@ -146,7 +110,8 @@ void EditorLayer::OnRender()
     return;
   }
 
-  const float aspect         = m_ViewportHeight_ > 0 ? static_cast<float>(m_ViewportWidth_) / static_cast<float>(m_ViewportHeight_) : 16.0f / 9.0f;
+  const auto& framebuffer    = PsychEngine::Get().GetFramebuffer();
+  const float aspect         = framebuffer.GetHeight() > 0 ? static_cast<float>(framebuffer.GetWidth()) / static_cast<float>(framebuffer.GetHeight()) : 16.0F / 9.0F;
 
   const glm::mat4 projection = glm::perspective(glm::radians(45.0f), aspect, 0.1f, 100.0f);
   const glm::mat4 view       = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -3.0f));
@@ -157,6 +122,18 @@ void EditorLayer::OnRender()
   m_RendererAPI_->DrawIndexed(m_CubeVertexArray_, 36);
 }
 
-void EditorLayer::OnUpdate(float ts) { m_CubeRotation_ += Time::DeltaTime(); }
+void EditorLayer::OnUpdate(float ts)
+{
+  m_PanelManager_.OnUpdate();
+  m_CubeRotation_ += Time::DeltaTime();
+}
+
+void EditorLayer::OpenFile(const std::filesystem::path& path)
+{
+  auto* fileViewer = m_PanelManager_.GetPanel<ui::FileViewerPanel>();
+  if (fileViewer != nullptr) {
+    fileViewer->SetFilePath(path);
+  }
+}
 
 } // namespace psych

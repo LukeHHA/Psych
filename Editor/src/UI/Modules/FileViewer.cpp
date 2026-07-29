@@ -5,10 +5,13 @@
 
 namespace psych::ui
 {
-void FileViewer(const std::filesystem::path& path)
-{
+Unique<FileViewerPanel> FileViewerPanel::Create() { return CreateUnique<FileViewerPanel>(); }
 
-  auto fileContent = Filesystem::TryReadFile(path);
+std::string FileViewerPanel::GetID() { return "FileViewerPanel"; }
+
+void FileViewerPanel::OnImGuiRender()
+{
+  auto fileContent = Filesystem::TryReadFile(m_Path_);
   if (!fileContent) {
     fileContent = "";
   }
@@ -24,4 +27,8 @@ void FileViewer(const std::filesystem::path& path)
 
   ImGui::End();
 }
+
+void FileViewerPanel::OnUpdate() {}
+
+void FileViewerPanel::SetFilePath(const std::filesystem::path& path) { m_Path_ = path; }
 } // namespace psych::ui

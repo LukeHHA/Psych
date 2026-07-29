@@ -5,6 +5,7 @@ set(SOURCES
     src/UI/Modules/EditorMenuBar.cpp
     src/UI/Modules/MainFileTree.cpp
     src/UI/Modules/FileViewer.cpp
+    src/UI/Modules/Viewport.cpp
 )
 
 add_executable(Editor)

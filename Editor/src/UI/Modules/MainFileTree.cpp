@@ -2,10 +2,40 @@
 #include "Assets/Fonts/IconsFontAwesome7.h"
 #include "FileSystem/FileSystem.h"
 #include <imgui.h>
+#include <utility>
 
 namespace psych::ui
 {
-void TraverseFileTreeNode(const FileNode* node, ImGuiTreeNodeFlags flags)
+Unique<MainFileTreePanel> MainFileTreePanel::Create() { return CreateUnique<MainFileTreePanel>(); }
+
+std::string MainFileTreePanel::GetID() { return "MainFileTreePanel"; }
+
+void MainFileTreePanel::OnImGuiRender()
+{
+  if (!ImGui::Begin("File Tree")) {
+    ImGui::End();
+    return;
+  }
+
+  ImGuiChildFlags childFlags = 0;
+  childFlags |= ImGuiChildFlags_AutoResizeY;
+  childFlags |= ImGuiChildFlags_ResizeX;
+
+  if (ImGui::BeginChild("FileView", ImVec2(250.0f, 0.0f), childFlags)) {
+    DrawFileTreeNode(m_RootNode_);
+  }
+
+  ImGui::EndChild();
+  ImGui::End();
+}
+
+void MainFileTreePanel::OnUpdate() {}
+
+void MainFileTreePanel::SetSelectedCallbackFn(SelectedCallbackFn fn) { m_SelectedCallbacks_.push_back(std::move(fn)); }
+
+void MainFileTreePanel::SetRootNode(const FileNode* node) { m_RootNode_ = node; }
+
+void MainFileTreePanel::DrawFileTreeNode(const FileNode* node)
 {
   if (node == nullptr) {
     return;
@@ -13,50 +43,26 @@ void TraverseFileTreeNode(const FileNode* node, ImGuiTreeNodeFlags flags)
 
   if (!node->isDir) {
     std::string label = std::string(ICON_FA_FILE) + " " + node->name + "##" + node->path.string();
-    ImGui::Selectable(label.c_str());
+    if (ImGui::Selectable(label.c_str())) {
+      m_CurrentSelected_ = node->path;
+      for (const auto& callback : m_SelectedCallbacks_) {
+        callback(m_CurrentSelected_);
+      }
+    }
     return;
   }
 
-  std::string label = std::string(ICON_FA_FOLDER) + " " + node->name + "##" + node->path.string();
+  const ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_DrawLinesFull;
+  std::string label              = std::string(ICON_FA_FOLDER) + " " + node->name + "##" + node->path.string();
 
   if (ImGui::TreeNodeEx(label.c_str(), flags)) {
     for (const auto& child : node->children) {
-      TraverseFileTreeNode(child.get(), flags);
+      DrawFileTreeNode(child.get());
     }
 
     ImGui::TreePop();
   }
 }
 
-void MainFileTree(const FileNode* node)
-{
-  if (node == nullptr) {
-    return;
-  }
-
-  ImGuiChildFlags child_flags = 0;
-  child_flags |= ImGuiChildFlags_AutoResizeY;
-  child_flags |= ImGuiChildFlags_ResizeX;
-
-  ImGuiWindowFlags window_flags = 0;
-  ImGuiTreeNodeFlags flags      = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_DrawLinesFull;
-
-  if (ImGui::BeginChild("FileView", ImVec2(250.0f, 0.0f), child_flags, window_flags)) {
-    if (!node->isDir) {
-      std::string label = std::string(ICON_FA_FILE) + " " + node->name + "##" + node->path.string();
-      ImGui::Selectable(label.c_str());
-      return;
-    }
-
-    std::string label = std::string(ICON_FA_FOLDER) + " " + node->name + "##" + node->path.string();
-    if (ImGui::TreeNodeEx(label.c_str(), flags)) {
-      for (const auto& child : node->children) {
-        TraverseFileTreeNode(child.get(), flags);
-      }
-      ImGui::TreePop();
-    }
-  }
-
-  ImGui::EndChild();
-}
+std::filesystem::path MainFileTreePanel::GetCurrentSelected() const { return m_CurrentSelected_; }
 } // namespace psych::ui
