@@ -35,7 +35,6 @@ set(SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/FileSystem/CoreFilesystemAPI.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/OS/OS.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/OS/OSAPI.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/OS/Platform/MacOS/MacOSAPI.mm
     ${CMAKE_CURRENT_SOURCE_DIR}/src/Imgui/ImguiLayer.cpp
 )
 
@@ -90,6 +89,7 @@ if(APPLE)
   target_sources(PsychEngine PRIVATE
         src/FileSystem/Platform/MacOSFilesystemAPI.cpp
         src/FileSystem/Platform/MacOSFilesystem.mm
+        src/OS/Platform/MacOS/MacOSAPI.mm
     )
 
   target_link_libraries(PsychEngine PUBLIC
@@ -105,6 +105,7 @@ elseif(UNIX AND NOT APPLE)
 
   target_sources(PsychEngine PRIVATE
         src/FileSystem/Platform/LinuxFilesystemAPI.cpp
+        src/OS/Platform/Linux/LinuxOSAPI.cpp
     )
 
   # target_link_libraries(PsychEngine PUBLIC OpenGL::GL Threads::Threads)
