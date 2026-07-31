@@ -1,11 +1,11 @@
- 
+
 /**************************************************************************/
-/*  PsychEngineConfig.cpp                                                 */                                                            
+/*  PsychEngineConfig.cpp                                                 */
 /**************************************************************************/
 /*                         This file is part of:                          */
 /*                             PSYCH ENGINE                               */
 /**************************************************************************/
-/* Copyright (c)  Luke Howe                                               */                                                  
+/* Copyright (c)  Luke Howe                                               */
 /*                                                                        */
 /* Permission is hereby granted, free of charge, to any person obtaining  */
 /* a copy of this software and associated documentation files (the        */
@@ -124,7 +124,7 @@ Expected<void, errors::SerializationError> PsychEngineConfig::TryDeserialize()
     cereal::XMLInputArchive archive(stream);
     archive(cereal::make_nvp("PsychEngineSpecification", m_EngineSpec_));
   } catch (const cereal::Exception&) {
-    CORE_ASSERT(false, "Failed to deserialize config")
+    CORE_ASSERT(false, "Failed to deserialize config - Config may be corrupt!")
     return Unexpected(errors::SerializationError::DeserializationFailed);
   }
 

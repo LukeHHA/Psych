@@ -33,6 +33,9 @@ set(SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/FileSystem/FileSystem.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/FileSystem/PathResolver.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/FileSystem/CoreFilesystemAPI.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/OS/OS.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/OS/OSAPI.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/OS/Platform/MacOS/MacOSAPI.mm
     ${CMAKE_CURRENT_SOURCE_DIR}/src/Imgui/ImguiLayer.cpp
 )
 

@@ -77,6 +77,7 @@ void EditorLayer::OnAttach()
 
   m_PanelManager_.AddPanel<ui::FileViewerPanel>();
   m_PanelManager_.AddPanel<ui::ViewportPanel>();
+  m_ProjectWindowPanel_ = ui::ProjectWindowPanel::Create();
 }
 
 void EditorLayer::OnDetach()
@@ -84,11 +85,16 @@ void EditorLayer::OnDetach()
   m_RendererAPI_.reset();
   m_CubeShader_.reset();
   m_CubeVertexArray_.reset();
+  m_ProjectWindowPanel_.reset();
 }
 
 void EditorLayer::OnEvent(Event& e)
 {
-  m_PanelManager_.OnEvent(e);
+  if (m_ShowNewProjectWindow_ && m_ProjectWindowPanel_ != nullptr) {
+    m_ProjectWindowPanel_->OnEvent(e);
+  } else {
+    m_PanelManager_.OnEvent(e);
+  }
 
   // if (m_BlockEvents) {
   //   ImGuiIO& io = ImGui::GetIO();
@@ -102,7 +108,14 @@ void EditorLayer::Begin() { CORE_PROFILE_FUNCTION(); }
 
 void EditorLayer::End() { CORE_PROFILE_FUNCTION(); }
 
-void EditorLayer::OnImGuiRender() { m_PanelManager_.OnImGuiRender(); }
+void EditorLayer::OnImGuiRender()
+{
+  if (m_ShowNewProjectWindow_ && m_ProjectWindowPanel_ != nullptr) {
+    m_ProjectWindowPanel_->OnImGuiRender();
+  } else {
+    m_PanelManager_.OnImGuiRender();
+  }
+}
 
 void EditorLayer::OnRender()
 {
@@ -124,7 +137,11 @@ void EditorLayer::OnRender()
 
 void EditorLayer::OnUpdate(float ts)
 {
-  m_PanelManager_.OnUpdate();
+  if (m_ShowNewProjectWindow_ && m_ProjectWindowPanel_ != nullptr) {
+    m_ProjectWindowPanel_->OnUpdate();
+  } else {
+    m_PanelManager_.OnUpdate();
+  }
   m_CubeRotation_ += Time::DeltaTime();
 }
 

@@ -7,6 +7,7 @@
 #include "Renderer/RendererAPI.h"
 #include "Renderer/Shader.h"
 #include "Renderer/VertexArray.h"
+#include "UI/Modules/ProjectWindow.h"
 #include <cstdint>
 #include <filesystem>
 
@@ -42,5 +43,8 @@ private:
   float m_CubeRotation_ = 0.0f;
 
   PanelManager m_PanelManager_;
+  Unique<ui::ProjectWindowPanel> m_ProjectWindowPanel_;
+
+  bool m_ShowNewProjectWindow_ = false;
 };
 } // namespace psych

@@ -36,7 +36,6 @@
 #include "Renderer/Renderer.h"
 #include "Util/Time.h"
 
-#include <filesystem>
 #include <utility>
 
 namespace psych

@@ -1,11 +1,11 @@
- 
+
 /**************************************************************************/
-/*  EntryPoint.h                                                          */                                                            
+/*  EntryPoint.h                                                          */
 /**************************************************************************/
 /*                         This file is part of:                          */
 /*                             PSYCH ENGINE                               */
 /**************************************************************************/
-/* Copyright (c)  Luke Howe                                               */                                                  
+/* Copyright (c)  Luke Howe                                               */
 /*                                                                        */
 /* Permission is hereby granted, free of charge, to any person obtaining  */
 /* a copy of this software and associated documentation files (the        */
@@ -35,6 +35,7 @@
 #include "Core/PsychEngine.h"
 #include "Debug/Instrumentor.h"
 #include "FileSystem/FileSystem.h"
+#include "OS/OS.h"
 #include "Util/CommandLine.h"
 
 // MAIN
@@ -56,6 +57,7 @@ int main(int argc, char** argv)
     }
 
     psych::Log::Init();
+    psych::OS::Init();
     psych::Filesystem::Init();
 
     CORE_PROFILE_BEGIN_SESSION("Startup", "CoreProfile-Startup.json");
@@ -84,6 +86,7 @@ int main(int argc, char** argv)
     }
 
     psych::Filesystem::Shutdown();
+    psych::OS::Shutdown();
     CORE_LOG_INFO("Filesystem Shutdown");
   }
 

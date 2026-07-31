@@ -7,11 +7,11 @@ if(GTest_FOUND)
     else()
         set(PSYCH_ENGINE_GTEST_TARGET GTest::GTest)
     endif()
-elseif(EXISTS "${PROJECT_SOURCE_DIR}/PsychEngine/Vendor/assimp/contrib/googletest/CMakeLists.txt")
+elseif(EXISTS "${PROJECT_SOURCE_DIR}/Psych/Vendor/assimp/contrib/googletest/CMakeLists.txt")
     set(BUILD_GMOCK OFF CACHE BOOL "" FORCE)
     set(INSTALL_GTEST OFF CACHE BOOL "" FORCE)
     add_subdirectory(
-        "${PROJECT_SOURCE_DIR}/PsychEngine/Vendor/assimp/contrib/googletest"
+        "${PROJECT_SOURCE_DIR}/Psych/Vendor/assimp/contrib/googletest"
         "${CMAKE_BINARY_DIR}/_deps/PSYCH_ENGINE_googletest-build"
         EXCLUDE_FROM_ALL
     )
@@ -33,6 +33,7 @@ add_executable(PsychEngineTests
     events/EventQueueTests.cpp
     filesystem/FilesystemTests.cpp
     layers/LayerStackTests.cpp
+    OS/OSTests.cpp
     util/CommandLineTests.cpp
 )
 

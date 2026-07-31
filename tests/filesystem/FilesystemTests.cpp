@@ -106,9 +106,9 @@ TEST_F(FilesystemTest, TryCreateFileReportsWrongTypeWhenPathIsDirectory)
 
 TEST_F(FilesystemTest, PlatformConfigPathRequiresFilesystemInitialization)
 {
-  psych::util::Filesystem::Shutdown();
+  psych::Filesystem::Shutdown();
 
-  const auto result = psych::util::Filesystem::TryGetBaseConfigPath();
+  const auto result = psych::Filesystem::TryGetBaseConfigPath();
 
   ASSERT_FALSE(result);
   EXPECT_EQ(result.error(), psych::errors::FilesystemError::NotInitialized);
@@ -130,7 +130,7 @@ TEST_F(FilesystemTest, CreateDirectoryTreeBuildsFileAndDirectoryNodes)
     output << "nested";
   }
 
-  psych::Unique<psych::util::FileNode> root = psych::util::Filesystem::CreateDirectoryTree(m_Root_);
+  psych::Unique<psych::FileNode> root = psych::Filesystem::CreateDirectoryTree(m_Root_);
 
   ASSERT_NE(root, nullptr);
   EXPECT_TRUE(root->isDir);
@@ -146,7 +146,7 @@ TEST_F(FilesystemTest, CreateDirectoryTreeBuildsFileAndDirectoryNodes)
 
   EXPECT_EQ(childNames, (std::vector<std::string>{"child", "root.txt"}));
 
-  const psych::util::FileNode* childDirectory = nullptr;
+  const psych::FileNode* childDirectory = nullptr;
   for (const auto& child : root->children) {
     if (child->name == "child") {
       childDirectory = child.get();
@@ -163,7 +163,7 @@ TEST_F(FilesystemTest, CreateDirectoryTreeBuildsFileAndDirectoryNodes)
 
 TEST_F(FilesystemTest, TryCreateDirectoryTreeReportsMissingRoot)
 {
-  const auto result = psych::util::Filesystem::TryCreateDirectoryTree(m_Root_ / "missing");
+  const auto result = psych::Filesystem::TryCreateDirectoryTree(m_Root_ / "missing");
 
   ASSERT_FALSE(result);
   EXPECT_EQ(result.error(), psych::errors::FilesystemError::FileNotFound);

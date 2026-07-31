@@ -1,10 +1,10 @@
 set(SOURCES
     src/EditorApp.cpp
     src/EditorLayer.cpp
-    src/ProjectWindow.cpp
     src/UI/Modules/EditorMenuBar.cpp
     src/UI/Modules/MainFileTree.cpp
     src/UI/Modules/FileViewer.cpp
+    src/UI/Modules/ProjectWindow.cpp
     src/UI/Modules/Viewport.cpp
 )
 

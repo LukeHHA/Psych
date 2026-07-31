@@ -1,11 +1,11 @@
- 
+
 /**************************************************************************/
-/*  Errors.h                                                              */                                                            
+/*  Errors.h                                                              */
 /**************************************************************************/
 /*                         This file is part of:                          */
 /*                             PSYCH ENGINE                               */
 /**************************************************************************/
-/* Copyright (c)  Luke Howe                                               */                                                  
+/* Copyright (c)  Luke Howe                                               */
 /*                                                                        */
 /* Permission is hereby granted, free of charge, to any person obtaining  */
 /* a copy of this software and associated documentation files (the        */
@@ -88,5 +88,13 @@ enum class ShaderError : std::uint8_t { None = 0, UnsupportedAPI, SourceFileNotF
 enum class SerializationError : std::uint8_t { None = 0, SerializationFailed, DeserializationFailed };
 
 enum class ProjectError : std::uint8_t { None = 0, InvalidPath, ConfigLoadFailed, ConfigSaveFailed, DirectoryCreationFailed, NoActiveProject };
+
+enum class OSError : std::uint8_t {
+  None = 0,
+  FailedToInitialize,
+  FailedToShutdown,
+  ExecutablePathUnavailable,
+  ExecutablePathResolutionFailed
+};
 
 } // namespace psych::errors
