@@ -36,6 +36,24 @@
 
 namespace psych
 {
+
+template <typename T>
+class Config
+{
+public:
+  Config()                         = default;
+  Config(Config&&)                 = default;
+  Config(const Config&)            = default;
+  Config& operator=(Config&&)      = default;
+  Config& operator=(const Config&) = default;
+  virtual ~Config()                = default;
+
+  virtual void Serialize()         = 0;
+  virtual void Deserialize()       = 0;
+
+private:
+  T m_Archive;
+};
 class PsychEngineConfig
 {
 public:

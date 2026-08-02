@@ -1,11 +1,11 @@
- 
+
 /**************************************************************************/
-/*  Serialization.h                                                       */                                                            
+/*  Serialization.h                                                       */
 /**************************************************************************/
 /*                         This file is part of:                          */
 /*                             PSYCH ENGINE                               */
 /**************************************************************************/
-/* Copyright (c)  Luke Howe                                               */                                                  
+/* Copyright (c)  Luke Howe                                               */
 /*                                                                        */
 /* Permission is hereby granted, free of charge, to any person obtaining  */
 /* a copy of this software and associated documentation files (the        */
@@ -29,23 +29,7 @@
 
 #pragma once
 
-#include "Errors/Errors.h"
-#include "expected.h"
 namespace psych
 {
-class Serializable
-{
-public:
-  Serializable()                                                                        = default;
-  Serializable(Serializable&&)                                                          = default;
-  Serializable(const Serializable&)                                                     = default;
-  Serializable& operator=(Serializable&&)                                               = default;
-  Serializable& operator=(const Serializable&)                                          = default;
-  virtual ~Serializable()                                                               = default;
 
-  [[nodiscard]] virtual Expected<void, errors::SerializationError> TrySerialize() const = 0;
-  [[nodiscard]] virtual Expected<void, errors::SerializationError> TryDeserialize()     = 0;
-
-private:
-};
-} // namespace psych
+}

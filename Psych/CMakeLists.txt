@@ -159,6 +159,7 @@ add_subdirectory(Vendor/glfw-3.4 EXCLUDE_FROM_ALL)
 add_subdirectory(Vendor/pugixml EXCLUDE_FROM_ALL)
 add_subdirectory(Vendor/assimp EXCLUDE_FROM_ALL)
 add_subdirectory(Vendor/glm EXCLUDE_FROM_ALL)
+add_subdirectory(Vendor/json EXCLUDE_FROM_ALL)
 # add_subdirectory(Vendor/cereal EXCLUDE_FROM_ALL)
 
 add_library(PsychEngineImgui OBJECT)
