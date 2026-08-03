@@ -65,6 +65,8 @@ std::filesystem::path LinuxFilesystemAPI::GetOSCacheDataPath() const
   return homePath / ".cache";
 }
 
+std::filesystem::path LinuxFilesystemAPI::GetOSLogDataPath() const { return GetOSAppDataPath(); }
+
 std::filesystem::path LinuxFilesystemAPI::GetHomePath() const
 {
   if (const char* home = std::getenv("HOME")) {

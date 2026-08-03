@@ -47,6 +47,7 @@ std::filesystem::path MacOSFilesystemAPI::GetOSFileExplorer() const
 
     [panel setCanChooseFiles:NO];
     [panel setCanChooseDirectories:YES];
+    [panel setCanCreateDirectories:YES];
     [panel setAllowsMultipleSelection:NO];
     [panel setMessage:@"Choose a project directory."];
 

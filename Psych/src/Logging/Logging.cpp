@@ -1,11 +1,11 @@
- 
+
 /**************************************************************************/
-/*  Logging.cpp                                                           */                                                            
+/*  Logging.cpp                                                           */
 /**************************************************************************/
 /*                         This file is part of:                          */
 /*                             PSYCH ENGINE                               */
 /**************************************************************************/
-/* Copyright (c)  Luke Howe                                               */                                                  
+/* Copyright (c)  Luke Howe                                               */
 /*                                                                        */
 /* Permission is hereby granted, free of charge, to any person obtaining  */
 /* a copy of this software and associated documentation files (the        */
@@ -29,6 +29,7 @@
 
 #include "Logging.h"
 #include "Core/Core.h"
+#include "FileSystem/FileSystem.h"
 #include "spdlog/common.h"
 #include "spdlog/sinks/basic_file_sink.h"
 #include "spdlog/sinks/stdout_color_sinks.h"
@@ -53,7 +54,8 @@ void Log::Init()
   s_AppConsoleLogger_->set_pattern("%^[%T] [%n] [%s:%#]: %v%$");
   s_AppConsoleLogger_->set_level(spdlog::level::trace);
 
-  s_JSONSink_ = CreateShared<FileSink_mt>("logs/debug_logs.json", true);
+  const std::filesystem::path logFilePath = Filesystem::GetBaseLogPath() / "debug_logs.json";
+  s_JSONSink_                            = CreateShared<FileSink_mt>(logFilePath.string(), true);
   s_JSONSink_->set_level(spdlog::level::trace);
   s_JSONSink_->set_pattern("{\n \"log\": [");
 

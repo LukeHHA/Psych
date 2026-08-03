@@ -24,60 +24,15 @@ void EditorLayer::OnAttach()
   CORE_PROFILE_FUNCTION();
   CORE_LOG_INFO("EditorLayer Attached");
 
-  static const float cubeVertices[] = {
-      // position           // color
-      -0.5f, -0.5f, -0.5f, 1.0f, 0.1f, 0.1f, 0.5f, -0.5f, -0.5f, 0.1f, 1.0f, 0.1f, 0.5f, 0.5f, -0.5f, 0.1f, 0.4f, 1.0f, -0.5f, 0.5f, -0.5f, 1.0f, 0.9f, 0.1f,
-      -0.5f, -0.5f, 0.5f,  1.0f, 0.1f, 0.8f, 0.5f, -0.5f, 0.5f,  0.1f, 1.0f, 0.9f, 0.5f, 0.5f, 0.5f,  0.9f, 0.4f, 1.0f, -0.5f, 0.5f, 0.5f,  1.0f, 0.5f, 0.1f,
-  };
-
-  static const uint32_t cubeIndices[] = {
-      0, 1, 2, 2, 3, 0, // back
-      4, 5, 6, 6, 7, 4, // front
-      4, 0, 3, 3, 7, 4, // left
-      1, 5, 6, 6, 2, 1, // right
-      3, 2, 6, 6, 7, 3, // top
-      4, 5, 1, 1, 0, 4  // bottom
-  };
-
-  auto vertexBuffer = VertexBuffer::Create(cubeVertices, sizeof(cubeVertices));
-  vertexBuffer->SetLayout(VertexFormatID::PC);
-
-  auto indexBuffer   = IndexBuffer::Create(cubeIndices, 36);
-
-  m_CubeVertexArray_ = VertexArray::Create();
-  m_CubeVertexArray_->AddVertexBuffer(vertexBuffer);
-  m_CubeVertexArray_->AddIndexBuffer(indexBuffer);
-
-  auto shaderResult = Shader::Create("engine://Editor/Assets/Shaders/editor_cube.vert.glsl", "engine://Editor/Assets/Shaders/editor_cube.frag.glsl", "EditorCube");
-  if (!shaderResult) {
-    CORE_LOG_ERROR("Failed to create editor cube shader");
-  } else {
-    m_CubeShader_ = shaderResult.value();
-  }
-
-  auto rendererAPI = RendererAPI::Create();
-  if (!rendererAPI) {
-    CORE_LOG_ERROR("Failed to create editor renderer API");
-  } else {
-    m_RendererAPI_ = std::move(rendererAPI.value());
-  }
-
   m_PanelManager_.AddPanel<ui::EditorMenuBarPanel>();
 
   auto* fileTree = m_PanelManager_.AddPanel<ui::MainFileTreePanel>();
   fileTree->SetSelectedCallbackFn([this](const std::filesystem::path& path) { OpenFile(path); });
 
-  auto fileTreeResult = Filesystem::TryCreateDirectoryTree(Filesystem::Current_Path());
-  if (!fileTreeResult) {
-    CORE_LOG_ERROR("Failed to create editor file tree");
-  } else {
-    m_FileTreeRoot_ = std::move(fileTreeResult.value());
-    fileTree->SetRootNode(m_FileTreeRoot_.get());
-  }
-
   m_PanelManager_.AddPanel<ui::FileViewerPanel>();
   m_PanelManager_.AddPanel<ui::ViewportPanel>();
   m_ProjectWindowPanel_ = ui::ProjectWindowPanel::Create();
+  m_ProjectWindowPanel_->SetProjectSelectedCallbackFn([this](const std::filesystem::path& path) { return OpenProject(path); });
 }
 
 void EditorLayer::OnDetach()
@@ -151,6 +106,34 @@ void EditorLayer::OpenFile(const std::filesystem::path& path)
   if (fileViewer != nullptr) {
     fileViewer->SetFilePath(path);
   }
+}
+
+bool EditorLayer::OpenProject(const std::filesystem::path& path)
+{
+  std::error_code error;
+  if (!std::filesystem::is_directory(path, error) || error) {
+    CORE_LOG_ERROR("Project path is not a directory: {}", path.string());
+    return false;
+  }
+
+  auto fileTreeResult = Filesystem::TryCreateDirectoryTree(path);
+  if (!fileTreeResult) {
+    CORE_LOG_ERROR("Failed to open project directory: {}", path.string());
+    return false;
+  }
+
+  auto* fileTree = m_PanelManager_.GetPanel<ui::MainFileTreePanel>();
+  if (fileTree == nullptr) {
+    CORE_LOG_ERROR("Failed to find the project file tree panel");
+    return false;
+  }
+
+  m_FileTreeRoot_ = std::move(fileTreeResult.value());
+  fileTree->SetRootNode(m_FileTreeRoot_.get());
+  m_ShowNewProjectWindow_ = false;
+
+  CORE_LOG_INFO("Opened project directory: {}", path.string());
+  return true;
 }
 
 } // namespace psych

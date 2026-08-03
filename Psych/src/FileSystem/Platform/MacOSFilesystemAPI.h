@@ -43,6 +43,7 @@ public:
 
   [[nodiscard]] std::filesystem::path GetOSAppDataPath() const override;
   [[nodiscard]] std::filesystem::path GetOSCacheDataPath() const override;
+  [[nodiscard]] std::filesystem::path GetOSLogDataPath() const override;
   [[nodiscard]] std::filesystem::path GetOSFileExplorer() const override;
 
 private:

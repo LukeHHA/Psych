@@ -10,6 +10,10 @@ set(SOURCES
 
 add_executable(Editor)
 
+if(APPLE AND PSYCH_ENGINE_BUILD_MACOS_BUNDLE)
+  set_target_properties(Editor PROPERTIES MACOSX_BUNDLE TRUE)
+endif()
+
 target_sources(Editor PRIVATE ${SOURCES})
 
 target_link_libraries(Editor PRIVATE PsychEngine)

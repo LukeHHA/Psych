@@ -80,8 +80,10 @@ public:
   static bool IsInitialized();
   static Expected<std::filesystem::path, errors::FilesystemError> TryGetBaseConfigPath();
   static Expected<std::filesystem::path, errors::FilesystemError> TryGetBaseCachePath();
+  static Expected<std::filesystem::path, errors::FilesystemError> TryGetBaseLogPath();
   static std::filesystem::path GetBaseConfigPath();
   static std::filesystem::path GetBaseCachePath();
+  static std::filesystem::path GetBaseLogPath();
   static std::filesystem::path GetFileExplorer();
 
 private:

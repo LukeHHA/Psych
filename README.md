@@ -24,6 +24,50 @@ Try to follow the architecture of the engine. It is what it is.
 
 The engine uses CMake 3.20 or newer. Configure from the repository root:
 
+### CMake Presets
+
+The easiest development workflow is to configure and build with matching presets:
+
+```bash
+cmake --preset editor-debug
+cmake --build --preset editor-debug
+```
+
+Every preset uses Ninja and has its own directory under `build/`, so changing configuration does not reuse incompatible cache values. List the available presets with:
+
+```bash
+cmake --list-presets
+cmake --build --list-presets
+```
+
+| Preset                    | Purpose                                             |
+| ------------------------- | --------------------------------------------------- |
+| `app-debug`               | Debug standalone App.                               |
+| `app-release`             | Release standalone App.                             |
+| `editor-debug`            | Debug Editor executable.                            |
+| `editor-release`          | Release Editor executable.                          |
+| `editor-bundle-debug`     | Debug macOS Editor application bundle.              |
+| `editor-bundle-release`   | Release macOS Editor application bundle.            |
+| `tests-debug`             | Debug unit-test executable and CTest configuration. |
+| `editor-sanitizers`       | Debug Editor with ASan and UBSan.                   |
+| `editor-tidy`             | Debug Editor with clang-tidy.                       |
+
+Tests use the same three-command pattern:
+
+```bash
+cmake --preset tests-debug
+cmake --build --preset tests-debug
+ctest --preset tests-debug
+```
+
+If clangd reads the repository-level `compile_commands.json` symlink, point it at the preset you use for active development:
+
+```bash
+ln -sfn build/editor-debug/compile_commands.json compile_commands.json
+```
+
+The equivalent commands without presets remain available. Configure from the repository root:
+
 ```bash
 cmake -S . -B build
 ```
@@ -59,6 +103,7 @@ cmake --build build --target PsychEngineTests --parallel
 | Option                           | Default | Description                                                                |
 | -------------------------------- | ------- | -------------------------------------------------------------------------- |
 | `PSYCH_ENGINE_BUILD_EDITOR`      | `OFF`   | Configure the `Editor` executable instead of the default `App` executable. |
+| `PSYCH_ENGINE_BUILD_MACOS_BUNDLE` | `OFF`   | Build the Editor as a macOS application bundle.                           |
 | `PSYCH_ENGINE_BUILD_TESTS`       | `OFF`   | Configure the `PsychEngineTests` target and CTest integration.             |
 | `PSYCH_ENABLE_ASSERTS`           | `ON`    | Enable engine runtime assertions.                                          |
 | `PSYCH_ENABLE_PROFILING`         | `ON`    | Enable profiling instrumentation.                                          |
@@ -104,6 +149,6 @@ This applies clang-tidy only to the engine/editor targets that call the project 
 Configure a sanitizer build:
 
 ```bash
-cmake -S . -B build-asan -DGE_ENABLE_SANITIZERS=ON -DPSYCH_ENGINE_BUILD_EDITOR=ON
+cmake -S . -B build-asan -DPSYCH_ENABLE_SANITIZERS=ON -DPSYCH_ENGINE_BUILD_EDITOR=ON
 cmake --build build-asan --target Editor --parallel
 ```

@@ -1,19 +1,28 @@
 #include "ProjectWindow.h"
 #include "Core/PsychEngine.h"
 #include "FileSystem/FileSystem.h"
-#include "Project/Project.h"
 #include <algorithm>
-#include <cctype>
 #include <filesystem>
 #include <imgui.h>
-
-#include "imgui/misc/cpp/imgui_stdlib.h"
-#include <system_error>
 #include <utility>
 
 namespace psych::ui
 {
-ProjectWindowPanel::ProjectWindowPanel() { const auto& config = PsychEngine::Get().GetEngineSpecification(); }
+ProjectWindowPanel::ProjectWindowPanel()
+{
+  const auto& projectSpec = PsychEngine::Get().GetEngineSpecification().Projects;
+  const std::filesystem::path previousProjectsDirectory{projectSpec.PreviousProjectsDir};
+
+  m_PreviousProjects_.reserve(projectSpec.PreviousProjects.size());
+  for (const auto& previousProject : projectSpec.PreviousProjects) {
+    std::filesystem::path projectPath{previousProject};
+    if (projectPath.is_relative() && !previousProjectsDirectory.empty()) {
+      projectPath = previousProjectsDirectory / projectPath;
+    }
+
+    m_PreviousProjects_.push_back(projectPath.lexically_normal());
+  }
+}
 
 Unique<ProjectWindowPanel> ProjectWindowPanel::Create() { return CreateUnique<ProjectWindowPanel>(); }
 
@@ -63,12 +72,34 @@ void ProjectWindowPanel::OnImGuiRender()
         ImGui::TableSetColumnIndex(0);
         ImGui::PushStyleColor(ImGuiCol_ChildBg, ImGui::GetStyleColorVec4(ImGuiCol_FrameBg));
         if (ImGui::BeginChild("RecentProjectsCard", ImVec2(0.0F, 0.0F), ImGuiChildFlags_Borders)) {
+          RecentProjects();
         }
         ImGui::EndChild();
         ImGui::PopStyleColor();
 
         ImGui::TableSetColumnIndex(1);
         if (ImGui::BeginChild("ProjectActionsCard", ImVec2(0.0F, 0.0F), ImGuiChildFlags_Borders)) {
+          ImGui::TextUnformatted("New Project");
+          ImGui::Separator();
+          ImGui::Dummy(ImVec2(0.0F, 6.0F));
+          ImGui::TextWrapped("Choose a folder for the project. Psych will use that folder as the project root and open it in the editor.");
+          ImGui::Dummy(ImVec2(0.0F, 14.0F));
+
+          if (ImGui::Button("New Project", ImVec2(-1.0F, 38.0F))) {
+            const std::filesystem::path projectPath = Filesystem::GetFileExplorer();
+            if (!projectPath.empty()) {
+              OpenProject(projectPath);
+            }
+          }
+
+          if (!m_StatusMessage_.empty()) {
+            ImGui::Dummy(ImVec2(0.0F, 8.0F));
+            if (m_StatusIsError_) {
+              ImGui::TextColored(ImVec4(0.95F, 0.35F, 0.35F, 1.0F), "%s", m_StatusMessage_.c_str());
+            } else {
+              ImGui::TextWrapped("%s", m_StatusMessage_.c_str());
+            }
+          }
         }
         ImGui::EndChild();
 
@@ -84,7 +115,7 @@ void ProjectWindowPanel::OnImGuiRender()
 
 void ProjectWindowPanel::OnUpdate() {}
 
-void ProjectWindowPanel::DrawRecentProjects()
+void ProjectWindowPanel::RecentProjects()
 {
   ImGui::TextUnformatted("Recent Projects");
   ImGui::SameLine();
@@ -110,13 +141,20 @@ void ProjectWindowPanel::DrawRecentProjects()
     }
 
     for (std::size_t index = 0; index < m_PreviousProjects_.size(); ++index) {
-      const auto& project = m_PreviousProjects_[index];
+      const auto& project       = m_PreviousProjects_[index];
+      std::string projectName   = project.filename().string();
+      std::string projectParent = project.parent_path().string();
+      if (projectName.empty()) {
+        projectName   = project.parent_path().filename().string();
+        projectParent = project.parent_path().parent_path().string();
+      }
+
       ImGui::PushID(static_cast<int>(index));
       ImGui::TableNextRow();
       ImGui::TableSetColumnIndex(0);
 
       const bool isSelected = m_SelectedRecentProject_ == static_cast<int>(index);
-      if (ImGui::Selectable(project.c_str(),
+      if (ImGui::Selectable(projectName.c_str(),
                             isSelected,
                             ImGuiSelectableFlags_SpanAllColumns | ImGuiSelectableFlags_AllowDoubleClick,
                             ImVec2(0.0F, ImGui::GetFrameHeight()))) {
@@ -127,7 +165,7 @@ void ProjectWindowPanel::DrawRecentProjects()
       }
 
       ImGui::TableSetColumnIndex(1);
-      ImGui::TextDisabled("%s", project.parent_path().string().c_str());
+      ImGui::TextDisabled("%s", projectParent.c_str());
       if (ImGui::IsItemHovered()) {
         ImGui::SetTooltip("%s", project.string().c_str());
       }
@@ -145,6 +183,24 @@ void ProjectWindowPanel::DrawRecentProjects()
   ImGui::EndDisabled();
 }
 
-void ProjectWindowPanel::OpenProject(const std::filesystem::path& projectPath) {}
+void ProjectWindowPanel::OpenProject(const std::filesystem::path& projectPath)
+{
+  if (!m_ProjectSelectedCallback_) {
+    m_StatusMessage_ = "The editor is not ready to open a project.";
+    m_StatusIsError_ = true;
+    return;
+  }
+
+  if (!m_ProjectSelectedCallback_(projectPath)) {
+    m_StatusMessage_ = "Unable to open the selected project folder.";
+    m_StatusIsError_ = true;
+    return;
+  }
+
+  m_StatusMessage_.clear();
+  m_StatusIsError_ = false;
+}
+
+void ProjectWindowPanel::SetProjectSelectedCallbackFn(ProjectSelectedCallbackFn callback) { m_ProjectSelectedCallback_ = std::move(callback); }
 
 } // namespace psych::ui

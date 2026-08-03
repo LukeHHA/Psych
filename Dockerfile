@@ -21,11 +21,9 @@ RUN mkdir -p /build
 
 COPY . .
 
-RUN cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release \
-    -DPSYCH_ENABLE_ASSERTS=OFF -DPSYCH_ENABLE_PROFILING=OFF \
-    -DPSYCH_ENGINE_BUILD_EDITOR=ON 
+RUN cmake --preset editor-release
 
-RUN cmake --build /src/build --target Editor --parallel 
+RUN cmake --build --preset editor-release
 
 FROM ubuntu:latest AS runner 
 
@@ -34,5 +32,4 @@ WORKDIR /src
 COPY --from=build /src/out/Editor ./
 
 CMD ["./Editor", "--data-dir", "."]
-
 

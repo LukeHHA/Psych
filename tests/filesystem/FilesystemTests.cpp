@@ -104,14 +104,27 @@ TEST_F(FilesystemTest, TryCreateFileReportsWrongTypeWhenPathIsDirectory)
   EXPECT_EQ(result.error(), psych::errors::FilesystemError::PathExistsWithWrongType);
 }
 
-TEST_F(FilesystemTest, PlatformConfigPathRequiresFilesystemInitialization)
+TEST_F(FilesystemTest, PlatformPathsRequireFilesystemInitialization)
 {
   psych::Filesystem::Shutdown();
 
-  const auto result = psych::Filesystem::TryGetBaseConfigPath();
+  const auto configResult = psych::Filesystem::TryGetBaseConfigPath();
+  const auto logResult    = psych::Filesystem::TryGetBaseLogPath();
 
-  ASSERT_FALSE(result);
-  EXPECT_EQ(result.error(), psych::errors::FilesystemError::NotInitialized);
+  ASSERT_FALSE(configResult);
+  EXPECT_EQ(configResult.error(), psych::errors::FilesystemError::NotInitialized);
+  ASSERT_FALSE(logResult);
+  EXPECT_EQ(logResult.error(), psych::errors::FilesystemError::NotInitialized);
+}
+
+TEST_F(FilesystemTest, BaseLogPathUsesEngineLogsDirectory)
+{
+  const auto result = psych::Filesystem::TryGetBaseLogPath();
+
+  ASSERT_TRUE(result);
+  EXPECT_EQ(result->filename(), "Logs");
+  EXPECT_EQ(result->parent_path().filename(), psych::PsychEngineName);
+  EXPECT_TRUE(std::filesystem::is_directory(*result));
 }
 
 TEST_F(FilesystemTest, CreateDirectoryTreeBuildsFileAndDirectoryNodes)

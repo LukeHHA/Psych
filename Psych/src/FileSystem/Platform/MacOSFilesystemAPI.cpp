@@ -35,4 +35,6 @@ std::filesystem::path MacOSFilesystemAPI::GetOSAppDataPath() const { return GetA
 
 std::filesystem::path MacOSFilesystemAPI::GetOSCacheDataPath() const { return GetCachePath(); }
 
+std::filesystem::path MacOSFilesystemAPI::GetOSLogDataPath() const { return GetApplicationSupportPath(); }
+
 } // namespace psych

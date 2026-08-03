@@ -43,6 +43,7 @@ public:
 
   [[nodiscard]] virtual std::filesystem::path GetOSAppDataPath() const   = 0;
   [[nodiscard]] virtual std::filesystem::path GetOSCacheDataPath() const = 0;
+  [[nodiscard]] virtual std::filesystem::path GetOSLogDataPath() const   = 0;
   [[nodiscard]] virtual std::filesystem::path GetOSFileExplorer() const  = 0;
 };
 } // namespace psych

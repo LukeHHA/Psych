@@ -44,21 +44,21 @@ extern psych::Expected<std::unique_ptr<psych::PsychEngine>, psych::errors::Engin
 int main(int argc, char** argv)
 {
   {
-    const psych::cli::ParseResult parseResult = psych::cli::CommandLineParser::Parse(argc, argv);
+    // const psych::cli::ParseResult parseResult = psych::cli::CommandLineParser::Parse(argc, argv);
+    //
+    // if (!parseResult.Success) {
+    //   std::cerr << parseResult.ErrorMessage;
+    //   return 1;
+    // }
+    //
+    // if (parseResult.Options.ShowHelp) {
+    //   std::cout << psych::cli::CommandLineParser::HelpText();
+    //   return 0;
+    // }
 
-    if (!parseResult.Success) {
-      std::cerr << parseResult.ErrorMessage;
-      return 1;
-    }
-
-    if (parseResult.Options.ShowHelp) {
-      std::cout << psych::cli::CommandLineParser::HelpText();
-      return 0;
-    }
-
-    psych::Log::Init();
     psych::OS::Init();
     psych::Filesystem::Init();
+    psych::Log::Init();
 
     CORE_PROFILE_BEGIN_SESSION("Startup", "CoreProfile-Startup.json");
     auto appResult = psych::CreatePsychEngine();

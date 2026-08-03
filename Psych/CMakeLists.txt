@@ -167,6 +167,19 @@ target_sources(PsychEngineImgui PRIVATE ${IMGUI_SOURCES})
 target_compile_features(PsychEngineImgui PRIVATE cxx_std_20)
 set_target_properties(PsychEngineImgui PROPERTIES CXX_EXTENSIONS OFF)
 
+foreach(PSYCH_ENGINE_VENDOR_TARGET IN ITEMS
+    spdlog
+    glad
+    glfw
+    pugixml-static
+    assimp
+    PsychEngineImgui
+)
+  set_target_properties(${PSYCH_ENGINE_VENDOR_TARGET} PROPERTIES
+    EXPORT_COMPILE_COMMANDS OFF
+  )
+endforeach()
+
 target_link_libraries(PsychEngineImgui PRIVATE
   glad
   glfw

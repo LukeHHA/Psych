@@ -165,6 +165,37 @@ std::filesystem::path Filesystem::GetBaseCachePath()
   return result.value();
 }
 
+Expected<std::filesystem::path, errors::FilesystemError> Filesystem::TryGetBaseLogPath()
+{
+  if (!IsInitialized()) {
+    return Unexpected(errors::FilesystemError::NotInitialized);
+  }
+
+  std::filesystem::path basePath = s_OSFilesystemAPI_->GetOSLogDataPath();
+  if (basePath.empty()) {
+    return Unexpected(errors::FilesystemError::OSPathFail);
+  }
+
+  std::filesystem::path logPath = basePath / PsychEngineName / "Logs";
+  const auto result             = CoreFilesystemAPI::TryCreateDirs(logPath);
+  if (!result) {
+    return Unexpected(result.error());
+  }
+
+  return logPath;
+}
+
+std::filesystem::path Filesystem::GetBaseLogPath()
+{
+  const auto result = TryGetBaseLogPath();
+  if (!result) {
+    CORE_ASSERT(false, "Unable to get log directory")
+    return {};
+  }
+
+  return result.value();
+}
+
 Unique<FileNode> Filesystem::CreateDirectoryTree(const std::filesystem::path& path)
 {
   auto result = TryCreateDirectoryTree(path);

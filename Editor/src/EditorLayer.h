@@ -34,6 +34,7 @@ public:
 
 private:
   void OpenFile(const std::filesystem::path& path);
+  bool OpenProject(const std::filesystem::path& path);
 
 private:
   Shared<VertexArray> m_CubeVertexArray_;
@@ -45,6 +46,6 @@ private:
   PanelManager m_PanelManager_;
   Unique<ui::ProjectWindowPanel> m_ProjectWindowPanel_;
 
-  bool m_ShowNewProjectWindow_ = false;
+  bool m_ShowNewProjectWindow_ = true;
 };
 } // namespace psych

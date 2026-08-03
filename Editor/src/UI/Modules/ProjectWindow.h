@@ -29,15 +29,12 @@ public:
   void SetProjectSelectedCallbackFn(ProjectSelectedCallbackFn callback);
 
 private:
-  void DrawRecentProjects();
   void OpenProject(const std::filesystem::path& projectPath);
+  void RecentProjects();
 
 private:
   ProjectSelectedCallbackFn m_ProjectSelectedCallback_;
   std::vector<std::filesystem::path> m_PreviousProjects_;
-  std::string m_NewProjectName_ = "New Project";
-  std::string m_CreateLocation_;
-  std::string m_ExistingProjectPath_;
   std::string m_StatusMessage_;
   int m_SelectedRecentProject_ = -1;
   bool m_StatusIsError_        = false;
