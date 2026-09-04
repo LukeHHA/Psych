@@ -1,11 +1,11 @@
- 
+
 /**************************************************************************/
-/*  ProjectManager.cpp                                                    */                                                            
+/*  ProjectManager.cpp                                                    */
 /**************************************************************************/
 /*                         This file is part of:                          */
 /*                             PSYCH ENGINE                               */
 /**************************************************************************/
-/* Copyright (c)  Luke Howe                                               */                                                  
+/* Copyright (c)  Luke Howe                                               */
 /*                                                                        */
 /* Permission is hereby granted, free of charge, to any person obtaining  */
 /* a copy of this software and associated documentation files (the        */
@@ -31,26 +31,15 @@
 
 #include "Debug/Assert.h"
 #include "Debug/Instrumentor.h"
+#include "FileSystem/FileSystem.h"
 
-#include <filesystem>
 #include <utility>
 
 namespace psych
 {
-Expected<void, errors::ProjectError> ProjectManager::Init(PathResolver& resolver)
-{
-  CORE_PROFILE_FUNCTION();
+Expected<void, errors::ProjectError> ProjectManager::Init() { CORE_PROFILE_FUNCTION(); }
 
-  std::error_code ec;
-  auto projectRoot = std::filesystem::current_path(ec);
-  if (ec) {
-    return Unexpected(errors::ProjectError::InvalidPath);
-  }
-
-  return OpenProject(std::move(projectRoot), resolver);
-}
-
-Expected<void, errors::ProjectError> ProjectManager::Shutdown(PathResolver& resolver)
+Expected<void, errors::ProjectError> ProjectManager::Shutdown()
 {
   CORE_PROFILE_FUNCTION();
 
@@ -67,11 +56,11 @@ Expected<void, errors::ProjectError> ProjectManager::Shutdown(PathResolver& reso
   return {};
 }
 
-Expected<void, errors::ProjectError> ProjectManager::OpenProject(std::filesystem::path projectRoot, PathResolver& resolver)
+Expected<void, errors::ProjectError> ProjectManager::OpenProject(const EnginePath::Path& path)
 {
   CORE_PROFILE_FUNCTION();
 
-  auto project = CreateUnique<Project>(std::move(projectRoot));
+  auto project = CreateUnique<Project>(path);
   auto result  = project->Init();
   if (!result) {
     return result;

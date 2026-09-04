@@ -33,6 +33,8 @@
 
 namespace psych
 {
+void PathResolver::SetEngineRoot(const std::filesystem::path& path) { m_EngineRoot_ = path; }
+
 Expected<std::filesystem::path, errors::FilesystemError> PathResolver::TryResolve(const EnginePath::Path& path) const
 {
   if (!path.IsValid()) {

@@ -1,11 +1,11 @@
- 
+
 /**************************************************************************/
-/*  Project.cpp                                                           */                                                            
+/*  Project.cpp                                                           */
 /**************************************************************************/
 /*                         This file is part of:                          */
 /*                             PSYCH ENGINE                               */
 /**************************************************************************/
-/* Copyright (c)  Luke Howe                                               */                                                  
+/* Copyright (c)  Luke Howe                                               */
 /*                                                                        */
 /* Permission is hereby granted, free of charge, to any person obtaining  */
 /* a copy of this software and associated documentation files (the        */
@@ -31,6 +31,7 @@
 
 #include "Debug/Assert.h"
 #include "Debug/Instrumentor.h"
+#include "FileSystem/FileSystem.h"
 #include "cereal/archives/xml.hpp"
 
 #include <fstream>
@@ -38,9 +39,9 @@
 
 namespace psych
 {
-Project::Project(std::filesystem::path rootPath) : m_RootPath_(std::move(rootPath)) {}
+Project::Project(const EnginePath::Path& path) : m_RootPath_(path) {}
 
-Project::Project(std::filesystem::path rootPath, ProjectConfig config) : m_RootPath_(std::move(rootPath)), m_Config_(std::move(config)) {}
+Project::Project(const EnginePath::Path& path, ProjectConfig config) : m_RootPath_(path), m_Config_(std::move(config)) {}
 
 Expected<void, errors::ProjectError> Project::Init() { return TryDeserialize(); }
 

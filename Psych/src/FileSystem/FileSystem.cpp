@@ -65,19 +65,90 @@ std::filesystem::path Filesystem::Current_Path() { return s_CurrentPath_; }
 
 void Filesystem::DeleteFile(const std::filesystem::path& path) { CoreFilesystemAPI::DeleteFile(path); }
 
+void Filesystem::DeleteFile(const EnginePath::Path& path)
+{
+  const auto result = TryDeleteFile(path);
+  CORE_ASSERT(result, "Failed to delete engine path");
+}
+
 Expected<void, errors::FilesystemError> Filesystem::TryDeleteFile(const std::filesystem::path& path) { return CoreFilesystemAPI::TryDeleteFile(path); }
+
+Expected<void, errors::FilesystemError> Filesystem::TryDeleteFile(const EnginePath::Path& path)
+{
+  const auto resolvedPath = TryResolve(path);
+  if (!resolvedPath) {
+    return Unexpected(resolvedPath.error());
+  }
+
+  return TryDeleteFile(resolvedPath.value());
+}
 
 bool Filesystem::FileExists(const std::filesystem::path& path) { return CoreFilesystemAPI::FileExists(path); }
 
+bool Filesystem::FileExists(const EnginePath::Path& path)
+{
+  const auto resolvedPath = TryResolve(path);
+  return resolvedPath && FileExists(resolvedPath.value());
+}
+
 bool Filesystem::DirExists(const std::filesystem::path& path) { return CoreFilesystemAPI::DirExists(path); }
+
+bool Filesystem::DirExists(const EnginePath::Path& path)
+{
+  const auto resolvedPath = TryResolve(path);
+  return resolvedPath && DirExists(resolvedPath.value());
+}
 
 bool Filesystem::CreateFile(const std::filesystem::path& path) { return CoreFilesystemAPI::CreateFile(path); }
 
+bool Filesystem::CreateFile(const EnginePath::Path& path) { return static_cast<bool>(TryCreateFile(path)); }
+
 Expected<void, errors::FilesystemError> Filesystem::TryCreateFile(const std::filesystem::path& path) { return CoreFilesystemAPI::TryCreateFile(path); }
+
+Expected<void, errors::FilesystemError> Filesystem::TryCreateFile(const EnginePath::Path& path)
+{
+  const auto resolvedPath = TryResolve(path);
+  if (!resolvedPath) {
+    return Unexpected(resolvedPath.error());
+  }
+
+  return TryCreateFile(resolvedPath.value());
+}
 
 Expected<void, errors::FilesystemError> Filesystem::TryCreateDirs(const std::filesystem::path& path) { return CoreFilesystemAPI::TryCreateDirs(path); }
 
-std::string Filesystem::StreamFile(const std::string& path) { return CoreFilesystemAPI::StreamFile(path); }
+Expected<void, errors::FilesystemError> Filesystem::TryCreateDirs(const EnginePath::Path& path)
+{
+  const auto resolvedPath = TryResolve(path);
+  if (!resolvedPath) {
+    return Unexpected(resolvedPath.error());
+  }
+
+  return TryCreateDirs(resolvedPath.value());
+}
+
+std::string Filesystem::StreamFile(const std::filesystem::path& path)
+{
+  const auto result = TryReadFile(path);
+  if (!result) {
+    CORE_LOG_ERROR("Path: {}", path.string());
+    CORE_ASSERT(false, "Failed to read file");
+    return {};
+  }
+
+  return result.value();
+}
+
+std::string Filesystem::StreamFile(const EnginePath::Path& path)
+{
+  const auto result = TryReadFile(path);
+  if (!result) {
+    CORE_ASSERT(false, "Failed to read engine path");
+    return {};
+  }
+
+  return result.value();
+}
 
 Expected<std::string, errors::FilesystemError> Filesystem::TryReadFile(const std::filesystem::path& path) { return CoreFilesystemAPI::TryReadFile(path); }
 
@@ -207,6 +278,17 @@ Unique<FileNode> Filesystem::CreateDirectoryTree(const std::filesystem::path& pa
   return std::move(result.value());
 }
 
+Unique<FileNode> Filesystem::CreateDirectoryTree(const EnginePath::Path& path)
+{
+  auto result = TryCreateDirectoryTree(path);
+  if (!result) {
+    CORE_ASSERT(false, "Unable to create directory tree from engine path");
+    return nullptr;
+  }
+
+  return std::move(result.value());
+}
+
 Expected<Unique<FileNode>, errors::FilesystemError> Filesystem::TryCreateDirectoryTree(const std::filesystem::path& path)
 {
   if (path.empty()) {
@@ -251,6 +333,16 @@ Expected<Unique<FileNode>, errors::FilesystemError> Filesystem::TryCreateDirecto
   return node;
 }
 
+Expected<Unique<FileNode>, errors::FilesystemError> Filesystem::TryCreateDirectoryTree(const EnginePath::Path& path)
+{
+  const auto resolvedPath = TryResolve(path);
+  if (!resolvedPath) {
+    return Unexpected(resolvedPath.error());
+  }
+
+  return TryCreateDirectoryTree(resolvedPath.value());
+}
+
 std::vector<std::byte> Filesystem::ReadBinaryFile(const std::filesystem::path& path)
 {
   std::ifstream file(path, std::ios::binary | std::ios::ate);
@@ -274,6 +366,17 @@ std::vector<std::byte> Filesystem::ReadBinaryFile(const std::filesystem::path& p
   }
 
   return buffer;
+}
+
+std::vector<std::byte> Filesystem::ReadBinaryFile(const EnginePath::Path& path)
+{
+  const auto resolvedPath = TryResolve(path);
+  if (!resolvedPath) {
+    CORE_ASSERT(false, "Failed to resolve engine path for binary read");
+    return {};
+  }
+
+  return ReadBinaryFile(resolvedPath.value());
 }
 
 std::filesystem::path Filesystem::GetFileExplorer() { return s_OSFilesystemAPI_->GetOSFileExplorer(); }

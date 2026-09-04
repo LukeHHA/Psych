@@ -4,6 +4,18 @@
 
 Psych is currently under active development. It aims to be a cross-platform 3D engine with a simple GUI and be highly configurable.
 
+## Development Roadmap
+
+The repository includes a local, interactive roadmap derived from the current engine/editor architecture. It tracks the first complete project → scene → textured object → camera → restart vertical slice and the capabilities that follow it.
+
+```bash
+cd roadmap
+npm install
+npm run dev
+```
+
+Open [http://localhost:3001](http://localhost:3001). See [`roadmap/README.md`](roadmap/README.md) for usage and verification details.
+
 ## Open Source
 
 Psych is licensed under MIT and will always be free.

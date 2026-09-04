@@ -37,11 +37,8 @@ private:
   bool OpenProject(const std::filesystem::path& path);
 
 private:
-  Shared<VertexArray> m_CubeVertexArray_;
-  Shared<Shader> m_CubeShader_;
   Unique<RendererAPI> m_RendererAPI_;
   Unique<FileNode> m_FileTreeRoot_;
-  float m_CubeRotation_ = 0.0f;
 
   PanelManager m_PanelManager_;
   Unique<ui::ProjectWindowPanel> m_ProjectWindowPanel_;

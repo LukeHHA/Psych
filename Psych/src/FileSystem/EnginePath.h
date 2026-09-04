@@ -1,11 +1,11 @@
- 
+
 /**************************************************************************/
-/*  EnginePath.h                                                          */                                                            
+/*  EnginePath.h                                                          */
 /**************************************************************************/
 /*                         This file is part of:                          */
 /*                             PSYCH ENGINE                               */
 /**************************************************************************/
-/* Copyright (c)  Luke Howe                                               */                                                  
+/* Copyright (c)  Luke Howe                                               */
 /*                                                                        */
 /* Permission is hereby granted, free of charge, to any person obtaining  */
 /* a copy of this software and associated documentation files (the        */
@@ -30,6 +30,7 @@
 #pragma once
 
 #include "Debug/Assert.h"
+#include "FileSystem/PathResolver.h"
 
 #include <cctype>
 #include <cstddef>
@@ -119,6 +120,17 @@ public:
   [[nodiscard]] const std::filesystem::path& GetRelativePath() const { return m_RelativePath; }
 
   [[nodiscard]] std::string ToString() const { return std::string{SchemaToString(m_Schema)} + m_RelativePath.string(); }
+
+  std::filesystem::path std_path()
+  {
+    PathResolver resolver{};
+    auto result = resolver.TryResolve(this);
+
+    if (!result) {
+      CORE_ASSERT(false, "Method PathResolver::std_path failed to resolve a path")
+    }
+    return result.value();
+  }
 
   explicit operator std::string() const { return ToString(); }
 

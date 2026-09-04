@@ -1,11 +1,11 @@
- 
+
 /**************************************************************************/
-/*  Project.h                                                             */                                                            
+/*  Project.h                                                             */
 /**************************************************************************/
 /*                         This file is part of:                          */
 /*                             PSYCH ENGINE                               */
 /**************************************************************************/
-/* Copyright (c)  Luke Howe                                               */                                                  
+/* Copyright (c)  Luke Howe                                               */
 /*                                                                        */
 /* Permission is hereby granted, free of charge, to any person obtaining  */
 /* a copy of this software and associated documentation files (the        */
@@ -30,11 +30,9 @@
 #pragma once
 
 #include "Errors/Errors.h"
-#include "FileSystem/FileSystem.h"
+#include "FileSystem/EnginePath.h"
 #include "Project/DefaultProjectConfig.h"
 #include "expected.h"
-
-#include <filesystem>
 
 namespace psych
 {
@@ -42,8 +40,8 @@ class Project
 {
 public:
   Project() = default;
-  explicit Project(std::filesystem::path rootPath);
-  Project(std::filesystem::path rootPath, ProjectConfig config);
+  explicit Project(const EnginePath::Path& path);
+  Project(const EnginePath::Path& path, ProjectConfig config);
   Project(Project&&)                 = default;
   Project(const Project&)            = default;
   Project& operator=(Project&&)      = default;
@@ -56,17 +54,17 @@ public:
   [[nodiscard]] Expected<void, errors::ProjectError> TryDeserialize();
 
   [[nodiscard]] const ProjectConfig& GetConfig() const;
-  [[nodiscard]] const std::filesystem::path& GetRootPath() const;
-  [[nodiscard]] std::filesystem::path GetAssetRootPath() const;
+  [[nodiscard]] const EnginePath::Path& GetRootPath() const;
+  [[nodiscard]] EnginePath::Path GetAssetRootPath() const;
 
 private:
-  [[nodiscard]] std::filesystem::path GetConfigPath() const;
+  [[nodiscard]] EnginePath::Path GetConfigPath() const;
   [[nodiscard]] Expected<void, errors::ProjectError> TryCreateProjectDirectories() const;
 
 private:
-  std::filesystem::path m_RootPath_;
+  EnginePath::Path m_RootPath_;
   ProjectConfig m_Config_;
-  bool m_HasBeenLoaded_                                       = false;
-  static inline const std::filesystem::path s_ConfigFileName_ = "project.xml";
+  bool m_HasBeenLoaded_                             = false;
+  static inline const std::string s_ConfigFileName_ = "project.xml";
 };
 } // namespace psych

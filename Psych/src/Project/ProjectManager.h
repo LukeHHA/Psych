@@ -1,11 +1,11 @@
- 
+
 /**************************************************************************/
-/*  ProjectManager.h                                                      */                                                            
+/*  ProjectManager.h                                                      */
 /**************************************************************************/
 /*                         This file is part of:                          */
 /*                             PSYCH ENGINE                               */
 /**************************************************************************/
-/* Copyright (c)  Luke Howe                                               */                                                  
+/* Copyright (c)  Luke Howe                                               */
 /*                                                                        */
 /* Permission is hereby granted, free of charge, to any person obtaining  */
 /* a copy of this software and associated documentation files (the        */
@@ -31,7 +31,7 @@
 
 #include "Core/Core.h"
 #include "Errors/Errors.h"
-#include "FileSystem/PathResolver.h"
+#include "FileSystem/EnginePath.h"
 #include "Project/Project.h"
 #include "expected.h"
 
@@ -49,9 +49,9 @@ public:
   ProjectManager& operator=(ProjectManager&&)      = delete;
   ~ProjectManager()                                = default;
 
-  [[nodiscard]] Expected<void, errors::ProjectError> Init(PathResolver& resolver);
-  [[nodiscard]] Expected<void, errors::ProjectError> Shutdown(PathResolver& resolver);
-  [[nodiscard]] Expected<void, errors::ProjectError> OpenProject(std::filesystem::path projectRoot, PathResolver& resolver);
+  [[nodiscard]] Expected<void, errors::ProjectError> Init();
+  [[nodiscard]] Expected<void, errors::ProjectError> Shutdown();
+  [[nodiscard]] Expected<void, errors::ProjectError> OpenProject(const EnginePath::Path& path);
 
   [[nodiscard]] bool HasActiveProject() const;
   [[nodiscard]] Project& GetActiveProject();

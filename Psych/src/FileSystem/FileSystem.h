@@ -60,22 +60,33 @@ public:
   ~Filesystem()                            = delete;
 
   static std::vector<std::byte> ReadBinaryFile(const std::filesystem::path& path);
+  static std::vector<std::byte> ReadBinaryFile(const EnginePath::Path& path);
   static void Init();
   static void Shutdown();
   static std::filesystem::path Current_Path();
   static void DeleteFile(const std::filesystem::path& path);
+  static void DeleteFile(const EnginePath::Path& path);
   static Expected<void, errors::FilesystemError> TryDeleteFile(const std::filesystem::path& path);
+  static Expected<void, errors::FilesystemError> TryDeleteFile(const EnginePath::Path& path);
   static bool FileExists(const std::filesystem::path& path);
+  static bool FileExists(const EnginePath::Path& path);
   static bool DirExists(const std::filesystem::path& path);
+  static bool DirExists(const EnginePath::Path& path);
   static bool CreateFile(const std::filesystem::path& path);
+  static bool CreateFile(const EnginePath::Path& path);
   static Expected<void, errors::FilesystemError> TryCreateFile(const std::filesystem::path& path);
+  static Expected<void, errors::FilesystemError> TryCreateFile(const EnginePath::Path& path);
   static Expected<void, errors::FilesystemError> TryCreateDirs(const std::filesystem::path& path);
-  static std::string StreamFile(const std::string& path);
+  static Expected<void, errors::FilesystemError> TryCreateDirs(const EnginePath::Path& path);
+  static std::string StreamFile(const std::filesystem::path& path);
+  static std::string StreamFile(const EnginePath::Path& path);
   static Expected<std::string, errors::FilesystemError> TryReadFile(const std::filesystem::path& path);
   static Expected<std::string, errors::FilesystemError> TryReadFile(const EnginePath::Path& path);
   static Expected<std::filesystem::path, errors::FilesystemError> TryResolve(const EnginePath::Path& path);
   static Unique<FileNode> CreateDirectoryTree(const std::filesystem::path& rootPath);
+  static Unique<FileNode> CreateDirectoryTree(const EnginePath::Path& rootPath);
   static Expected<Unique<FileNode>, errors::FilesystemError> TryCreateDirectoryTree(const std::filesystem::path& rootPath);
+  static Expected<Unique<FileNode>, errors::FilesystemError> TryCreateDirectoryTree(const EnginePath::Path& rootPath);
 
   static bool IsInitialized();
   static Expected<std::filesystem::path, errors::FilesystemError> TryGetBaseConfigPath();
