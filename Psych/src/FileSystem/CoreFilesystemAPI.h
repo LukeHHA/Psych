@@ -34,6 +34,7 @@
 #include "expected.h"
 
 #include <filesystem>
+#include <string_view>
 
 namespace psych
 {
@@ -51,6 +52,8 @@ public:
   static std::string StreamFile(const std::string& path);
 
   static Expected<std::string, errors::FilesystemError> TryReadFile(const std::filesystem::path& path);
+
+  static Expected<void, errors::FilesystemError> TryWriteFile(const std::filesystem::path& path, std::string_view contents);
 
   static bool CreateDir(const std::filesystem::path& path);
 

@@ -37,13 +37,19 @@
 
 namespace psych
 {
-Expected<void, errors::ProjectError> ProjectManager::Init() { CORE_PROFILE_FUNCTION(); }
+Expected<void, errors::ProjectError> ProjectManager::Init()
+{
+  CORE_PROFILE_FUNCTION();
+  return {};
+}
 
 Expected<void, errors::ProjectError> ProjectManager::Shutdown()
 {
   CORE_PROFILE_FUNCTION();
 
   if (!m_ActiveProject_) {
+    Filesystem::ClearProjectRoot();
+    m_ActiveProjectRoot_.clear();
     return {};
   }
 
@@ -53,27 +59,56 @@ Expected<void, errors::ProjectError> ProjectManager::Shutdown()
   }
 
   m_ActiveProject_.reset();
+  m_ActiveProjectRoot_.clear();
+  Filesystem::ClearProjectRoot();
   return {};
 }
 
-Expected<void, errors::ProjectError> ProjectManager::OpenProject(const EnginePath::Path& path)
+Expected<void, errors::ProjectError> ProjectManager::OpenProject(const std::filesystem::path& path)
 {
   CORE_PROFILE_FUNCTION();
 
-  auto project = CreateUnique<Project>(path);
+  if (path.empty()) {
+    return Unexpected(errors::ProjectError::InvalidPath);
+  }
+
+  const auto projectRoot = path.lexically_normal();
+  const auto bindResult  = Filesystem::TrySetProjectRoot(projectRoot);
+  if (!bindResult) {
+    return Unexpected(errors::ProjectError::InvalidPath);
+  }
+
+  auto project = CreateUnique<Project>(EnginePath::Path{"proj://"});
   auto result  = project->Init();
   if (!result) {
+    if (m_ActiveProject_) {
+      const auto restoreResult = Filesystem::TrySetProjectRoot(m_ActiveProjectRoot_);
+      CORE_ASSERT(restoreResult, "Failed to restore active project root")
+    } else {
+      Filesystem::ClearProjectRoot();
+    }
     return result;
   }
 
   if (m_ActiveProject_) {
+    const auto restoreResult = Filesystem::TrySetProjectRoot(m_ActiveProjectRoot_);
+    if (!restoreResult) {
+      return Unexpected(errors::ProjectError::InvalidPath);
+    }
+
     const auto shutdownResult = m_ActiveProject_->Shutdown();
     if (!shutdownResult) {
       return shutdownResult;
     }
+
+    const auto rebindResult = Filesystem::TrySetProjectRoot(projectRoot);
+    if (!rebindResult) {
+      return Unexpected(errors::ProjectError::InvalidPath);
+    }
   }
 
-  m_ActiveProject_ = std::move(project);
+  m_ActiveProject_     = std::move(project);
+  m_ActiveProjectRoot_ = projectRoot;
   return {};
 }
 

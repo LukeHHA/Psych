@@ -30,7 +30,6 @@
 #pragma once
 
 #include "Debug/Assert.h"
-#include "FileSystem/PathResolver.h"
 
 #include <cctype>
 #include <cstddef>
@@ -42,7 +41,7 @@
 namespace psych::EnginePath
 {
 
-enum class Schema : std::uint8_t { None = 0, Config, Cache, Engine };
+enum class Schema : std::uint8_t { None = 0, Config, Cache, Engine, Project };
 
 [[nodiscard]] inline std::string_view SchemaToString(const Schema schema)
 {
@@ -55,6 +54,9 @@ enum class Schema : std::uint8_t { None = 0, Config, Cache, Engine };
 
   case Schema::Engine:
     return "engine://";
+
+  case Schema::Project:
+    return "proj://";
 
   case Schema::None:
     break;
@@ -94,6 +96,10 @@ enum class Schema : std::uint8_t { None = 0, Config, Cache, Engine };
     return Schema::Engine;
   }
 
+  if (SchemaEquals(schema, "proj://")) {
+    return Schema::Project;
+  }
+
   return Schema::None;
 }
 
@@ -111,6 +117,12 @@ public:
 
   explicit Path(const std::string& path) { Convert(path); }
 
+  Path& operator=(const std::string& path)
+  {
+    Convert(path);
+    return *this;
+  }
+
   // Keep malformed user-provided engine paths representable so higher-level Try*
   // APIs can return errors instead of asserting during parsing.
   [[nodiscard]] bool IsValid() const { return m_IsValid; }
@@ -119,24 +131,19 @@ public:
 
   [[nodiscard]] const std::filesystem::path& GetRelativePath() const { return m_RelativePath; }
 
-  [[nodiscard]] std::string ToString() const { return std::string{SchemaToString(m_Schema)} + m_RelativePath.string(); }
+  [[nodiscard]] std::string string() const { return std::string{SchemaToString(m_Schema)} + m_RelativePath.generic_string(); }
 
-  std::filesystem::path std_path()
-  {
-    PathResolver resolver{};
-    auto result = resolver.TryResolve(this);
+  void append(const std::string& path) { m_RelativePath.append(path); }
 
-    if (!result) {
-      CORE_ASSERT(false, "Method PathResolver::std_path failed to resolve a path")
-    }
-    return result.value();
-  }
-
-  explicit operator std::string() const { return ToString(); }
+  explicit operator std::string() const { return string(); }
 
 private:
   void Convert(const std::string_view path)
   {
+    m_RelativePath.clear();
+    m_Schema              = Schema::None;
+    m_IsValid             = false;
+
     const auto schema_end = path.find("://");
 
     if (schema_end == std::string_view::npos) {
@@ -149,13 +156,18 @@ private:
       return;
     }
 
-    const std::string_view relative_path = path.substr(schema_end + 3);
-
-    if (relative_path.find("..") != std::string_view::npos) {
+    const std::filesystem::path relative_path{path.substr(schema_end + 3)};
+    if (relative_path.is_absolute() || relative_path.has_root_name() || relative_path.has_root_directory()) {
       return;
     }
 
-    m_RelativePath = std::filesystem::path{relative_path};
+    for (const auto& component : relative_path) {
+      if (component == "..") {
+        return;
+      }
+    }
+
+    m_RelativePath = relative_path.lexically_normal();
     m_IsValid      = true;
   }
 

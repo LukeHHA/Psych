@@ -36,16 +36,18 @@
 #include "expected.h"
 
 #include <filesystem>
+#include <string_view>
+#include <utility>
 
 namespace psych
 {
 struct FileNode {
   FileNode() = default;
-  FileNode(std::filesystem::path path, bool isDir) : isDir(isDir), path(std::move(path)), name(this->path.filename().string()) {}
+  FileNode(EnginePath::Path path, const bool isDir, std::string name) : isDir(isDir), path(std::move(path)), name(std::move(name)) {}
 
   bool isDir = false;
   std::vector<Unique<FileNode>> children;
-  std::filesystem::path path;
+  EnginePath::Path path;
   std::string name;
 };
 
@@ -78,15 +80,17 @@ public:
   static Expected<void, errors::FilesystemError> TryCreateFile(const EnginePath::Path& path);
   static Expected<void, errors::FilesystemError> TryCreateDirs(const std::filesystem::path& path);
   static Expected<void, errors::FilesystemError> TryCreateDirs(const EnginePath::Path& path);
+  static Expected<void, errors::FilesystemError> TryWriteFile(const std::filesystem::path& path, std::string_view contents);
+  static Expected<void, errors::FilesystemError> TryWriteFile(const EnginePath::Path& path, std::string_view contents);
   static std::string StreamFile(const std::filesystem::path& path);
   static std::string StreamFile(const EnginePath::Path& path);
   static Expected<std::string, errors::FilesystemError> TryReadFile(const std::filesystem::path& path);
   static Expected<std::string, errors::FilesystemError> TryReadFile(const EnginePath::Path& path);
   static Expected<std::filesystem::path, errors::FilesystemError> TryResolve(const EnginePath::Path& path);
-  static Unique<FileNode> CreateDirectoryTree(const std::filesystem::path& rootPath);
   static Unique<FileNode> CreateDirectoryTree(const EnginePath::Path& rootPath);
-  static Expected<Unique<FileNode>, errors::FilesystemError> TryCreateDirectoryTree(const std::filesystem::path& rootPath);
   static Expected<Unique<FileNode>, errors::FilesystemError> TryCreateDirectoryTree(const EnginePath::Path& rootPath);
+  static Expected<void, errors::FilesystemError> TrySetProjectRoot(const std::filesystem::path& path);
+  static void ClearProjectRoot();
 
   static bool IsInitialized();
   static Expected<std::filesystem::path, errors::FilesystemError> TryGetBaseConfigPath();

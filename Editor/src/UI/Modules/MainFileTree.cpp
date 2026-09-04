@@ -64,5 +64,5 @@ void MainFileTreePanel::DrawFileTreeNode(const FileNode* node)
   }
 }
 
-std::filesystem::path MainFileTreePanel::GetCurrentSelected() const { return m_CurrentSelected_; }
+const EnginePath::Path& MainFileTreePanel::GetCurrentSelected() const { return m_CurrentSelected_; }
 } // namespace psych::ui

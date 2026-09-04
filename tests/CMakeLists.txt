@@ -34,6 +34,7 @@ add_executable(PsychEngineTests
     filesystem/FilesystemTests.cpp
     layers/LayerStackTests.cpp
     OS/OSTests.cpp
+    project/ProjectTests.cpp
     util/CommandLineTests.cpp
 )
 

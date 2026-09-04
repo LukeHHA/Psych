@@ -51,7 +51,7 @@ public:
 
   [[nodiscard]] Expected<void, errors::ProjectError> Init();
   [[nodiscard]] Expected<void, errors::ProjectError> Shutdown();
-  [[nodiscard]] Expected<void, errors::ProjectError> OpenProject(const EnginePath::Path& path);
+  [[nodiscard]] Expected<void, errors::ProjectError> OpenProject(const std::filesystem::path& path);
 
   [[nodiscard]] bool HasActiveProject() const;
   [[nodiscard]] Project& GetActiveProject();
@@ -59,5 +59,6 @@ public:
 
 private:
   Unique<Project> m_ActiveProject_;
+  std::filesystem::path m_ActiveProjectRoot_;
 };
 } // namespace psych

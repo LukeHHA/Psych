@@ -68,7 +68,8 @@ enum class FilesystemError : std::uint8_t {
   DirectoryIterationFailed,
   ReadFailed,
   OSPathFail,
-  LoadFailed
+  LoadFailed,
+  WriteFailed
 };
 
 enum class ShaderLibraryError : std::uint8_t { None = 0, NotFound };

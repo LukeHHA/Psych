@@ -1,8 +1,10 @@
 #pragma once
 
 #include "Core/Core.h"
+#include "FileSystem/EnginePath.h"
 #include "FileSystem/FileSystem.h"
 #include "Panel.h"
+#include <functional>
 #include <string>
 #include <vector>
 
@@ -11,7 +13,7 @@ namespace psych::ui
 class MainFileTreePanel : public Panel
 {
 public:
-  using SelectedCallbackFn                               = std::function<void(const std::filesystem::path&)>;
+  using SelectedCallbackFn                               = std::function<void(const EnginePath::Path&)>;
 
   MainFileTreePanel()                                    = default;
   MainFileTreePanel(const MainFileTreePanel&)            = default;
@@ -27,13 +29,13 @@ public:
   void OnUpdate() override;
   void SetSelectedCallbackFn(SelectedCallbackFn fn);
   void SetRootNode(const FileNode* node);
-  [[nodiscard]] std::filesystem::path GetCurrentSelected() const;
+  [[nodiscard]] const EnginePath::Path& GetCurrentSelected() const;
 
 private:
   void DrawFileTreeNode(const FileNode* node);
 
   const FileNode* m_RootNode_ = nullptr;
-  std::filesystem::path m_CurrentSelected_;
+  EnginePath::Path m_CurrentSelected_;
   std::vector<SelectedCallbackFn> m_SelectedCallbacks_;
 };
 } // namespace psych::ui

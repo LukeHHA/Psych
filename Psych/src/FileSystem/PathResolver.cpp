@@ -35,6 +35,10 @@ namespace psych
 {
 void PathResolver::SetEngineRoot(const std::filesystem::path& path) { m_EngineRoot_ = path; }
 
+void PathResolver::SetProjectRoot(const std::filesystem::path& path) { m_ProjectRoot_ = path; }
+
+void PathResolver::ClearProjectRoot() { m_ProjectRoot_.clear(); }
+
 Expected<std::filesystem::path, errors::FilesystemError> PathResolver::TryResolve(const EnginePath::Path& path) const
 {
   if (!path.IsValid()) {
@@ -65,6 +69,12 @@ Expected<std::filesystem::path, errors::FilesystemError> PathResolver::TryResolv
     }
     return baseCachePath.value() / relativePath;
   }
+
+  case EnginePath::Schema::Project:
+    if (m_ProjectRoot_.empty()) {
+      return Unexpected(errors::FilesystemError::InvalidPath);
+    }
+    return m_ProjectRoot_ / relativePath;
 
   case EnginePath::Schema::None:
     break;

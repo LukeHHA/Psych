@@ -9,7 +9,7 @@
 
 namespace psych::ui
 {
-class ProjectWindowPanel : public Panel
+class ProjectWindowPanel : public psych::Panel
 {
 public:
   using ProjectSelectedCallbackFn = std::function<bool(const std::filesystem::path&)>;

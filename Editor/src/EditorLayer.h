@@ -4,11 +4,9 @@
 #include "FileSystem/FileSystem.h"
 #include "Layers/Layer.h"
 #include "PanelManager.h"
-#include "Renderer/RendererAPI.h"
-#include "Renderer/Shader.h"
-#include "Renderer/VertexArray.h"
+#include "Project/ProjectManager.h"
 #include "UI/Modules/ProjectWindow.h"
-#include <cstdint>
+
 #include <filesystem>
 
 namespace psych
@@ -33,12 +31,12 @@ public:
   void OnImGuiRender() override;
 
 private:
-  void OpenFile(const std::filesystem::path& path);
+  void OpenFile(const EnginePath::Path& path);
   bool OpenProject(const std::filesystem::path& path);
 
 private:
-  Unique<RendererAPI> m_RendererAPI_;
   Unique<FileNode> m_FileTreeRoot_;
+  ProjectManager m_ProjectManager_;
 
   PanelManager m_PanelManager_;
   Unique<ui::ProjectWindowPanel> m_ProjectWindowPanel_;

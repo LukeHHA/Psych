@@ -54,7 +54,7 @@ public:
   [[nodiscard]] Expected<void, errors::ProjectError> TryDeserialize();
 
   [[nodiscard]] const ProjectConfig& GetConfig() const;
-  [[nodiscard]] const EnginePath::Path& GetRootPath() const;
+  [[nodiscard]] const EnginePath::Path& GetProjectPath() const;
   [[nodiscard]] EnginePath::Path GetAssetRootPath() const;
 
 private:
@@ -62,7 +62,7 @@ private:
   [[nodiscard]] Expected<void, errors::ProjectError> TryCreateProjectDirectories() const;
 
 private:
-  EnginePath::Path m_RootPath_;
+  EnginePath::Path m_ProjectPath_;
   ProjectConfig m_Config_;
   bool m_HasBeenLoaded_                             = false;
   static inline const std::string s_ConfigFileName_ = "project.xml";

@@ -1,13 +1,13 @@
 #pragma once
 
 #include "Core/Core.h"
+#include "FileSystem/EnginePath.h"
 #include "Panel.h"
-#include <filesystem>
 #include <string>
 
 namespace psych::ui
 {
-class FileViewerPanel : public Panel
+class FileViewerPanel : public psych::Panel
 {
 public:
   FileViewerPanel()                                  = default;
@@ -22,9 +22,9 @@ public:
 
   void OnImGuiRender() override;
   void OnUpdate() override;
-  void SetFilePath(const std::filesystem::path& path);
+  void SetFilePath(const EnginePath::Path& path);
 
 private:
-  std::filesystem::path m_Path_;
+  EnginePath::Path m_Path_;
 };
 } // namespace psych::ui

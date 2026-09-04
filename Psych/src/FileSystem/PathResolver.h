@@ -34,13 +34,14 @@
 #include "expected.h"
 
 #include <filesystem>
+#include <utility>
 
 namespace psych
 {
 class PathResolver
 {
 public:
-  PathResolver()                               = default;
+  explicit PathResolver(std::filesystem::path engineRoot) : m_EngineRoot_(std::move(engineRoot)) {}
   PathResolver(const PathResolver&)            = delete;
   PathResolver& operator=(const PathResolver&) = delete;
   PathResolver(PathResolver&&)                 = delete;
@@ -48,9 +49,12 @@ public:
   ~PathResolver()                              = default;
 
   void SetEngineRoot(const std::filesystem::path& path);
+  void SetProjectRoot(const std::filesystem::path& path);
+  void ClearProjectRoot();
   [[nodiscard]] Expected<std::filesystem::path, errors::FilesystemError> TryResolve(const EnginePath::Path& path) const;
 
 private:
-  inline static std::filesystem::path m_EngineRoot_;
+  std::filesystem::path m_EngineRoot_;
+  std::filesystem::path m_ProjectRoot_;
 };
 } // namespace psych

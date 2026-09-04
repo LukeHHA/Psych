@@ -1,5 +1,6 @@
 #include "EditorLayer.h"
 #include "Core/Core.h"
+#include "Debug/Assert.h"
 #include "Debug/Instrumentor.h"
 #include "FileSystem/FileSystem.h"
 #include "UI/Modules/EditorMenuBar.h"
@@ -19,10 +20,13 @@ void EditorLayer::OnAttach()
   CORE_PROFILE_FUNCTION();
   CORE_LOG_INFO("EditorLayer Attached");
 
+  auto pm_result = m_ProjectManager_.Init();
+  CORE_ASSERT(pm_result, "Failed to initialise project manager")
+
   m_PanelManager_.AddPanel<ui::EditorMenuBarPanel>();
 
   auto* fileTree = m_PanelManager_.AddPanel<ui::MainFileTreePanel>();
-  fileTree->SetSelectedCallbackFn([this](const std::filesystem::path& path) { OpenFile(path); });
+  fileTree->SetSelectedCallbackFn([this](const EnginePath::Path& path) { OpenFile(path); });
 
   m_PanelManager_.AddPanel<ui::FileViewerPanel>();
   m_PanelManager_.AddPanel<ui::ViewportPanel>();
@@ -32,8 +36,9 @@ void EditorLayer::OnAttach()
 
 void EditorLayer::OnDetach()
 {
-  m_RendererAPI_.reset();
   m_ProjectWindowPanel_.reset();
+  auto pm_result = m_ProjectManager_.Shutdown();
+  CORE_ASSERT(pm_result, "Project manager failed to shutdown")
 }
 
 void EditorLayer::OnEvent(Event& e)
@@ -76,7 +81,7 @@ void EditorLayer::OnUpdate(float ts)
   }
 }
 
-void EditorLayer::OpenFile(const std::filesystem::path& path)
+void EditorLayer::OpenFile(const EnginePath::Path& path)
 {
   auto* fileViewer = m_PanelManager_.GetPanel<ui::FileViewerPanel>();
   if (fileViewer != nullptr) {
@@ -86,15 +91,21 @@ void EditorLayer::OpenFile(const std::filesystem::path& path)
 
 bool EditorLayer::OpenProject(const std::filesystem::path& path)
 {
-  std::error_code error;
-  if (!std::filesystem::is_directory(path, error) || error) {
+  if (!Filesystem::DirExists(path)) {
     CORE_LOG_ERROR("Project path is not a directory: {}", path.string());
     return false;
   }
 
-  auto fileTreeResult = Filesystem::TryCreateDirectoryTree(path);
+  const auto projectResult = m_ProjectManager_.OpenProject(path);
+  if (!projectResult) {
+    CORE_LOG_ERROR("Failed to open project: {}", path.string());
+    return false;
+  }
+
+  const auto assetRoot = m_ProjectManager_.GetActiveProject().GetAssetRootPath();
+  auto fileTreeResult  = Filesystem::TryCreateDirectoryTree(assetRoot);
   if (!fileTreeResult) {
-    CORE_LOG_ERROR("Failed to open project directory: {}", path.string());
+    CORE_LOG_ERROR("Failed to open project asset directory: {}", assetRoot.string());
     return false;
   }
 
@@ -104,6 +115,8 @@ bool EditorLayer::OpenProject(const std::filesystem::path& path)
     return false;
   }
 
+  // TODO: Consider moving the whole file tree root into the filetree panel
+  //  makes more sense for the filetree to own that knowledge
   m_FileTreeRoot_ = std::move(fileTreeResult.value());
   fileTree->SetRootNode(m_FileTreeRoot_.get());
   m_ShowNewProjectWindow_ = false;

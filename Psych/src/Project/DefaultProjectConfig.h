@@ -1,11 +1,11 @@
- 
+
 /**************************************************************************/
-/*  DefaultProjectConfig.h                                                */                                                            
+/*  DefaultProjectConfig.h                                                */
 /**************************************************************************/
 /*                         This file is part of:                          */
 /*                             PSYCH ENGINE                               */
 /**************************************************************************/
-/* Copyright (c)  Luke Howe                                               */                                                  
+/* Copyright (c)  Luke Howe                                               */
 /*                                                                        */
 /* Permission is hereby granted, free of charge, to any person obtaining  */
 /* a copy of this software and associated documentation files (the        */
@@ -37,7 +37,7 @@ namespace psych
 {
 struct ProjectConfig {
   std::string Name           = "Default Project";
-  std::string AssetDirectory = "data";
+  std::string AssetDirectory = "proj://data";
 
   template <class Archive>
   void serialize(Archive& archive)

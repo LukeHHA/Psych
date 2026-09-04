@@ -127,6 +127,21 @@ Expected<void, errors::FilesystemError> Filesystem::TryCreateDirs(const EnginePa
   return TryCreateDirs(resolvedPath.value());
 }
 
+Expected<void, errors::FilesystemError> Filesystem::TryWriteFile(const std::filesystem::path& path, const std::string_view contents)
+{
+  return CoreFilesystemAPI::TryWriteFile(path, contents);
+}
+
+Expected<void, errors::FilesystemError> Filesystem::TryWriteFile(const EnginePath::Path& path, const std::string_view contents)
+{
+  const auto resolvedPath = TryResolve(path);
+  if (!resolvedPath) {
+    return Unexpected(resolvedPath.error());
+  }
+
+  return CoreFilesystemAPI::TryWriteFile(resolvedPath.value(), contents);
+}
+
 std::string Filesystem::StreamFile(const std::filesystem::path& path)
 {
   const auto result = TryReadFile(path);
@@ -169,6 +184,27 @@ Expected<std::filesystem::path, errors::FilesystemError> Filesystem::TryResolve(
   }
 
   return s_PathResolver_->TryResolve(path);
+}
+
+Expected<void, errors::FilesystemError> Filesystem::TrySetProjectRoot(const std::filesystem::path& path)
+{
+  if (!s_PathResolver_) {
+    return Unexpected(errors::FilesystemError::NotInitialized);
+  }
+
+  if (path.empty()) {
+    return Unexpected(errors::FilesystemError::InvalidPath);
+  }
+
+  s_PathResolver_->SetProjectRoot(path.lexically_normal());
+  return {};
+}
+
+void Filesystem::ClearProjectRoot()
+{
+  if (s_PathResolver_) {
+    s_PathResolver_->ClearProjectRoot();
+  }
 }
 
 bool Filesystem::IsInitialized() { return s_OSFilesystemAPI_ != nullptr && s_PathResolver_ != nullptr; }
@@ -267,17 +303,6 @@ std::filesystem::path Filesystem::GetBaseLogPath()
   return result.value();
 }
 
-Unique<FileNode> Filesystem::CreateDirectoryTree(const std::filesystem::path& path)
-{
-  auto result = TryCreateDirectoryTree(path);
-  if (!result) {
-    CORE_ASSERT(false, "Unable to create directory tree")
-    return nullptr;
-  }
-
-  return std::move(result.value());
-}
-
 Unique<FileNode> Filesystem::CreateDirectoryTree(const EnginePath::Path& path)
 {
   auto result = TryCreateDirectoryTree(path);
@@ -289,14 +314,16 @@ Unique<FileNode> Filesystem::CreateDirectoryTree(const EnginePath::Path& path)
   return std::move(result.value());
 }
 
-Expected<Unique<FileNode>, errors::FilesystemError> Filesystem::TryCreateDirectoryTree(const std::filesystem::path& path)
+namespace
 {
-  if (path.empty()) {
+Expected<Unique<FileNode>, errors::FilesystemError> TryBuildDirectoryTree(const std::filesystem::path& storagePath, const EnginePath::Path& enginePath)
+{
+  if (storagePath.empty()) {
     return Unexpected(errors::FilesystemError::InvalidPath);
   }
 
   std::error_code ec;
-  const bool exists = std::filesystem::exists(path, ec);
+  const bool exists = std::filesystem::exists(storagePath, ec);
   if (ec) {
     return Unexpected(errors::FilesystemError::DirectoryIterationFailed);
   }
@@ -305,24 +332,27 @@ Expected<Unique<FileNode>, errors::FilesystemError> Filesystem::TryCreateDirecto
     return Unexpected(errors::FilesystemError::FileNotFound);
   }
 
-  const bool isDir = std::filesystem::is_directory(path, ec);
+  const bool isDir = std::filesystem::is_directory(storagePath, ec);
   if (ec) {
     return Unexpected(errors::FilesystemError::DirectoryIterationFailed);
   }
 
-  auto node = CreateUnique<FileNode>(path, isDir);
+  auto node = CreateUnique<FileNode>(enginePath, isDir, storagePath.filename().string());
 
   if (!isDir) {
     return node;
   }
 
-  std::filesystem::directory_iterator iterator(path, ec);
+  std::filesystem::directory_iterator iterator(storagePath, ec);
   if (ec) {
     return Unexpected(errors::FilesystemError::DirectoryIterationFailed);
   }
 
   for (const auto& entry : iterator) {
-    auto child = TryCreateDirectoryTree(entry.path());
+    auto childEnginePath = enginePath;
+    childEnginePath.append(entry.path().filename().generic_string());
+
+    auto child = TryBuildDirectoryTree(entry.path(), childEnginePath);
     if (!child) {
       return Unexpected(child.error());
     }
@@ -332,6 +362,7 @@ Expected<Unique<FileNode>, errors::FilesystemError> Filesystem::TryCreateDirecto
 
   return node;
 }
+} // namespace
 
 Expected<Unique<FileNode>, errors::FilesystemError> Filesystem::TryCreateDirectoryTree(const EnginePath::Path& path)
 {
@@ -340,7 +371,7 @@ Expected<Unique<FileNode>, errors::FilesystemError> Filesystem::TryCreateDirecto
     return Unexpected(resolvedPath.error());
   }
 
-  return TryCreateDirectoryTree(resolvedPath.value());
+  return TryBuildDirectoryTree(resolvedPath.value(), path);
 }
 
 std::vector<std::byte> Filesystem::ReadBinaryFile(const std::filesystem::path& path)

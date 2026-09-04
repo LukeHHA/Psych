@@ -1,6 +1,5 @@
 #include "FileViewer.h"
 #include "FileSystem/FileSystem.h"
-#include <filesystem>
 #include <imgui.h>
 
 namespace psych::ui
@@ -30,5 +29,5 @@ void FileViewerPanel::OnImGuiRender()
 
 void FileViewerPanel::OnUpdate() {}
 
-void FileViewerPanel::SetFilePath(const std::filesystem::path& path) { m_Path_ = path; }
+void FileViewerPanel::SetFilePath(const EnginePath::Path& path) { m_Path_ = path; }
 } // namespace psych::ui

@@ -199,6 +199,33 @@ Expected<std::string, errors::FilesystemError> CoreFilesystemAPI::TryReadFile(co
   return contents.str();
 }
 
+Expected<void, errors::FilesystemError> CoreFilesystemAPI::TryWriteFile(const std::filesystem::path& path, const std::string_view contents)
+{
+  if (path.empty()) {
+    return Unexpected(errors::FilesystemError::InvalidPath);
+  }
+
+  const auto parent = path.parent_path();
+  if (!parent.empty()) {
+    const auto parentResult = TryCreateDirs(parent);
+    if (!parentResult) {
+      return Unexpected(parentResult.error());
+    }
+  }
+
+  std::ofstream file(path, std::ios::binary | std::ios::trunc);
+  if (!file) {
+    return Unexpected(errors::FilesystemError::WriteFailed);
+  }
+
+  file.write(contents.data(), static_cast<std::streamsize>(contents.size()));
+  if (!file) {
+    return Unexpected(errors::FilesystemError::WriteFailed);
+  }
+
+  return {};
+}
+
 bool CoreFilesystemAPI::CreateDir(const std::filesystem::path& path) { return std::filesystem::create_directory(path); }
 
 bool CoreFilesystemAPI::CreateDirWithParentPerms(const std::filesystem::path& path, const std::filesystem::path& parent_path)
