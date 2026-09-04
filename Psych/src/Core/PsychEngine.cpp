@@ -142,7 +142,11 @@ void PsychEngine::HandleEvents()
     case EventType::WindowClose:
       m_Running = false;
     }
-    m_Window->HandleEvents(std::move(event));
+    m_Window->HandleEvents(event.get());
+
+    for (const auto& layer : Layers()) {
+      layer->OnEvent(event.get());
+    }
   }
 }
 

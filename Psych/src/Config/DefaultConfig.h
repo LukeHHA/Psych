@@ -61,7 +61,7 @@ struct EditorUISpec {
 
 struct ProjectSpec {
   std::string PreviousProjectsDir = "://";
-  std::vector<std::string> PreviousProjects{"/Documents", "/Desktop"};
+  std::vector<std::string> PreviousProjects;
 
   template <class Archive>
   void serialize(Archive& archive)

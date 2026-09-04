@@ -3,6 +3,7 @@
 #include "Debug/Assert.h"
 #include "Debug/Instrumentor.h"
 #include "FileSystem/FileSystem.h"
+#include "Logging/Logging.h"
 #include "UI/Modules/EditorMenuBar.h"
 #include "UI/Modules/FileViewer.h"
 #include "UI/Modules/MainFileTree.h"
@@ -41,8 +42,13 @@ void EditorLayer::OnDetach()
   CORE_ASSERT(pm_result, "Project manager failed to shutdown")
 }
 
-void EditorLayer::OnEvent(Event& e)
+void EditorLayer::OnEvent(Event* e)
 {
+  if (e->GetEventType() == EventType::OpenProjectWindow) {
+    m_ShowNewProjectWindow_ = true;
+    CORE_LOG_INFO("Project event was handled");
+  }
+
   if (m_ShowNewProjectWindow_ && m_ProjectWindowPanel_ != nullptr) {
     m_ProjectWindowPanel_->OnEvent(e);
   } else {

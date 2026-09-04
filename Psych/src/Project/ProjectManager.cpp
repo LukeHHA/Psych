@@ -29,6 +29,7 @@
 
 #include "ProjectManager.h"
 
+#include "Core/PsychEngine.h"
 #include "Debug/Assert.h"
 #include "Debug/Instrumentor.h"
 #include "FileSystem/FileSystem.h"
@@ -74,6 +75,7 @@ Expected<void, errors::ProjectError> ProjectManager::OpenProject(const std::file
 
   const auto projectRoot = path.lexically_normal();
   const auto bindResult  = Filesystem::TrySetProjectRoot(projectRoot);
+
   if (!bindResult) {
     return Unexpected(errors::ProjectError::InvalidPath);
   }

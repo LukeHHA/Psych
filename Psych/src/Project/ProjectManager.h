@@ -31,7 +31,6 @@
 
 #include "Core/Core.h"
 #include "Errors/Errors.h"
-#include "FileSystem/EnginePath.h"
 #include "Project/Project.h"
 #include "expected.h"
 

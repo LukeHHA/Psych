@@ -97,7 +97,7 @@ public:
     }
   }
 
-  void OnEvent(Event& event)
+  void OnEvent(Event* event)
   {
     for (auto& panel : m_Panels_) {
       panel->OnEvent(event);

@@ -1,11 +1,11 @@
- 
+
 /**************************************************************************/
-/*  Event.h                                                               */                                                            
+/*  Event.h                                                               */
 /**************************************************************************/
 /*                         This file is part of:                          */
 /*                             PSYCH ENGINE                               */
 /**************************************************************************/
-/* Copyright (c)  Luke Howe                                               */                                                  
+/* Copyright (c)  Luke Howe                                               */
 /*                                                                        */
 /* Permission is hereby granted, free of charge, to any person obtaining  */
 /* a copy of this software and associated documentation files (the        */
@@ -55,7 +55,8 @@ enum class EventType {
   MouseButtonPressed,
   MouseButtonReleased,
   MouseMoved,
-  MouseScrolled
+  MouseScrolled,
+  OpenProjectWindow
 };
 
 enum EventCategory {
@@ -168,6 +169,23 @@ public:
   }
 
   EVENT_CLASS_TYPE(WindowClose)
+  EVENT_CLASS_CATEGORY(EventCategoryApplication)
+};
+
+class OpenProjectWindowEvent : public Event
+{
+public:
+  OpenProjectWindowEvent()  = default;
+  ~OpenProjectWindowEvent() = default;
+
+  [[nodiscard]] std::string ToString() const override
+  {
+    std::stringstream ss;
+    ss << "OpenProjectWindowEvent: ";
+    return ss.str();
+  }
+
+  EVENT_CLASS_TYPE(OpenProjectWindow)
   EVENT_CLASS_CATEGORY(EventCategoryApplication)
 };
 

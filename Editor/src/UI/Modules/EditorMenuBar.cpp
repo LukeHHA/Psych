@@ -19,23 +19,28 @@ void EditorMenuBarPanel::ShowExampleMenuFile()
 {
   if (ImGui::MenuItem("File")) {
   }
-  if (ImGui::MenuItem("Open", "Ctrl+O")) {
-  }
-  if (ImGui::BeginMenu("Open Recent")) {
-    ImGui::MenuItem("fish_hat.c");
-    ImGui::MenuItem("fish_hat.inl");
-    ImGui::MenuItem("fish_hat.h");
-    if (ImGui::BeginMenu("More..")) {
-      ImGui::MenuItem("Hello");
-      ImGui::MenuItem("Sailor");
-      if (ImGui::BeginMenu("Recurse..")) {
-        ShowExampleMenuFile();
-        ImGui::EndMenu();
-      }
-      ImGui::EndMenu();
+  bool open_selected = false;
+  if (ImGui::MenuItem("Open", "Ctrl+O", &open_selected)) {
+    if (open_selected) {
+      auto event = CreateUnique<OpenProjectWindowEvent>();
+      PsychEngine::Get().GetEventHandler().QueueEvent(std::move(event));
     }
-    ImGui::EndMenu();
   }
+  // if (ImGui::BeginMenu("Open Recent")) {
+  //   ImGui::MenuItem("fish_hat.c");
+  //   ImGui::MenuItem("fish_hat.inl");
+  //   ImGui::MenuItem("fish_hat.h");
+  //   if (ImGui::BeginMenu("More..")) {
+  //     ImGui::MenuItem("Hello");
+  //     ImGui::MenuItem("Sailor");
+  //     if (ImGui::BeginMenu("Recurse..")) {
+  //       ShowExampleMenuFile();
+  //       ImGui::EndMenu();
+  //     }
+  //     ImGui::EndMenu();
+  //   }
+  //   ImGui::EndMenu();
+  // }
   if (ImGui::MenuItem("Save", "Ctrl+S")) {
   }
   if (ImGui::MenuItem("Save As..")) {

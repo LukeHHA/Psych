@@ -1,11 +1,11 @@
- 
+
 /**************************************************************************/
-/*  EngineWindow.cpp                                                      */                                                            
+/*  EngineWindow.cpp                                                      */
 /**************************************************************************/
 /*                         This file is part of:                          */
 /*                             PSYCH ENGINE                               */
 /**************************************************************************/
-/* Copyright (c)  Luke Howe                                               */                                                  
+/* Copyright (c)  Luke Howe                                               */
 /*                                                                        */
 /* Permission is hereby granted, free of charge, to any person obtaining  */
 /* a copy of this software and associated documentation files (the        */
@@ -221,7 +221,7 @@ void EngineWindow::OnUpdate()
   m_RendererContext->SwapBuffers();
 }
 
-void EngineWindow::HandleEvents(Unique<Event> event)
+void EngineWindow::HandleEvents(Event* event)
 {
   switch (event->GetEventType()) {
   case EventType::WindowResize:

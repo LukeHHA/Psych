@@ -1,11 +1,11 @@
- 
+
 /**************************************************************************/
-/*  ImguiLayer.h                                                          */                                                            
+/*  ImguiLayer.h                                                          */
 /**************************************************************************/
 /*                         This file is part of:                          */
 /*                             PSYCH ENGINE                               */
 /**************************************************************************/
-/* Copyright (c)  Luke Howe                                               */                                                  
+/* Copyright (c)  Luke Howe                                               */
 /*                                                                        */
 /* Permission is hereby granted, free of charge, to any person obtaining  */
 /* a copy of this software and associated documentation files (the        */
@@ -46,7 +46,7 @@ public:
 
   void OnAttach() override;
   void OnDetach() override;
-  void OnEvent(Event& e) override;
+  void OnEvent(Event* e) override;
   void OnUpdate(float ts = 1) override {}
   void OnRender() override {}
 

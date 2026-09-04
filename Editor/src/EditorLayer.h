@@ -23,7 +23,7 @@ public:
 
   void OnAttach() override;
   void OnDetach() override;
-  void OnEvent(Event& event) override;
+  void OnEvent(Event* event) override;
   virtual void Begin();
   virtual void End();
   void OnUpdate(float ts = 1) override;

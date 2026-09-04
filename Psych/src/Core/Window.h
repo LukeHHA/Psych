@@ -1,11 +1,11 @@
- 
+
 /**************************************************************************/
-/*  Window.h                                                              */                                                            
+/*  Window.h                                                              */
 /**************************************************************************/
 /*                         This file is part of:                          */
 /*                             PSYCH ENGINE                               */
 /**************************************************************************/
-/* Copyright (c)  Luke Howe                                               */                                                  
+/* Copyright (c)  Luke Howe                                               */
 /*                                                                        */
 /* Permission is hereby granted, free of charge, to any person obtaining  */
 /* a copy of this software and associated documentation files (the        */
@@ -80,7 +80,7 @@ public:
   virtual void SetEventCallback(const EventCallbackFn& callback)                                                                                  = 0;
   virtual void SetVSync(bool enabled)                                                                                                             = 0;
   [[nodiscard]] virtual bool IsVSync() const                                                                                                      = 0;
-  virtual void HandleEvents(Unique<Event> event)                                                                                                  = 0;
+  virtual void HandleEvents(Event* event)                                                                                                         = 0;
   static Expected<Unique<Window>, errors::WindowError> Create(const std::string& title, unsigned int width, unsigned int height, EventHandler& eventHandler);
 
 private:

@@ -1,11 +1,11 @@
- 
+
 /**************************************************************************/
-/*  HeadlessWindow.cpp                                                    */                                                            
+/*  HeadlessWindow.cpp                                                    */
 /**************************************************************************/
 /*                         This file is part of:                          */
 /*                             PSYCH ENGINE                               */
 /**************************************************************************/
-/* Copyright (c)  Luke Howe                                               */                                                  
+/* Copyright (c)  Luke Howe                                               */
 /*                                                                        */
 /* Permission is hereby granted, free of charge, to any person obtaining  */
 /* a copy of this software and associated documentation files (the        */
@@ -120,5 +120,5 @@ void HeadlessWindow::SetVSync(bool enabled) { m_Data.VSync = enabled; }
 
 bool HeadlessWindow::IsVSync() const { return m_Data.VSync; }
 
-void HeadlessWindow::HandleEvents(Unique<Event> event) {};
+void HeadlessWindow::HandleEvents(Event* event) {};
 } // namespace psych

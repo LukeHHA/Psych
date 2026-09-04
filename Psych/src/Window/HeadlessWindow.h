@@ -1,11 +1,11 @@
- 
+
 /**************************************************************************/
-/*  HeadlessWindow.h                                                      */                                                            
+/*  HeadlessWindow.h                                                      */
 /**************************************************************************/
 /*                         This file is part of:                          */
 /*                             PSYCH ENGINE                               */
 /**************************************************************************/
-/* Copyright (c)  Luke Howe                                               */                                                  
+/* Copyright (c)  Luke Howe                                               */
 /*                                                                        */
 /* Permission is hereby granted, free of charge, to any person obtaining  */
 /* a copy of this software and associated documentation files (the        */
@@ -63,7 +63,7 @@ public:
   void SetEventCallback(const EventCallbackFn& callback) override { m_Data.EventCallback = callback; }
   void OnUpdate() override;
   void SetVSync(bool enabled) override;
-  void HandleEvents(Unique<Event> event) override;
+  void HandleEvents(Event* event) override;
   [[nodiscard]] bool IsVSync() const override;
 
 private:

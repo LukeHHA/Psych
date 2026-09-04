@@ -16,6 +16,6 @@ public:
 
   virtual void OnImGuiRender()   = 0;
   virtual void OnUpdate()        = 0;
-  virtual void OnEvent(Event&) {}
+  virtual void OnEvent(Event*) {}
 };
 } // namespace psych

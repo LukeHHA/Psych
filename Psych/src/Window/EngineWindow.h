@@ -1,11 +1,11 @@
- 
+
 /**************************************************************************/
-/*  EngineWindow.h                                                        */                                                            
+/*  EngineWindow.h                                                        */
 /**************************************************************************/
 /*                         This file is part of:                          */
 /*                             PSYCH ENGINE                               */
 /**************************************************************************/
-/* Copyright (c)  Luke Howe                                               */                                                  
+/* Copyright (c)  Luke Howe                                               */
 /*                                                                        */
 /* Permission is hereby granted, free of charge, to any person obtaining  */
 /* a copy of this software and associated documentation files (the        */
@@ -62,7 +62,7 @@ public:
   [[nodiscard]] GLFWwindow* GetNativeWindow() const override { return m_Window.get(); }
   void SetEventCallback(const EventCallbackFn& callback) override { m_Data.EventCallback = callback; }
   void OnUpdate() override;
-  void HandleEvents(Unique<Event> event) override;
+  void HandleEvents(Event* event) override;
   void SetVSync(bool enabled) override;
   [[nodiscard]] bool IsVSync() const override;
 

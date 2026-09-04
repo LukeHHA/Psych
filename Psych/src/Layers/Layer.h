@@ -1,11 +1,11 @@
- 
+
 /**************************************************************************/
-/*  Layer.h                                                               */                                                            
+/*  Layer.h                                                               */
 /**************************************************************************/
 /*                         This file is part of:                          */
 /*                             PSYCH ENGINE                               */
 /**************************************************************************/
-/* Copyright (c)  Luke Howe                                               */                                                  
+/* Copyright (c)  Luke Howe                                               */
 /*                                                                        */
 /* Permission is hereby granted, free of charge, to any person obtaining  */
 /* a copy of this software and associated documentation files (the        */
@@ -42,7 +42,7 @@ public:
 
   virtual void OnAttach()             = 0;
   virtual void OnDetach()             = 0;
-  virtual void OnEvent(Event& event)  = 0;
+  virtual void OnEvent(Event* event)  = 0;
   virtual void OnUpdate(float ts = 1) = 0;
   virtual void OnRender()             = 0;
   virtual void OnImGuiRender()        = 0;
