@@ -7,6 +7,7 @@
 #include "UI/Modules/EditorMenuBar.h"
 #include "UI/Modules/FileViewer.h"
 #include "UI/Modules/MainFileTree.h"
+#include "UI/Modules/PopupModal.h"
 #include "UI/Modules/Viewport.h"
 #include "Util/Time.h"
 #include <glm/ext/matrix_clip_space.hpp>
@@ -100,6 +101,10 @@ bool EditorLayer::OpenProject(const std::filesystem::path& path)
   if (!Filesystem::DirExists(path)) {
     CORE_LOG_ERROR("Project path is not a directory: {}", path.string());
     return false;
+  }
+
+  if (!Filesystem::FileExists(path / "project.xml")) {
+    ui::PopupModal("Create new project?");
   }
 
   const auto projectResult = m_ProjectManager_.OpenProject(path);
