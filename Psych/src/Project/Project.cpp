@@ -79,115 +79,119 @@ Expected<void, errors::ProjectError> Project::TrySerialize() const
     }
   } catch (const cereal::Exception&) {
     CORE_ASSERT(false, "Failed to serialize project config")
-    return Unexpected(errors::ProjectError::ConfigSaveFailed);
-  }
 
-  const auto writeResult = Filesystem::TryWriteFile(GetConfigPath(), stream.str());
-  if (!writeResult) {
-    CORE_ASSERT(false, "Failed to write project config file")
-    return Unexpected(errors::ProjectError::ConfigSaveFailed);
-  }
+    std::ofstream stream(GetConfigPath().std_path());
+    if (!stream) {
+      CORE_ASSERT(false, "Failed to open project config file for writing")
+      return Unexpected(errors::ProjectError::ConfigSaveFailed);
+    }
 
-  return {};
-}
+    const auto writeResult = Filesystem::TryWriteFile(GetConfigPath(), stream.str());
+    if (!writeResult) {
+      CORE_ASSERT(false, "Failed to write project config file")
+      return Unexpected(errors::ProjectError::ConfigSaveFailed);
+    }
 
-Expected<void, errors::ProjectError> Project::TryDeserialize()
-{
-  CORE_PROFILE_FUNCTION();
-  if (m_HasBeenLoaded_) {
     return {};
   }
 
-  const auto createDirectories = TryCreateProjectDirectories();
-  if (!createDirectories) {
-    return Unexpected(createDirectories.error());
-  }
+  Expected<void, errors::ProjectError> Project::TryDeserialize()
+  {
+    CORE_PROFILE_FUNCTION();
+    if (m_HasBeenLoaded_) {
+      return {};
+    }
 
-  const auto configPath = GetConfigPath();
-  if (!Filesystem::FileExists(configPath)) {
-    const auto serializeResult = TrySerialize();
-    if (!serializeResult) {
-      CORE_ASSERT(false, "Failed to create default project config file")
-      return Unexpected(serializeResult.error());
+    const auto createDirectories = TryCreateProjectDirectories();
+    if (!createDirectories) {
+      return Unexpected(createDirectories.error());
+    }
+
+    const auto configPath = GetConfigPath();
+    if (!Filesystem::FileExists(configPath)) {
+      const auto serializeResult = TrySerialize();
+      if (!serializeResult) {
+        CORE_ASSERT(false, "Failed to create default project config file")
+        return Unexpected(serializeResult.error());
+      }
+
+      m_HasBeenLoaded_ = true;
+      return {};
+    }
+
+    auto configContents = Filesystem::TryReadFile(configPath);
+    if (!configContents) {
+      CORE_ASSERT(false, "Failed to read project config file")
+      return Unexpected(errors::ProjectError::ConfigLoadFailed);
+    }
+
+    std::istringstream stream(std::move(configContents.value()));
+    try {
+      cereal::XMLInputArchive archive(stream);
+      archive(cereal::make_nvp("ProjectConfig", m_Config_));
+    } catch (const cereal::Exception&) {
+      CORE_ASSERT(false, "Failed to deserialize project config")
+      return Unexpected(errors::ProjectError::ConfigLoadFailed);
+    }
+
+    const auto assetRoot = GetAssetRootPath();
+    if (!assetRoot.IsValid()) {
+      return Unexpected(errors::ProjectError::InvalidPath);
+    }
+
+    m_Config_.AssetDirectory  = assetRoot.string();
+
+    const auto assetDirectory = Filesystem::TryCreateDirs(assetRoot);
+    if (!assetDirectory) {
+      return Unexpected(errors::ProjectError::DirectoryCreationFailed);
     }
 
     m_HasBeenLoaded_ = true;
     return {};
   }
 
-  auto configContents = Filesystem::TryReadFile(configPath);
-  if (!configContents) {
-    CORE_ASSERT(false, "Failed to read project config file")
-    return Unexpected(errors::ProjectError::ConfigLoadFailed);
+  const ProjectConfig& Project::GetConfig() const { return m_Config_; }
+
+  const EnginePath::Path& Project::GetProjectPath() const { return m_ProjectPath_; }
+
+  EnginePath::Path Project::GetAssetRootPath() const
+  {
+    EnginePath::Path assetPath{m_Config_.AssetDirectory};
+    if (assetPath.IsValid() || m_Config_.AssetDirectory.find("://") != std::string::npos) {
+      return assetPath;
+    }
+
+    return EnginePath::Path{"proj://" + m_Config_.AssetDirectory};
   }
 
-  std::istringstream stream(std::move(configContents.value()));
-  try {
-    cereal::XMLInputArchive archive(stream);
-    archive(cereal::make_nvp("ProjectConfig", m_Config_));
-  } catch (const cereal::Exception&) {
-    CORE_ASSERT(false, "Failed to deserialize project config")
-    return Unexpected(errors::ProjectError::ConfigLoadFailed);
+  EnginePath::Path Project::GetConfigPath() const
+  {
+    EnginePath::Path config_path = m_ProjectPath_;
+    config_path.append(s_ConfigFileName_);
+    return config_path;
   }
 
-  const auto assetRoot = GetAssetRootPath();
-  if (!assetRoot.IsValid()) {
-    return Unexpected(errors::ProjectError::InvalidPath);
+  Expected<void, errors::ProjectError> Project::TryCreateProjectDirectories() const
+  {
+    if (!m_ProjectPath_.IsValid()) {
+      return Unexpected(errors::ProjectError::InvalidPath);
+    }
+
+    const auto rootResult = Filesystem::TryCreateDirs(m_ProjectPath_);
+    if (!rootResult) {
+      return Unexpected(errors::ProjectError::DirectoryCreationFailed);
+    }
+
+    const auto assetRoot = GetAssetRootPath();
+    if (!assetRoot.IsValid()) {
+      return Unexpected(errors::ProjectError::InvalidPath);
+    }
+
+    const auto assetResult = Filesystem::TryCreateDirs(assetRoot);
+    if (!assetResult) {
+      return Unexpected(errors::ProjectError::DirectoryCreationFailed);
+    }
+
+    return {};
   }
-
-  m_Config_.AssetDirectory  = assetRoot.string();
-
-  const auto assetDirectory = Filesystem::TryCreateDirs(assetRoot);
-  if (!assetDirectory) {
-    return Unexpected(errors::ProjectError::DirectoryCreationFailed);
-  }
-
-  m_HasBeenLoaded_ = true;
-  return {};
-}
-
-const ProjectConfig& Project::GetConfig() const { return m_Config_; }
-
-const EnginePath::Path& Project::GetProjectPath() const { return m_ProjectPath_; }
-
-EnginePath::Path Project::GetAssetRootPath() const
-{
-  EnginePath::Path assetPath{m_Config_.AssetDirectory};
-  if (assetPath.IsValid() || m_Config_.AssetDirectory.find("://") != std::string::npos) {
-    return assetPath;
-  }
-
-  return EnginePath::Path{"proj://" + m_Config_.AssetDirectory};
-}
-
-EnginePath::Path Project::GetConfigPath() const
-{
-  EnginePath::Path config_path = m_ProjectPath_;
-  config_path.append(s_ConfigFileName_);
-  return config_path;
-}
-
-Expected<void, errors::ProjectError> Project::TryCreateProjectDirectories() const
-{
-  if (!m_ProjectPath_.IsValid()) {
-    return Unexpected(errors::ProjectError::InvalidPath);
-  }
-
-  const auto rootResult = Filesystem::TryCreateDirs(m_ProjectPath_);
-  if (!rootResult) {
-    return Unexpected(errors::ProjectError::DirectoryCreationFailed);
-  }
-
-  const auto assetRoot = GetAssetRootPath();
-  if (!assetRoot.IsValid()) {
-    return Unexpected(errors::ProjectError::InvalidPath);
-  }
-
-  const auto assetResult = Filesystem::TryCreateDirs(assetRoot);
-  if (!assetResult) {
-    return Unexpected(errors::ProjectError::DirectoryCreationFailed);
-  }
-
-  return {};
-}
 } // namespace psych
