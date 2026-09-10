@@ -71,6 +71,7 @@ public:
   [[nodiscard]] Expected<void, errors::SerializationError> TryDeserialize();
 
   [[nodiscard]] const PsychEngineSpecification& GetPsychEngineSpec() const;
+  [[nodiscard]] PsychEngineSpecification& GetPsychEngineSpec();
 
 private:
   PsychEngineSpecification m_EngineSpec_;

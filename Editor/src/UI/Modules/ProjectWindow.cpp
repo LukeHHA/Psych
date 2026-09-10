@@ -10,7 +10,7 @@ namespace psych::ui
 {
 ProjectWindowPanel::ProjectWindowPanel()
 {
-  const auto& projectSpec = PsychEngine::Get().GetEngineSpecification().Projects;
+  const auto& projectSpec = PsychEngine::Get().GetConfig().Projects;
   const std::filesystem::path previousProjectsDirectory{projectSpec.PreviousProjectsDir};
 
   m_PreviousProjects_.reserve(projectSpec.PreviousProjects.size());

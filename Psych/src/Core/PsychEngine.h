@@ -29,6 +29,7 @@
 
 #pragma once
 
+#include "Config/DefaultConfig.h"
 #include "Config/PsychEngineConfig.h"
 #include "Core/Core.h"
 #include "Core/Window.h"
@@ -59,8 +60,8 @@ public:
   void PushOverlay(std::unique_ptr<Layer> layer);
 
   /// getters for member objects
-  [[nodiscard]] const PsychEngineConfig& GetConfig() const;
-  [[nodiscard]] const PsychEngineSpecification& GetEngineSpecification() const;
+  [[nodiscard]] const PsychEngineSpecification& GetConfig() const;
+  [[nodiscard]] PsychEngineSpecification& GetConfig();
   [[nodiscard]] const FontManager& GetFontLibrary() const;
 
   /// getters for ptrs

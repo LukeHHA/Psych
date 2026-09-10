@@ -34,6 +34,7 @@
 #include "Debug/Instrumentor.h"
 #include "FileSystem/FileSystem.h"
 
+#include <algorithm>
 #include <utility>
 
 namespace psych
@@ -106,6 +107,14 @@ Expected<void, errors::ProjectError> ProjectManager::OpenProject(const std::file
     const auto rebindResult = Filesystem::TrySetProjectRoot(projectRoot);
     if (!rebindResult) {
       return Unexpected(errors::ProjectError::InvalidPath);
+    }
+  }
+
+  // updates previous projects config value with the 5 most recent projects
+  auto& previous_projects = PsychEngine::Get().GetConfig().Projects.PreviousProjects;
+  if (previous_projects.size() < 5) {
+    if (auto it = std::ranges::find(previous_projects.begin(), previous_projects.end(), projectRoot.string()); it == previous_projects.end()) {
+      previous_projects.push_back(projectRoot);
     }
   }
 

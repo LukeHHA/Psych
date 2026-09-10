@@ -152,7 +152,7 @@ void ImGuiLayer::OnAttach()
   ImGui::CreateContext();
 
   PsychEngine& app = PsychEngine::Get();
-  m_EditorSpec_    = app.GetConfig().GetPsychEngineSpec().EditorUI;
+  m_EditorSpec_    = app.GetConfig().EditorUI;
   ConfigureEditorUIRuntime();
 
   auto* window = app.GetWindow().GetNativeWindow();

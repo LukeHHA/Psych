@@ -22,7 +22,7 @@ psych::Expected<psych::Unique<psych::PsychEngine>, psych::errors::EngineError> p
   }
 
   // If building as an editor why would you not push the overlay?
-  if (app->GetConfig().GetPsychEngineSpec().EnableEditorUI) {
+  if (app->GetConfig().EnableEditorUI) {
     app->PushOverlay(psych::CreateUnique<psych::EditorLayer>());
   }
   return std::move(app);

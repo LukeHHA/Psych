@@ -133,5 +133,6 @@ Expected<void, errors::SerializationError> PsychEngineConfig::TryDeserialize()
 }
 
 const PsychEngineSpecification& PsychEngineConfig::GetPsychEngineSpec() const { return m_EngineSpec_; }
+PsychEngineSpecification& PsychEngineConfig::GetPsychEngineSpec() { return m_EngineSpec_; }
 
 } // namespace psych

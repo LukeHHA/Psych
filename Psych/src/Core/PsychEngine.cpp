@@ -28,6 +28,7 @@
 /**************************************************************************/
 
 #include "PsychEngine.h"
+#include "Config/DefaultConfig.h"
 #include "Core/Core.h"
 #include "Debug/Assert.h"
 #include "Debug/Instrumentor.h"
@@ -179,7 +180,7 @@ void PsychEngine::Run()
 
     Renderer::EndScene();
 
-    if (GetEngineSpecification().EnableEditorUI) {
+    if (PsychEngineSpecification().EnableEditorUI) {
       Renderer::Clear();
       ImGuiLayer::Begin();
 
@@ -220,13 +221,17 @@ void PsychEngine::PushOverlay(std::unique_ptr<Layer> layer)
   m_LayerStack->PushOverlay(std::move(layer));
 }
 
-const PsychEngineConfig& PsychEngine::GetConfig() const
+const PsychEngineSpecification& PsychEngine::GetConfig() const
 {
   CORE_ASSERT(s_Application, "PsychEngine does not exist yet");
-  return m_Config;
+  return m_Config.GetPsychEngineSpec();
 }
 
-const PsychEngineSpecification& PsychEngine::GetEngineSpecification() const { return GetConfig().GetPsychEngineSpec(); }
+PsychEngineSpecification& PsychEngine::GetConfig()
+{
+  CORE_ASSERT(s_Application, "PsychEngine does not exist yet");
+  return m_Config.GetPsychEngineSpec();
+}
 
 const FontManager& PsychEngine::GetFontLibrary() const { return m_FontLibrary_; }
 
