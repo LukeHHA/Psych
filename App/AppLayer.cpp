@@ -1,6 +1,8 @@
 #include "AppLayer.h"
-#include "Psych/Core/Core.h"
-#include "Psych/Core/Renderer.h"
+#include "Core/Core.h"
+#include "Debug/Instrumentor.h"
+#include "Renderer/Buffer.h"
+#include "Renderer/RendererAPI.h"
 
 AppLayer::AppLayer() : psych::Layer("AppLayer") { CORE_PROFILE_FUNCTION(); }
 
@@ -11,7 +13,10 @@ void AppLayer::OnUpdate(float ts)
   CORE_PROFILE_FUNCTION();
 
   auto renderer = psych::RendererAPI::Create();
-  renderer->DrawIndexed(m_VertexArray, 6);
+  if (!renderer) {
+    return;
+  }
+  renderer.value()->DrawIndexed(m_VertexArray, 6);
 }
 void AppLayer::OnEvent(psych::Event& event) { CORE_PROFILE_FUNCTION(); }
 
@@ -20,9 +25,12 @@ void AppLayer::OnRender() { CORE_PROFILE_FUNCTION(); }
 void AppLayer::OnAttach()
 {
   CORE_PROFILE_FUNCTION();
-  const auto shader = psych::Shader::Create("data/Shaders/vertex.glsl", "data/Shaders/fragment.glsl", "TestShader");
-
-  shader->Bind();
+  auto shader = psych::Shader::Create("data/Shaders/vertex.glsl", "data/Shaders/fragment.glsl", "TestShader");
+  if (!shader) {
+    return;
+  }
+  m_Shader = std::move(shader.value());
+  m_Shader->Bind();
   static const float s_TriangleVertices[] = {
       // pos xyz         // color rgb
       0.5f,  0.5f,  0.0f, 0.5f, 0.6f, 0.1f, // 0 top right

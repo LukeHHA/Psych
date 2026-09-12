@@ -1,7 +1,37 @@
+
+/**************************************************************************/
+/*  ImguiLayer.cpp                                                        */
+/**************************************************************************/
+/*                         This file is part of:                          */
+/*                             PSYCH ENGINE                               */
+/**************************************************************************/
+/* Copyright (c)  Luke Howe                                               */
+/*                                                                        */
+/* Permission is hereby granted, free of charge, to any person obtaining  */
+/* a copy of this software and associated documentation files (the        */
+/* "Software"), to deal in the Software without restriction, including    */
+/* without limitation the rights to use, copy, modify, merge, publish,    */
+/* distribute, sublicense, and/or sell copies of the Software, and to     */
+/* permit persons to whom the Software is furnished to do so, subject to  */
+/* the following conditions:                                              */
+/*                                                                        */
+/* The above copyright notice and this permission notice shall be         */
+/* included in all copies or substantial portions of the Software.        */
+/*                                                                        */
+/* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,        */
+/* EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF     */
+/* MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. */
+/* IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY   */
+/* CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,   */
+/* TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE      */
+/* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                 */
+/**************************************************************************/
+
 #include "ImguiLayer.h"
 #include "Core/PsychEngine.h"
 #include "Debug/Instrumentor.h"
-#include "FileSystem/EngineFilesystem.h"
+#include "FileSystem/EnginePath.h"
+#include "FileSystem/FileSystem.h"
 #include "imgui/imgui.h"
 #include <limits>
 #include <string>
@@ -99,7 +129,7 @@ void ImGuiLayer::ConfigureEditorUIRuntime()
   }
 
   if (m_EditorSpec_.ImGuiINIPath.find("://") != std::string::npos) {
-    const auto iniPath = util::EngineFilesystem::TryResolve(m_EditorSpec_.ImGuiINIPath);
+    const auto iniPath = Filesystem::TryResolve(EnginePath::Path{m_EditorSpec_.ImGuiINIPath});
     if (iniPath) {
       m_EditorSpec_.ImGuiINIPath = iniPath.value().string();
     }
@@ -122,7 +152,7 @@ void ImGuiLayer::OnAttach()
   ImGui::CreateContext();
 
   PsychEngine& app = PsychEngine::Get();
-  m_EditorSpec_    = app.GetConfig().GetPsychEngineSpec().EditorUI;
+  m_EditorSpec_    = app.GetConfig().EditorUI;
   ConfigureEditorUIRuntime();
 
   auto* window = app.GetWindow().GetNativeWindow();
@@ -138,7 +168,7 @@ void ImGuiLayer::OnDetach()
   ImGui_ImplGlfw_Shutdown();
   ImGui::DestroyContext();
 }
-void ImGuiLayer::OnEvent(Event& e) {}
+void ImGuiLayer::OnEvent(Event* e) {}
 
 void ImGuiLayer::Begin()
 {

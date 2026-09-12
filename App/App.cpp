@@ -1,9 +1,9 @@
 #include "AppLayer.h"
 #include "Core/PsychEngine.h"
 
-#define GE_ENTRYPOINT_IMPL
+#define PSYCH_ENTRYPOINT_IMPL
 #include "EntryPoint.h"
-#include "Psych/Core/Core.h"
+#include "Core/Core.h"
 
 class App : public psych::PsychEngine
 {

@@ -1,14 +1,43 @@
+
+/**************************************************************************/
+/*  PsychEngine.cpp                                                       */
+/**************************************************************************/
+/*                         This file is part of:                          */
+/*                             PSYCH ENGINE                               */
+/**************************************************************************/
+/* Copyright (c)  Luke Howe                                               */
+/*                                                                        */
+/* Permission is hereby granted, free of charge, to any person obtaining  */
+/* a copy of this software and associated documentation files (the        */
+/* "Software"), to deal in the Software without restriction, including    */
+/* without limitation the rights to use, copy, modify, merge, publish,    */
+/* distribute, sublicense, and/or sell copies of the Software, and to     */
+/* permit persons to whom the Software is furnished to do so, subject to  */
+/* the following conditions:                                              */
+/*                                                                        */
+/* The above copyright notice and this permission notice shall be         */
+/* included in all copies or substantial portions of the Software.        */
+/*                                                                        */
+/* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,        */
+/* EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF     */
+/* MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. */
+/* IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY   */
+/* CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,   */
+/* TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE      */
+/* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                 */
+/**************************************************************************/
+
 #include "PsychEngine.h"
+#include "Config/DefaultConfig.h"
 #include "Core/Core.h"
 #include "Debug/Assert.h"
 #include "Debug/Instrumentor.h"
-#include "FileSystem/EngineFilesystem.h"
 #include "Fonts/FontManager.h"
 #include "Imgui/ImguiLayer.h"
+#include "OS/OS.h"
 #include "Renderer/Renderer.h"
 #include "Util/Time.h"
 
-#include <filesystem>
 #include <utility>
 
 namespace psych
@@ -18,7 +47,7 @@ PsychEngine* PsychEngine::s_Application = nullptr;
 
 PsychEngine::PsychEngine()
 {
-  CORE_LOG_INFO("Game engine startup");
+  CORE_LOG_INFO("Psych engine startup");
   CORE_ASSERT(!s_Application, "Application already exists")
   s_Application = this;
 }
@@ -36,19 +65,7 @@ Expected<void, errors::EngineError> PsychEngine::Init()
   if (!configResult) {
     return Unexpected(errors::EngineError::PsychEngineInitializationFailed);
   }
-  auto spec = m_Config.GetPsychEngineSpec();
-
-  std::error_code resourcePathError;
-  const auto resourcePath = std::filesystem::current_path(resourcePathError);
-  if (resourcePathError) {
-    return Unexpected(errors::EngineError::PsychEngineInitializationFailed);
-  }
-
-  const auto projectResult = m_ProjectManager_.Init(m_PathResolver_);
-  if (!projectResult) {
-    return Unexpected(errors::EngineError::PsychEngineInitializationFailed);
-  }
-  util::EngineFilesystem::Init(m_PathResolver_);
+  auto spec    = m_Config.GetPsychEngineSpec();
 
   m_LayerStack = CreateUnique<LayerStack>();
 
@@ -105,13 +122,8 @@ Expected<void, errors::EngineError> PsychEngine::Shutdown()
   Renderer::Shutdown();
   m_Window.reset();
 
-  m_Initialized            = false;
-  s_Application            = nullptr;
-  const auto projectResult = m_ProjectManager_.Shutdown(m_PathResolver_);
-  util::EngineFilesystem::Shutdown();
-  if (!projectResult) {
-    return Unexpected(errors::EngineError::PsychEngineInitializationFailed);
-  }
+  m_Initialized           = false;
+  s_Application           = nullptr;
 
   const auto configResult = m_Config.Shutdown();
   if (!configResult) {
@@ -131,7 +143,11 @@ void PsychEngine::HandleEvents()
     case EventType::WindowClose:
       m_Running = false;
     }
-    m_Window->HandleEvents(std::move(event));
+    m_Window->HandleEvents(event.get());
+
+    for (const auto& layer : Layers()) {
+      layer->OnEvent(event.get());
+    }
   }
 }
 
@@ -164,7 +180,7 @@ void PsychEngine::Run()
 
     Renderer::EndScene();
 
-    if (GetEngineSpecification().EnableEditorUI) {
+    if (PsychEngineSpecification().EnableEditorUI) {
       Renderer::Clear();
       ImGuiLayer::Begin();
 
@@ -205,17 +221,17 @@ void PsychEngine::PushOverlay(std::unique_ptr<Layer> layer)
   m_LayerStack->PushOverlay(std::move(layer));
 }
 
-const PsychEngineConfig& PsychEngine::GetConfig() const
+const PsychEngineSpecification& PsychEngine::GetConfig() const
 {
   CORE_ASSERT(s_Application, "PsychEngine does not exist yet");
-  return m_Config;
+  return m_Config.GetPsychEngineSpec();
 }
 
-const PsychEngineSpecification& PsychEngine::GetEngineSpecification() const { return GetConfig().GetPsychEngineSpec(); }
-
-ProjectManager& PsychEngine::GetProjectManager() { return m_ProjectManager_; }
-
-const ProjectManager& PsychEngine::GetProjectManager() const { return m_ProjectManager_; }
+PsychEngineSpecification& PsychEngine::GetConfig()
+{
+  CORE_ASSERT(s_Application, "PsychEngine does not exist yet");
+  return m_Config.GetPsychEngineSpec();
+}
 
 const FontManager& PsychEngine::GetFontLibrary() const { return m_FontLibrary_; }
 

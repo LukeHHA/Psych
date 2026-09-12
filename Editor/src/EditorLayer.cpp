@@ -1,16 +1,15 @@
 #include "EditorLayer.h"
-#include "Core/PsychEngine.h"
+#include "Core/Core.h"
+#include "Debug/Assert.h"
 #include "Debug/Instrumentor.h"
-#include "FileSystem/EngineFilesystem.h"
-#include "Renderer/Buffer.h"
-#include "Renderer/RendererAPI.h"
-#include "Renderer/VertexArray.h"
+#include "FileSystem/FileSystem.h"
+#include "Logging/Logging.h"
 #include "UI/Modules/EditorMenuBar.h"
 #include "UI/Modules/FileViewer.h"
 #include "UI/Modules/MainFileTree.h"
+#include "UI/Modules/PopupModal.h"
+#include "UI/Modules/Viewport.h"
 #include "Util/Time.h"
-#include "imgui/imgui.h"
-#include <cstdint>
 #include <glm/ext/matrix_clip_space.hpp>
 #include <glm/ext/matrix_transform.hpp>
 
@@ -23,54 +22,40 @@ void EditorLayer::OnAttach()
   CORE_PROFILE_FUNCTION();
   CORE_LOG_INFO("EditorLayer Attached");
 
-  static const float cubeVertices[] = {
-      // position           // color
-      -0.5f, -0.5f, -0.5f, 1.0f, 0.1f, 0.1f, 0.5f, -0.5f, -0.5f, 0.1f, 1.0f, 0.1f, 0.5f, 0.5f, -0.5f, 0.1f, 0.4f, 1.0f, -0.5f, 0.5f, -0.5f, 1.0f, 0.9f, 0.1f,
-      -0.5f, -0.5f, 0.5f,  1.0f, 0.1f, 0.8f, 0.5f, -0.5f, 0.5f,  0.1f, 1.0f, 0.9f, 0.5f, 0.5f, 0.5f,  0.9f, 0.4f, 1.0f, -0.5f, 0.5f, 0.5f,  1.0f, 0.5f, 0.1f,
-  };
+  auto pm_result = m_ProjectManager_.Init();
+  CORE_ASSERT(pm_result, "Failed to initialise project manager")
 
-  static const uint32_t cubeIndices[] = {
-      0, 1, 2, 2, 3, 0, // back
-      4, 5, 6, 6, 7, 4, // front
-      4, 0, 3, 3, 7, 4, // left
-      1, 5, 6, 6, 2, 1, // right
-      3, 2, 6, 6, 7, 3, // top
-      4, 5, 1, 1, 0, 4  // bottom
-  };
+  m_PanelManager_.AddPanel<ui::EditorMenuBarPanel>();
 
-  auto vertexBuffer = VertexBuffer::Create(cubeVertices, sizeof(cubeVertices));
-  vertexBuffer->SetLayout(VertexFormatID::PC);
+  auto* fileTree = m_PanelManager_.AddPanel<ui::MainFileTreePanel>();
+  fileTree->SetSelectedCallbackFn([this](const EnginePath::Path& path) { OpenFile(path); });
 
-  auto indexBuffer   = IndexBuffer::Create(cubeIndices, 36);
-
-  m_CubeVertexArray_ = VertexArray::Create();
-  m_CubeVertexArray_->AddVertexBuffer(vertexBuffer);
-  m_CubeVertexArray_->AddIndexBuffer(indexBuffer);
-
-  auto shaderResult = Shader::Create("engine://Editor/Assets/Shaders/editor_cube.vert.glsl", "engine://Editor/Assets/Shaders/editor_cube.frag.glsl", "EditorCube");
-  if (!shaderResult) {
-    CORE_LOG_ERROR("Failed to create editor cube shader");
-  } else {
-    m_CubeShader_ = shaderResult.value();
-  }
-
-  auto rendererAPI = RendererAPI::Create();
-  if (!rendererAPI) {
-    CORE_LOG_ERROR("Failed to create editor renderer API");
-  } else {
-    m_RendererAPI_ = std::move(rendererAPI.value());
-  }
+  m_PanelManager_.AddPanel<ui::FileViewerPanel>();
+  m_PanelManager_.AddPanel<ui::ViewportPanel>();
+  m_ProjectWindowPanel_ = ui::ProjectWindowPanel::Create();
+  m_ProjectWindowPanel_->SetProjectSelectedCallbackFn([this](const std::filesystem::path& path) { return OpenProject(path); });
 }
 
 void EditorLayer::OnDetach()
 {
-  m_RendererAPI_.reset();
-  m_CubeShader_.reset();
-  m_CubeVertexArray_.reset();
+  m_ProjectWindowPanel_.reset();
+  auto pm_result = m_ProjectManager_.Shutdown();
+  CORE_ASSERT(pm_result, "Project manager failed to shutdown")
 }
 
-void EditorLayer::OnEvent(Event& e)
+void EditorLayer::OnEvent(Event* e)
 {
+  if (e->GetEventType() == EventType::OpenProjectWindow) {
+    m_ShowNewProjectWindow_ = true;
+    CORE_LOG_INFO("Project event was handled");
+  }
+
+  if (m_ShowNewProjectWindow_ && m_ProjectWindowPanel_ != nullptr) {
+    m_ProjectWindowPanel_->OnEvent(e);
+  } else {
+    m_PanelManager_.OnEvent(e);
+  }
+
   // if (m_BlockEvents) {
   //   ImGuiIO& io = ImGui::GetIO();
   //   e.Handled |= e.IsInCategory(EventCategoryMouse) & io.WantCaptureMouse;
@@ -85,71 +70,70 @@ void EditorLayer::End() { CORE_PROFILE_FUNCTION(); }
 
 void EditorLayer::OnImGuiRender()
 {
-  ui::MainMenuBar();
-
-  static std::unique_ptr<util::FileNode> FileTree;
-
-  if (!FileTree) {
-    auto fileTreeResult = util::EngineFilesystem::TryCreateDirectoryTree("assets://");
-    if (!fileTreeResult) {
-      CORE_LOG_ERROR("Failed to create editor file tree");
-    } else {
-      FileTree = std::move(fileTreeResult.value());
-    }
+  if (m_ShowNewProjectWindow_ && m_ProjectWindowPanel_ != nullptr) {
+    m_ProjectWindowPanel_->OnImGuiRender();
+  } else {
+    m_PanelManager_.OnImGuiRender();
   }
-
-  if (ImGui::Begin("File Tree")) {
-    ui::MainFileTree(FileTree.get());
-  }
-  ImGui::End();
-
-  ImGuiWindowFlags viewportWindowFlags = 0;
-  viewportWindowFlags |= ImGuiWindowFlags_NoScrollbar;
-  viewportWindowFlags |= ImGuiWindowFlags_NoScrollWithMouse;
-  viewportWindowFlags |= ImGuiWindowFlags_HorizontalScrollbar;
-
-  if (ImGui::Begin("Viewport", nullptr, viewportWindowFlags)) {
-    ImVec2 viewportSize = ImGui::GetContentRegionAvail();
-
-    if (viewportSize.x > 0.0f && viewportSize.y > 0.0f) {
-      auto& framebuffer         = PsychEngine::Get().GetFramebuffer();
-
-      const auto viewportWidth  = static_cast<uint32_t>(viewportSize.x);
-      const auto viewportHeight = static_cast<uint32_t>(viewportSize.y);
-
-      if (viewportWidth != m_ViewportWidth_ || viewportHeight != m_ViewportHeight_) {
-        framebuffer.Resize(viewportWidth, viewportHeight);
-        m_ViewportWidth_  = viewportWidth;
-        m_ViewportHeight_ = viewportHeight;
-      }
-
-      const auto framebufferTexture = static_cast<ImTextureID>(framebuffer.GetColorAttachmentID());
-
-      ImGui::Image(framebufferTexture, viewportSize, ImVec2(0.0f, 1.0f), ImVec2(1.0f, 0.0f));
-    }
-  }
-  ImGui::End();
-
-  ui::FileViewer("./data/config.xml");
 }
 
-void EditorLayer::OnRender()
+void EditorLayer::OnRender() {}
+
+void EditorLayer::OnUpdate(float ts)
 {
-  if (!m_CubeVertexArray_ || !m_CubeShader_ || !m_RendererAPI_) {
-    return;
+  if (m_ShowNewProjectWindow_ && m_ProjectWindowPanel_ != nullptr) {
+    m_ProjectWindowPanel_->OnUpdate();
+  } else {
+    m_PanelManager_.OnUpdate();
   }
-
-  const float aspect         = m_ViewportHeight_ > 0 ? static_cast<float>(m_ViewportWidth_) / static_cast<float>(m_ViewportHeight_) : 16.0f / 9.0f;
-
-  const glm::mat4 projection = glm::perspective(glm::radians(45.0f), aspect, 0.1f, 100.0f);
-  const glm::mat4 view       = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -3.0f));
-  const glm::mat4 model      = glm::rotate(glm::mat4(1.0f), m_CubeRotation_, glm::normalize(glm::vec3(0.4f, 1.0f, 0.2f)));
-
-  m_CubeShader_->Bind();
-  m_CubeShader_->SetMat4("u_MVP", projection * view * model);
-  m_RendererAPI_->DrawIndexed(m_CubeVertexArray_, 36);
 }
 
-void EditorLayer::OnUpdate(float ts) { m_CubeRotation_ += Time::DeltaTime(); }
+void EditorLayer::OpenFile(const EnginePath::Path& path)
+{
+  auto* fileViewer = m_PanelManager_.GetPanel<ui::FileViewerPanel>();
+  if (fileViewer != nullptr) {
+    fileViewer->SetFilePath(path);
+  }
+}
+
+bool EditorLayer::OpenProject(const std::filesystem::path& path)
+{
+  if (!Filesystem::DirExists(path)) {
+    CORE_LOG_ERROR("Project path is not a directory: {}", path.string());
+    return false;
+  }
+
+  if (!Filesystem::FileExists(path / "project.xml")) {
+    ui::PopupModal("Create new project?");
+  }
+
+  const auto projectResult = m_ProjectManager_.OpenProject(path);
+  if (!projectResult) {
+    CORE_LOG_ERROR("Failed to open project: {}", path.string());
+    return false;
+  }
+
+  const auto assetRoot = m_ProjectManager_.GetActiveProject().GetAssetRootPath();
+  auto fileTreeResult  = Filesystem::TryCreateDirectoryTree(assetRoot);
+  if (!fileTreeResult) {
+    CORE_LOG_ERROR("Failed to open project asset directory: {}", assetRoot.string());
+    return false;
+  }
+
+  auto* fileTree = m_PanelManager_.GetPanel<ui::MainFileTreePanel>();
+  if (fileTree == nullptr) {
+    CORE_LOG_ERROR("Failed to find the project file tree panel");
+    return false;
+  }
+
+  // TODO: Consider moving the whole file tree root into the filetree panel
+  //  makes more sense for the filetree to own that knowledge
+  m_FileTreeRoot_ = std::move(fileTreeResult.value());
+  fileTree->SetRootNode(m_FileTreeRoot_.get());
+  m_ShowNewProjectWindow_ = false;
+
+  CORE_LOG_INFO("Opened project directory: {}", path.string());
+  return true;
+}
 
 } // namespace psych

@@ -1,3 +1,32 @@
+ 
+/**************************************************************************/
+/*  CoreFilesystemAPI.cpp                                                 */                                                            
+/**************************************************************************/
+/*                         This file is part of:                          */
+/*                             PSYCH ENGINE                               */
+/**************************************************************************/
+/* Copyright (c)  Luke Howe                                               */                                                  
+/*                                                                        */
+/* Permission is hereby granted, free of charge, to any person obtaining  */
+/* a copy of this software and associated documentation files (the        */
+/* "Software"), to deal in the Software without restriction, including    */
+/* without limitation the rights to use, copy, modify, merge, publish,    */
+/* distribute, sublicense, and/or sell copies of the Software, and to     */
+/* permit persons to whom the Software is furnished to do so, subject to  */
+/* the following conditions:                                              */
+/*                                                                        */
+/* The above copyright notice and this permission notice shall be         */
+/* included in all copies or substantial portions of the Software.        */
+/*                                                                        */
+/* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,        */
+/* EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF     */
+/* MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. */
+/* IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY   */
+/* CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,   */
+/* TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE      */
+/* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                 */
+/**************************************************************************/
+
 #include "CoreFilesystemAPI.h"
 #include "Debug/Assert.h"
 #include "FileSystem/OSFilesystemAPI.h"
@@ -85,7 +114,7 @@ Expected<void, errors::FilesystemError> CoreFilesystemAPI::TryDeleteFile(const s
 
 bool CoreFilesystemAPI::CreateFile(const std::filesystem::path& path) { return static_cast<bool>(TryCreateFile(path)); }
 
-Expected<void, errors::FilesystemError> CoreFilesystemAPI::TryCreateFile(const FilePath& path)
+Expected<void, errors::FilesystemError> CoreFilesystemAPI::TryCreateFile(const std::filesystem::path& path)
 {
   if (path.empty()) {
     return Unexpected(errors::FilesystemError::InvalidPath);
@@ -170,13 +199,43 @@ Expected<std::string, errors::FilesystemError> CoreFilesystemAPI::TryReadFile(co
   return contents.str();
 }
 
-bool CoreFilesystemAPI::CreateDir(const DirPath& path) { return std::filesystem::create_directory(path); }
+Expected<void, errors::FilesystemError> CoreFilesystemAPI::TryWriteFile(const std::filesystem::path& path, const std::string_view contents)
+{
+  if (path.empty()) {
+    return Unexpected(errors::FilesystemError::InvalidPath);
+  }
 
-bool CoreFilesystemAPI::CreateDirWithParentPerms(const DirPath& path, const DirPath& parent_path) { return std::filesystem::create_directory(path, parent_path); }
+  const auto parent = path.parent_path();
+  if (!parent.empty()) {
+    const auto parentResult = TryCreateDirs(parent);
+    if (!parentResult) {
+      return Unexpected(parentResult.error());
+    }
+  }
 
-bool CoreFilesystemAPI::CreateDirs(const DirPath& path) { return static_cast<bool>(TryCreateDirs(path)); }
+  std::ofstream file(path, std::ios::binary | std::ios::trunc);
+  if (!file) {
+    return Unexpected(errors::FilesystemError::WriteFailed);
+  }
 
-Expected<void, errors::FilesystemError> CoreFilesystemAPI::TryCreateDirs(const DirPath& path)
+  file.write(contents.data(), static_cast<std::streamsize>(contents.size()));
+  if (!file) {
+    return Unexpected(errors::FilesystemError::WriteFailed);
+  }
+
+  return {};
+}
+
+bool CoreFilesystemAPI::CreateDir(const std::filesystem::path& path) { return std::filesystem::create_directory(path); }
+
+bool CoreFilesystemAPI::CreateDirWithParentPerms(const std::filesystem::path& path, const std::filesystem::path& parent_path)
+{
+  return std::filesystem::create_directory(path, parent_path);
+}
+
+bool CoreFilesystemAPI::CreateDirs(const std::filesystem::path& path) { return static_cast<bool>(TryCreateDirs(path)); }
+
+Expected<void, errors::FilesystemError> CoreFilesystemAPI::TryCreateDirs(const std::filesystem::path& path)
 {
   if (path.empty()) {
     return Unexpected(errors::FilesystemError::InvalidPath);
@@ -207,6 +266,6 @@ Expected<void, errors::FilesystemError> CoreFilesystemAPI::TryCreateDirs(const D
   return {};
 }
 
-bool CoreFilesystemAPI::CreateDirsWithParentPerms(const DirPath& path) { return std::filesystem::create_directories(path); }
+bool CoreFilesystemAPI::CreateDirsWithParentPerms(const std::filesystem::path& path) { return std::filesystem::create_directories(path); }
 
 } // namespace psych

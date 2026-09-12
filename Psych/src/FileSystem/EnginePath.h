@@ -1,3 +1,32 @@
+
+/**************************************************************************/
+/*  EnginePath.h                                                          */
+/**************************************************************************/
+/*                         This file is part of:                          */
+/*                             PSYCH ENGINE                               */
+/**************************************************************************/
+/* Copyright (c)  Luke Howe                                               */
+/*                                                                        */
+/* Permission is hereby granted, free of charge, to any person obtaining  */
+/* a copy of this software and associated documentation files (the        */
+/* "Software"), to deal in the Software without restriction, including    */
+/* without limitation the rights to use, copy, modify, merge, publish,    */
+/* distribute, sublicense, and/or sell copies of the Software, and to     */
+/* permit persons to whom the Software is furnished to do so, subject to  */
+/* the following conditions:                                              */
+/*                                                                        */
+/* The above copyright notice and this permission notice shall be         */
+/* included in all copies or substantial portions of the Software.        */
+/*                                                                        */
+/* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,        */
+/* EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF     */
+/* MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. */
+/* IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY   */
+/* CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,   */
+/* TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE      */
+/* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                 */
+/**************************************************************************/
+
 #pragma once
 
 #include "Debug/Assert.h"
@@ -12,7 +41,7 @@
 namespace psych::EnginePath
 {
 
-enum class Schema : std::uint8_t { None = 0, Config, Cache, Engine };
+enum class Schema : std::uint8_t { None = 0, Config, Cache, Engine, Project };
 
 [[nodiscard]] inline std::string_view SchemaToString(const Schema schema)
 {
@@ -25,6 +54,9 @@ enum class Schema : std::uint8_t { None = 0, Config, Cache, Engine };
 
   case Schema::Engine:
     return "engine://";
+
+  case Schema::Project:
+    return "proj://";
 
   case Schema::None:
     break;
@@ -64,6 +96,10 @@ enum class Schema : std::uint8_t { None = 0, Config, Cache, Engine };
     return Schema::Engine;
   }
 
+  if (SchemaEquals(schema, "proj://")) {
+    return Schema::Project;
+  }
+
   return Schema::None;
 }
 
@@ -81,6 +117,12 @@ public:
 
   explicit Path(const std::string& path) { Convert(path); }
 
+  Path& operator=(const std::string& path)
+  {
+    Convert(path);
+    return *this;
+  }
+
   // Keep malformed user-provided engine paths representable so higher-level Try*
   // APIs can return errors instead of asserting during parsing.
   [[nodiscard]] bool IsValid() const { return m_IsValid; }
@@ -89,13 +131,19 @@ public:
 
   [[nodiscard]] const std::filesystem::path& GetRelativePath() const { return m_RelativePath; }
 
-  [[nodiscard]] std::string ToString() const { return std::string{SchemaToString(m_Schema)} + m_RelativePath.string(); }
+  [[nodiscard]] std::string string() const { return std::string{SchemaToString(m_Schema)} + m_RelativePath.generic_string(); }
 
-  explicit operator std::string() const { return ToString(); }
+  void append(const std::string& path) { m_RelativePath.append(path); }
+
+  explicit operator std::string() const { return string(); }
 
 private:
   void Convert(const std::string_view path)
   {
+    m_RelativePath.clear();
+    m_Schema              = Schema::None;
+    m_IsValid             = false;
+
     const auto schema_end = path.find("://");
 
     if (schema_end == std::string_view::npos) {
@@ -108,13 +156,18 @@ private:
       return;
     }
 
-    const std::string_view relative_path = path.substr(schema_end + 3);
-
-    if (relative_path.find("..") != std::string_view::npos) {
+    const std::filesystem::path relative_path{path.substr(schema_end + 3)};
+    if (relative_path.is_absolute() || relative_path.has_root_name() || relative_path.has_root_directory()) {
       return;
     }
 
-    m_RelativePath = std::filesystem::path{relative_path};
+    for (const auto& component : relative_path) {
+      if (component == "..") {
+        return;
+      }
+    }
+
+    m_RelativePath = relative_path.lexically_normal();
     m_IsValid      = true;
   }
 

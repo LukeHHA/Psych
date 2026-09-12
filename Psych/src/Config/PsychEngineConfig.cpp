@@ -1,3 +1,32 @@
+
+/**************************************************************************/
+/*  PsychEngineConfig.cpp                                                 */
+/**************************************************************************/
+/*                         This file is part of:                          */
+/*                             PSYCH ENGINE                               */
+/**************************************************************************/
+/* Copyright (c)  Luke Howe                                               */
+/*                                                                        */
+/* Permission is hereby granted, free of charge, to any person obtaining  */
+/* a copy of this software and associated documentation files (the        */
+/* "Software"), to deal in the Software without restriction, including    */
+/* without limitation the rights to use, copy, modify, merge, publish,    */
+/* distribute, sublicense, and/or sell copies of the Software, and to     */
+/* permit persons to whom the Software is furnished to do so, subject to  */
+/* the following conditions:                                              */
+/*                                                                        */
+/* The above copyright notice and this permission notice shall be         */
+/* included in all copies or substantial portions of the Software.        */
+/*                                                                        */
+/* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,        */
+/* EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF     */
+/* MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. */
+/* IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY   */
+/* CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,   */
+/* TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE      */
+/* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                 */
+/**************************************************************************/
+
 #include "PsychEngineConfig.h"
 
 #include "Debug/Assert.h"
@@ -35,7 +64,7 @@ Expected<void, errors::SerializationError> PsychEngineConfig::TrySerialize() con
 {
   CORE_PROFILE_FUNCTION();
 
-  const auto baseConfigPath = util::Filesystem::TryGetBaseConfigPath();
+  const auto baseConfigPath = Filesystem::TryGetBaseConfigPath();
   if (!baseConfigPath) {
     CORE_ASSERT(false, "Failed to get config path")
     return Unexpected(errors::SerializationError::SerializationFailed);
@@ -67,7 +96,7 @@ Expected<void, errors::SerializationError> PsychEngineConfig::TryDeserialize()
     return {};
   }
 
-  const auto baseConfigPath = util::Filesystem::TryGetBaseConfigPath();
+  const auto baseConfigPath = Filesystem::TryGetBaseConfigPath();
   if (!baseConfigPath) {
     /// Could assert on baseConfigPath itself but the future intent is to not assert
     CORE_ASSERT(false, "Failed to get config path")
@@ -75,7 +104,7 @@ Expected<void, errors::SerializationError> PsychEngineConfig::TryDeserialize()
   }
   const auto configPath = baseConfigPath.value() / s_ConfigFileName_;
 
-  if (!util::Filesystem::FileExists(configPath)) {
+  if (!Filesystem::FileExists(configPath)) {
     const auto res = TrySerialize();
     if (!res) {
       CORE_ASSERT(false, "Failed to create config file on disk")
@@ -95,7 +124,7 @@ Expected<void, errors::SerializationError> PsychEngineConfig::TryDeserialize()
     cereal::XMLInputArchive archive(stream);
     archive(cereal::make_nvp("PsychEngineSpecification", m_EngineSpec_));
   } catch (const cereal::Exception&) {
-    CORE_ASSERT(false, "Failed to deserialize config")
+    CORE_ASSERT(false, "Failed to deserialize config - Config may be corrupt!")
     return Unexpected(errors::SerializationError::DeserializationFailed);
   }
 
@@ -104,5 +133,6 @@ Expected<void, errors::SerializationError> PsychEngineConfig::TryDeserialize()
 }
 
 const PsychEngineSpecification& PsychEngineConfig::GetPsychEngineSpec() const { return m_EngineSpec_; }
+PsychEngineSpecification& PsychEngineConfig::GetPsychEngineSpec() { return m_EngineSpec_; }
 
 } // namespace psych

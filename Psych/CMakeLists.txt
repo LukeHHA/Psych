@@ -30,10 +30,11 @@ set(SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/Window/HeadlessWindow.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/Events/EventHandler.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/Events/EventQueue.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/FileSystem/EngineFilesystem.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/FileSystem/FileSystem.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/FileSystem/PathResolver.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/FileSystem/CoreFilesystemAPI.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/OS/OS.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/OS/OSAPI.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/Imgui/ImguiLayer.cpp
 )
 
@@ -88,6 +89,7 @@ if(APPLE)
   target_sources(PsychEngine PRIVATE
         src/FileSystem/Platform/MacOSFilesystemAPI.cpp
         src/FileSystem/Platform/MacOSFilesystem.mm
+        src/OS/Platform/MacOS/MacOSAPI.mm
     )
 
   target_link_libraries(PsychEngine PUBLIC
@@ -103,6 +105,7 @@ elseif(UNIX AND NOT APPLE)
 
   target_sources(PsychEngine PRIVATE
         src/FileSystem/Platform/LinuxFilesystemAPI.cpp
+        src/OS/Platform/Linux/LinuxOSAPI.cpp
     )
 
   # target_link_libraries(PsychEngine PUBLIC OpenGL::GL Threads::Threads)
@@ -142,6 +145,7 @@ endif()
 set(ASSIMP_BUILD_ASSIMP_TOOLS OFF CACHE BOOL "" FORCE)
 set(ASSIMP_BUILD_SAMPLES OFF CACHE BOOL "" FORCE)
 set(ASSIMP_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+set(ASSIMP_BUILD_MINIZIP ON CACHE BOOL "Use Assimp's bundled minizip" FORCE)
 set(ASSIMP_INSTALL OFF CACHE BOOL "" FORCE)
 set(ASSIMP_WARNINGS_AS_ERRORS OFF CACHE BOOL "" FORCE)
 set(PUGIXML_BUILD_TESTS OFF CACHE BOOL "" FORCE)
@@ -156,12 +160,26 @@ add_subdirectory(Vendor/glfw-3.4 EXCLUDE_FROM_ALL)
 add_subdirectory(Vendor/pugixml EXCLUDE_FROM_ALL)
 add_subdirectory(Vendor/assimp EXCLUDE_FROM_ALL)
 add_subdirectory(Vendor/glm EXCLUDE_FROM_ALL)
+add_subdirectory(Vendor/json EXCLUDE_FROM_ALL)
 # add_subdirectory(Vendor/cereal EXCLUDE_FROM_ALL)
 
 add_library(PsychEngineImgui OBJECT)
 target_sources(PsychEngineImgui PRIVATE ${IMGUI_SOURCES})
 target_compile_features(PsychEngineImgui PRIVATE cxx_std_20)
 set_target_properties(PsychEngineImgui PROPERTIES CXX_EXTENSIONS OFF)
+
+foreach(PSYCH_ENGINE_VENDOR_TARGET IN ITEMS
+    spdlog
+    glad
+    glfw
+    pugixml-static
+    assimp
+    PsychEngineImgui
+)
+  set_target_properties(${PSYCH_ENGINE_VENDOR_TARGET} PROPERTIES
+    EXPORT_COMPILE_COMMANDS OFF
+  )
+endforeach()
 
 target_link_libraries(PsychEngineImgui PRIVATE
   glad
@@ -203,13 +221,13 @@ target_include_directories(PsychEngine SYSTEM PUBLIC
 )
 
 if(PSYCH_ENGINE_BUILD_TESTS)
-  target_compile_definitions(PsychEngine PRIVATE GE_TESTS_ENABLED)
+  target_compile_definitions(PsychEngine PRIVATE PSYCH_TESTS_ENABLED)
 endif()
 
 target_compile_definitions(PsychEngine
   PUBLIC
-    $<$<BOOL:${PSYCH_ENABLE_ASSERTS}>:GE_ENABLE_ASSERTS>
-    $<$<BOOL:${PSYCH_ENABLE_PROFILING}>:GE_PROFILE>
+    $<$<BOOL:${PSYCH_ENABLE_ASSERTS}>:PSYCH_ENABLE_ASSERTS>
+    $<$<BOOL:${PSYCH_ENABLE_PROFILING}>:PSYCH_PROFILE>
   PRIVATE
     GL_SILENCE_DEPRECATION
 )

@@ -3,30 +3,44 @@
 #include "Events/Event.h"
 #include "Events/EventHandler.h"
 #include "imgui.h"
+#include <utility>
 
 namespace psych::ui
 {
-void ShowExampleMenuFile()
+Unique<EditorMenuBarPanel> EditorMenuBarPanel::Create() { return CreateUnique<EditorMenuBarPanel>(); }
+
+std::string EditorMenuBarPanel::GetID() { return "EditorMenuBarPanel"; }
+
+void EditorMenuBarPanel::OnImGuiRender() { MainMenuBar(); }
+
+void EditorMenuBarPanel::OnUpdate() {}
+
+void EditorMenuBarPanel::ShowExampleMenuFile()
 {
   if (ImGui::MenuItem("File")) {
   }
-  if (ImGui::MenuItem("Open", "Ctrl+O")) {
-  }
-  if (ImGui::BeginMenu("Open Recent")) {
-    ImGui::MenuItem("fish_hat.c");
-    ImGui::MenuItem("fish_hat.inl");
-    ImGui::MenuItem("fish_hat.h");
-    if (ImGui::BeginMenu("More..")) {
-      ImGui::MenuItem("Hello");
-      ImGui::MenuItem("Sailor");
-      if (ImGui::BeginMenu("Recurse..")) {
-        ShowExampleMenuFile();
-        ImGui::EndMenu();
-      }
-      ImGui::EndMenu();
+  bool open_selected = false;
+  if (ImGui::MenuItem("Open", "Ctrl+O", &open_selected)) {
+    if (open_selected) {
+      auto event = CreateUnique<OpenProjectWindowEvent>();
+      PsychEngine::Get().GetEventHandler().QueueEvent(std::move(event));
     }
-    ImGui::EndMenu();
   }
+  // if (ImGui::BeginMenu("Open Recent")) {
+  //   ImGui::MenuItem("fish_hat.c");
+  //   ImGui::MenuItem("fish_hat.inl");
+  //   ImGui::MenuItem("fish_hat.h");
+  //   if (ImGui::BeginMenu("More..")) {
+  //     ImGui::MenuItem("Hello");
+  //     ImGui::MenuItem("Sailor");
+  //     if (ImGui::BeginMenu("Recurse..")) {
+  //       ShowExampleMenuFile();
+  //       ImGui::EndMenu();
+  //     }
+  //     ImGui::EndMenu();
+  //   }
+  //   ImGui::EndMenu();
+  // }
   if (ImGui::MenuItem("Save", "Ctrl+S")) {
   }
   if (ImGui::MenuItem("Save As..")) {
@@ -34,18 +48,15 @@ void ShowExampleMenuFile()
 
   ImGui::Separator();
   if (ImGui::BeginMenu("Options")) {
-    static bool enabled = true;
-    ImGui::MenuItem("Enabled", "", &enabled);
+    ImGui::MenuItem("Enabled", "", &m_OptionsEnabled_);
     ImGui::BeginChild("child", ImVec2(0, 60), ImGuiChildFlags_Borders);
     for (int i = 0; i < 10; i++) {
       ImGui::Text("Scrolling Text %d", i);
     }
     ImGui::EndChild();
-    static float f = 0.5f;
-    static int n   = 0;
-    ImGui::SliderFloat("Value", &f, 0.0f, 1.0f);
-    ImGui::InputFloat("Input", &f, 0.1f);
-    ImGui::Combo("Combo", &n, "Yes\0No\0Maybe\0\0");
+    ImGui::SliderFloat("Value", &m_OptionValue_, 0.0f, 1.0f);
+    ImGui::InputFloat("Input", &m_OptionValue_, 0.1f);
+    ImGui::Combo("Combo", &m_OptionSelection_, "Yes\0No\0Maybe\0\0");
     ImGui::EndMenu();
   }
 
@@ -68,8 +79,7 @@ void ShowExampleMenuFile()
   // would make senses to use this feature from very different code locations.
   if (ImGui::BeginMenu("Options")) // <-- Append!
   {
-    static bool b = true;
-    ImGui::Checkbox("SomeOption", &b);
+    ImGui::Checkbox("SomeOption", &m_OptionChecked_);
     ImGui::EndMenu();
   }
 
@@ -89,7 +99,7 @@ void ShowExampleMenuFile()
   }
 }
 
-void WindowMenuBar()
+void EditorMenuBarPanel::WindowMenuBar()
 {
   if (ImGui::BeginMenuBar()) {
     if (ImGui::BeginMenu("File")) {
@@ -108,7 +118,7 @@ void WindowMenuBar()
   }
 }
 
-void MainMenuBar()
+void EditorMenuBarPanel::MainMenuBar()
 {
   if (ImGui::BeginMainMenuBar()) {
     if (ImGui::BeginMenu("File")) {

@@ -1,11 +1,38 @@
+
+/**************************************************************************/
+/*  Project.h                                                             */
+/**************************************************************************/
+/*                         This file is part of:                          */
+/*                             PSYCH ENGINE                               */
+/**************************************************************************/
+/* Copyright (c)  Luke Howe                                               */
+/*                                                                        */
+/* Permission is hereby granted, free of charge, to any person obtaining  */
+/* a copy of this software and associated documentation files (the        */
+/* "Software"), to deal in the Software without restriction, including    */
+/* without limitation the rights to use, copy, modify, merge, publish,    */
+/* distribute, sublicense, and/or sell copies of the Software, and to     */
+/* permit persons to whom the Software is furnished to do so, subject to  */
+/* the following conditions:                                              */
+/*                                                                        */
+/* The above copyright notice and this permission notice shall be         */
+/* included in all copies or substantial portions of the Software.        */
+/*                                                                        */
+/* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,        */
+/* EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF     */
+/* MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. */
+/* IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY   */
+/* CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,   */
+/* TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE      */
+/* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                 */
+/**************************************************************************/
+
 #pragma once
 
 #include "Errors/Errors.h"
-#include "FileSystem/FileSystem.h"
+#include "FileSystem/EnginePath.h"
 #include "Project/DefaultProjectConfig.h"
 #include "expected.h"
-
-#include <filesystem>
 
 namespace psych
 {
@@ -13,8 +40,8 @@ class Project
 {
 public:
   Project() = default;
-  explicit Project(util::FilePath rootPath);
-  Project(util::FilePath rootPath, ProjectConfig config);
+  explicit Project(const EnginePath::Path& path);
+  Project(const EnginePath::Path& path, ProjectConfig config);
   Project(Project&&)                 = default;
   Project(const Project&)            = default;
   Project& operator=(Project&&)      = default;
@@ -27,17 +54,17 @@ public:
   [[nodiscard]] Expected<void, errors::ProjectError> TryDeserialize();
 
   [[nodiscard]] const ProjectConfig& GetConfig() const;
-  [[nodiscard]] const util::FilePath& GetRootPath() const;
-  [[nodiscard]] util::FilePath GetAssetRootPath() const;
+  [[nodiscard]] const EnginePath::Path& GetProjectPath() const;
+  [[nodiscard]] EnginePath::Path GetAssetRootPath() const;
 
 private:
-  [[nodiscard]] util::FilePath GetConfigPath() const;
+  [[nodiscard]] EnginePath::Path GetConfigPath() const;
   [[nodiscard]] Expected<void, errors::ProjectError> TryCreateProjectDirectories() const;
 
 private:
-  util::FilePath m_RootPath_;
+  EnginePath::Path m_ProjectPath_;
   ProjectConfig m_Config_;
-  bool m_HasBeenLoaded_                                       = false;
-  static inline const std::filesystem::path s_ConfigFileName_ = "project.xml";
+  bool m_HasBeenLoaded_                             = false;
+  static inline const std::string s_ConfigFileName_ = "project.xml";
 };
 } // namespace psych

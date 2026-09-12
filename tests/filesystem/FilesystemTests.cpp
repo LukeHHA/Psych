@@ -1,4 +1,5 @@
 #include "FileSystem/CoreFilesystemAPI.h"
+#include "FileSystem/EnginePath.h"
 #include "FileSystem/FileSystem.h"
 #include <algorithm>
 #include <filesystem>
@@ -14,13 +15,21 @@ class FilesystemTest : public ::testing::Test
 protected:
   void SetUp() override
   {
+    if (!psych::Filesystem::IsInitialized()) {
+      psych::Filesystem::Init();
+    }
+
     const auto* testInfo = ::testing::UnitTest::GetInstance()->current_test_info();
     m_Root_ = std::filesystem::temp_directory_path() / ("PSYCH_ENGINE_fs_tests_" + std::string(testInfo->test_suite_name()) + "_" + std::string(testInfo->name()));
     std::filesystem::remove_all(m_Root_);
     std::filesystem::create_directories(m_Root_);
   }
 
-  void TearDown() override { std::filesystem::remove_all(m_Root_); }
+  void TearDown() override
+  {
+    psych::Filesystem::ClearProjectRoot();
+    std::filesystem::remove_all(m_Root_);
+  }
 
   std::filesystem::path m_Root_;
 };
@@ -104,14 +113,27 @@ TEST_F(FilesystemTest, TryCreateFileReportsWrongTypeWhenPathIsDirectory)
   EXPECT_EQ(result.error(), psych::errors::FilesystemError::PathExistsWithWrongType);
 }
 
-TEST_F(FilesystemTest, PlatformConfigPathRequiresFilesystemInitialization)
+TEST_F(FilesystemTest, PlatformPathsRequireFilesystemInitialization)
 {
-  psych::util::Filesystem::Shutdown();
+  psych::Filesystem::Shutdown();
 
-  const auto result = psych::util::Filesystem::TryGetBaseConfigPath();
+  const auto configResult = psych::Filesystem::TryGetBaseConfigPath();
+  const auto logResult    = psych::Filesystem::TryGetBaseLogPath();
 
-  ASSERT_FALSE(result);
-  EXPECT_EQ(result.error(), psych::errors::FilesystemError::NotInitialized);
+  ASSERT_FALSE(configResult);
+  EXPECT_EQ(configResult.error(), psych::errors::FilesystemError::NotInitialized);
+  ASSERT_FALSE(logResult);
+  EXPECT_EQ(logResult.error(), psych::errors::FilesystemError::NotInitialized);
+}
+
+TEST_F(FilesystemTest, BaseLogPathUsesEngineLogsDirectory)
+{
+  const auto result = psych::Filesystem::TryGetBaseLogPath();
+
+  ASSERT_TRUE(result);
+  EXPECT_EQ(result->filename(), "Logs");
+  EXPECT_EQ(result->parent_path().filename(), psych::PsychEngineName);
+  EXPECT_TRUE(std::filesystem::is_directory(*result));
 }
 
 TEST_F(FilesystemTest, CreateDirectoryTreeBuildsFileAndDirectoryNodes)
@@ -130,12 +152,13 @@ TEST_F(FilesystemTest, CreateDirectoryTreeBuildsFileAndDirectoryNodes)
     output << "nested";
   }
 
-  psych::Unique<psych::util::FileNode> root = psych::util::Filesystem::CreateDirectoryTree(m_Root_);
+  ASSERT_TRUE(psych::Filesystem::TrySetProjectRoot(m_Root_));
+  psych::Unique<psych::FileNode> root = psych::Filesystem::CreateDirectoryTree(psych::EnginePath::Path{"proj://"});
 
   ASSERT_NE(root, nullptr);
   EXPECT_TRUE(root->isDir);
-  EXPECT_EQ(root->path, m_Root_);
-  EXPECT_EQ(root->name, m_Root_.filename().string());
+  EXPECT_EQ(root->path.string(), "proj://");
+  EXPECT_TRUE(root->name.empty());
   ASSERT_EQ(root->children.size(), 2u);
 
   std::vector<std::string> childNames;
@@ -146,7 +169,7 @@ TEST_F(FilesystemTest, CreateDirectoryTreeBuildsFileAndDirectoryNodes)
 
   EXPECT_EQ(childNames, (std::vector<std::string>{"child", "root.txt"}));
 
-  const psych::util::FileNode* childDirectory = nullptr;
+  const psych::FileNode* childDirectory = nullptr;
   for (const auto& child : root->children) {
     if (child->name == "child") {
       childDirectory = child.get();
@@ -156,16 +179,70 @@ TEST_F(FilesystemTest, CreateDirectoryTreeBuildsFileAndDirectoryNodes)
 
   ASSERT_NE(childDirectory, nullptr);
   EXPECT_TRUE(childDirectory->isDir);
+  EXPECT_EQ(childDirectory->path.string(), "proj://child");
   ASSERT_EQ(childDirectory->children.size(), 1u);
   EXPECT_EQ(childDirectory->children.front()->name, "nested.txt");
+  EXPECT_EQ(childDirectory->children.front()->path.string(), "proj://child/nested.txt");
   EXPECT_FALSE(childDirectory->children.front()->isDir);
 }
 
 TEST_F(FilesystemTest, TryCreateDirectoryTreeReportsMissingRoot)
 {
-  const auto result = psych::util::Filesystem::TryCreateDirectoryTree(m_Root_ / "missing");
+  ASSERT_TRUE(psych::Filesystem::TrySetProjectRoot(m_Root_));
+  const auto result = psych::Filesystem::TryCreateDirectoryTree(psych::EnginePath::Path{"proj://missing"});
 
   ASSERT_FALSE(result);
   EXPECT_EQ(result.error(), psych::errors::FilesystemError::FileNotFound);
+}
+
+TEST_F(FilesystemTest, ProjectPathsReadAndWriteThroughBoundRoot)
+{
+  ASSERT_TRUE(psych::Filesystem::TrySetProjectRoot(m_Root_));
+  const psych::EnginePath::Path filePath{"proj://data/nested.txt"};
+
+  ASSERT_TRUE(psych::Filesystem::TryWriteFile(filePath, "project-data"));
+
+  const auto contents = psych::Filesystem::TryReadFile(filePath);
+  ASSERT_TRUE(contents);
+  EXPECT_EQ(contents.value(), "project-data");
+  EXPECT_TRUE(std::filesystem::is_regular_file(m_Root_ / "data" / "nested.txt"));
+}
+
+TEST_F(FilesystemTest, ProjectPathsRequireBoundRoot)
+{
+  psych::Filesystem::ClearProjectRoot();
+
+  const auto result = psych::Filesystem::TryResolve(psych::EnginePath::Path{"proj://data"});
+
+  ASSERT_FALSE(result);
+  EXPECT_EQ(result.error(), psych::errors::FilesystemError::InvalidPath);
+}
+
+TEST(EnginePathTest, RecognizesAndFormatsProjectPaths)
+{
+  const psych::EnginePath::Path path{"PrOj://data/scenes/intro.scene"};
+
+  EXPECT_TRUE(path.IsValid());
+  EXPECT_EQ(path.GetSchema(), psych::EnginePath::Schema::Project);
+  EXPECT_EQ(path.GetRelativePath(), std::filesystem::path("data/scenes/intro.scene"));
+  EXPECT_EQ(path.string(), "proj://data/scenes/intro.scene");
+}
+
+TEST(EnginePathTest, RejectsAbsoluteAndParentTraversalPaths)
+{
+  EXPECT_FALSE(psych::EnginePath::Path{"proj:///tmp/project"}.IsValid());
+  EXPECT_FALSE(psych::EnginePath::Path{"proj://data/../project.xml"}.IsValid());
+  EXPECT_TRUE(psych::EnginePath::Path{"proj://data/version..txt"}.IsValid());
+}
+
+TEST(EnginePathTest, AssignmentClearsPreviousValidStateOnInvalidInput)
+{
+  psych::EnginePath::Path path{"proj://data"};
+
+  path = std::string{"missing-schema"};
+
+  EXPECT_FALSE(path.IsValid());
+  EXPECT_EQ(path.GetSchema(), psych::EnginePath::Schema::None);
+  EXPECT_TRUE(path.GetRelativePath().empty());
 }
 } // namespace

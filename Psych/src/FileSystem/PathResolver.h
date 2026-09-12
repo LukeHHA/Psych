@@ -1,23 +1,60 @@
+
+/**************************************************************************/
+/*  PathResolver.h                                                        */
+/**************************************************************************/
+/*                         This file is part of:                          */
+/*                             PSYCH ENGINE                               */
+/**************************************************************************/
+/* Copyright (c)  Luke Howe                                               */
+/*                                                                        */
+/* Permission is hereby granted, free of charge, to any person obtaining  */
+/* a copy of this software and associated documentation files (the        */
+/* "Software"), to deal in the Software without restriction, including    */
+/* without limitation the rights to use, copy, modify, merge, publish,    */
+/* distribute, sublicense, and/or sell copies of the Software, and to     */
+/* permit persons to whom the Software is furnished to do so, subject to  */
+/* the following conditions:                                              */
+/*                                                                        */
+/* The above copyright notice and this permission notice shall be         */
+/* included in all copies or substantial portions of the Software.        */
+/*                                                                        */
+/* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,        */
+/* EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF     */
+/* MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. */
+/* IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY   */
+/* CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,   */
+/* TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE      */
+/* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                 */
+/**************************************************************************/
+
 #pragma once
 
+#include "Errors/Errors.h"
 #include "FileSystem/EnginePath.h"
-#include "FileSystem/FileSystem.h"
+#include "expected.h"
 
-namespace psych::util
+#include <filesystem>
+#include <utility>
+
+namespace psych
 {
 class PathResolver
 {
 public:
-  PathResolver();
+  explicit PathResolver(std::filesystem::path engineRoot) : m_EngineRoot_(std::move(engineRoot)) {}
   PathResolver(const PathResolver&)            = delete;
   PathResolver& operator=(const PathResolver&) = delete;
   PathResolver(PathResolver&&)                 = delete;
   PathResolver& operator=(PathResolver&&)      = delete;
   ~PathResolver()                              = default;
 
-  [[nodiscard]] Expected<FilePath, errors::FilesystemError> TryResolve(const EnginePath::Path& path) const;
+  void SetEngineRoot(const std::filesystem::path& path);
+  void SetProjectRoot(const std::filesystem::path& path);
+  void ClearProjectRoot();
+  [[nodiscard]] Expected<std::filesystem::path, errors::FilesystemError> TryResolve(const EnginePath::Path& path) const;
 
 private:
-  FilePath m_EngineRoot_;
+  std::filesystem::path m_EngineRoot_;
+  std::filesystem::path m_ProjectRoot_;
 };
-} // namespace psych::util
+} // namespace psych

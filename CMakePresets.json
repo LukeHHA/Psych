@@ -1,0 +1,179 @@
+{
+  "version": 2,
+  "cmakeMinimumRequired": {
+    "major": 3,
+    "minor": 20,
+    "patch": 0
+  },
+  "configurePresets": [
+    {
+      "name": "base",
+      "hidden": true,
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build/${presetName}",
+      "cacheVariables": {
+        "BUILD_SHARED_LIBS": "OFF",
+        "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
+        "PSYCH_ENGINE_BUILD_EDITOR": "OFF",
+        "PSYCH_ENGINE_BUILD_MACOS_BUNDLE": "OFF",
+        "PSYCH_ENGINE_BUILD_TESTS": "OFF",
+        "PSYCH_ENGINE_ENABLE_CLANG_TIDY": "OFF",
+        "PSYCH_ENABLE_ASSERTS": "ON",
+        "PSYCH_ENABLE_PROFILING": "ON",
+        "PSYCH_ENABLE_SANITIZERS": "OFF"
+      }
+    },
+    {
+      "name": "debug",
+      "hidden": true,
+      "inherits": "base",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug"
+      }
+    },
+    {
+      "name": "release",
+      "hidden": true,
+      "inherits": "base",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "PSYCH_ENABLE_ASSERTS": "OFF",
+        "PSYCH_ENABLE_PROFILING": "OFF"
+      }
+    },
+    {
+      "name": "app-debug",
+      "displayName": "App | Debug",
+      "description": "Debug build of the standalone App frontend",
+      "inherits": "debug"
+    },
+    {
+      "name": "app-release",
+      "displayName": "App | Release",
+      "description": "Release build of the standalone App frontend",
+      "inherits": "release"
+    },
+    {
+      "name": "editor-debug",
+      "displayName": "Editor | Debug",
+      "description": "Debug build of the Editor as a normal executable",
+      "inherits": "debug",
+      "cacheVariables": {
+        "PSYCH_ENGINE_BUILD_EDITOR": "ON"
+      }
+    },
+    {
+      "name": "editor-release",
+      "displayName": "Editor | Release",
+      "description": "Release build of the Editor as a normal executable",
+      "inherits": "release",
+      "cacheVariables": {
+        "PSYCH_ENGINE_BUILD_EDITOR": "ON"
+      }
+    },
+    {
+      "name": "editor-bundle-debug",
+      "displayName": "Editor Bundle | Debug",
+      "description": "Debug build of the Editor as a macOS application bundle",
+      "inherits": "editor-debug",
+      "cacheVariables": {
+        "PSYCH_ENGINE_BUILD_MACOS_BUNDLE": "ON"
+      }
+    },
+    {
+      "name": "editor-bundle-release",
+      "displayName": "Editor Bundle | Release",
+      "description": "Release build of the Editor as a macOS application bundle",
+      "inherits": "editor-release",
+      "cacheVariables": {
+        "PSYCH_ENGINE_BUILD_MACOS_BUNDLE": "ON"
+      }
+    },
+    {
+      "name": "tests-debug",
+      "displayName": "Tests | Debug",
+      "description": "Debug build of the PsychEngine unit tests",
+      "inherits": "debug",
+      "cacheVariables": {
+        "PSYCH_ENGINE_BUILD_TESTS": "ON"
+      }
+    },
+    {
+      "name": "editor-sanitizers",
+      "displayName": "Editor | ASan and UBSan",
+      "description": "Debug Editor build with address and undefined-behaviour sanitizers",
+      "inherits": "editor-debug",
+      "cacheVariables": {
+        "PSYCH_ENABLE_SANITIZERS": "ON"
+      }
+    },
+    {
+      "name": "editor-tidy",
+      "displayName": "Editor | Clang-Tidy",
+      "description": "Debug Editor build with clang-tidy enabled",
+      "inherits": "editor-debug",
+      "cacheVariables": {
+        "PSYCH_ENGINE_ENABLE_CLANG_TIDY": "ON"
+      }
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "app-debug",
+      "configurePreset": "app-debug",
+      "targets": ["App"]
+    },
+    {
+      "name": "app-release",
+      "configurePreset": "app-release",
+      "targets": ["App"]
+    },
+    {
+      "name": "editor-debug",
+      "configurePreset": "editor-debug",
+      "targets": ["Editor"]
+    },
+    {
+      "name": "editor-release",
+      "configurePreset": "editor-release",
+      "targets": ["Editor"]
+    },
+    {
+      "name": "editor-bundle-debug",
+      "configurePreset": "editor-bundle-debug",
+      "targets": ["Editor"]
+    },
+    {
+      "name": "editor-bundle-release",
+      "configurePreset": "editor-bundle-release",
+      "targets": ["Editor"]
+    },
+    {
+      "name": "tests-debug",
+      "configurePreset": "tests-debug",
+      "targets": ["PsychEngineTests"]
+    },
+    {
+      "name": "editor-sanitizers",
+      "configurePreset": "editor-sanitizers",
+      "targets": ["Editor"]
+    },
+    {
+      "name": "editor-tidy",
+      "configurePreset": "editor-tidy",
+      "targets": ["Editor"]
+    }
+  ],
+  "testPresets": [
+    {
+      "name": "tests-debug",
+      "configurePreset": "tests-debug",
+      "output": {
+        "outputOnFailure": true
+      },
+      "execution": {
+        "noTestsAction": "error"
+      }
+    }
+  ]
+}
