@@ -21,7 +21,7 @@ public:
 
   void OnAttach() override { m_Events_.attached.push_back(m_Name_); }
   void OnDetach() override { m_Events_.detached.push_back(m_Name_); }
-  void OnEvent(psych::Event&) override {}
+  void OnEvent(psych::Event*) override {}
   void OnUpdate(float) override {}
   void OnRender() override {}
   void OnImGuiRender() override {}
